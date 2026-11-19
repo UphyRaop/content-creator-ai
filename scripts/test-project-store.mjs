@@ -9,6 +9,7 @@ try {
   const workflow = await import("../src/lib/script-workflow.ts");
   const store = await import("../src/lib/project-store.ts");
   const entities = await import("../src/lib/entity-store.ts");
+  const imageFlow = await import("../src/lib/image-workflow.ts");
   const project = store.createProject("Demo film", { step: 2, settings: { durationMinutes: 3 } });
   assert.equal(project.title, "Demo film");
   assert.equal(project.payload.step, 2);
@@ -69,6 +70,55 @@ try {
   assert.equal(second[0].text, "first draft");
   assert.equal(workflow.appendScriptVersion(second, "edited draft", "edited").length, 2);
   console.log("PASS preserves and deduplicates script version history");
+
+  const scenePlan = imageFlow.planSceneBreakdown({ script: "First the train arrives. Then Mira finds the letter. Finally, the family reads it together.", durationSeconds: 60, visualStyle: "Documentary", aspectRatio: "16:9", characters: ["Mira"], locations: ["Station"] });
+  assert.equal(scenePlan.length, 15);
+  assert.ok(scenePlan.every((scene) => scene.seconds >= 3 && scene.seconds <= 5));
+  assert.ok(scenePlan.every((scene) => scene.approvalStatus === "pending" && scene.imageVersions.length === 0));
+  const orderedScript = scenePlan.map((scene) => scene.line).join(" ");
+  assert.ok(orderedScript.indexOf("train") < orderedScript.indexOf("letter"));
+  assert.ok(orderedScript.indexOf("letter") < orderedScript.indexOf("together"));
+  assert.equal(imageFlow.planSceneBreakdown({ script: "Story", durationSeconds: 300, visualStyle: "Cinematic", aspectRatio: "9:16" }).length, 75);
+  assert.throws(() => imageFlow.planSceneBreakdown({ script: "", durationSeconds: 60, visualStyle: "", aspectRatio: "16:9" }), /non-empty script/);
+  assert.ok(imageFlow.planSceneBreakdown({ script: "春天来到城市，孩子找到一封信。", durationSeconds: 60, visualStyle: "Cinematic", aspectRatio: "16:9", language: "Chinese" }).some((scene) => scene.line.includes("春天")));
+  console.log("PASS plans chronological scenes at approximately four seconds each, including Chinese text");
+
+  const reviewScenes = [
+    { ...scenePlan[0], id: "approved", image: "old-approved", approved: true, approvalStatus: "approved", decision: null },
+    { ...scenePlan[1], id: "rejected", image: "old-rejected", decision: "reject" },
+    { ...scenePlan[2], id: "accepted", image: "accepted-image", decision: "approve" },
+  ];
+  const decision = imageFlow.confirmSceneDecisions(reviewScenes);
+  assert.deepEqual(decision.rejectedIds, ["rejected"]);
+  assert.equal(decision.scenes[0], reviewScenes[0], "approved scenes are preserved by identity");
+  assert.equal(decision.scenes[0].image, "old-approved");
+  assert.equal(decision.scenes[1].approvalStatus, "rejected");
+  assert.equal(decision.scenes[2].approved, true);
+  assert.equal(imageFlow.canGenerateVoice(decision.scenes), false);
+  assert.equal(imageFlow.canGenerateVoice(decision.scenes.map((scene) => ({ ...scene, image: scene.image || "new-image", approved: true }))), true);
+  console.log("PASS confirms per-scene decisions without changing approved images and keeps voice locked");
+
+  const queued = [{ id: "j1", sceneId: "s1", status: "generating", progress: 45, kind: "initial", prompt: "p", scriptText: "s", createdAt: "now" }, { id: "j2", sceneId: "s2", status: "pending", progress: 0, kind: "initial", prompt: "p", scriptText: "s", createdAt: "now" }];
+  assert.equal(imageFlow.recoverImageJobs(queued)[0].status, "pending");
+  assert.equal(imageFlow.recoverImageJobs(queued)[0].progress, 0);
+  assert.deepEqual(imageFlow.deduplicateImageJobs(queued, [{ ...queued[0], id: "j3", sceneId: "s1" }, { ...queued[0], id: "j4", sceneId: "s3" }]).map((job) => job.id), ["j4"]);
+  console.log("PASS recovers interrupted queue work and prevents duplicate scene jobs");
+
+  assert.equal(imageFlow.estimateImageCostMyr(4, "simulated"), 0);
+  assert.equal(imageFlow.estimateImageCostMyr(4, "flux-schnell"), null);
+  assert.equal(imageFlow.estimateImageCostMyr(4, "flux-schnell", 0.5), 2);
+  assert.throws(() => imageFlow.estimateImageCostMyr(101, "simulated"), /between 0 and 100/);
+  const crop = imageFlow.coverCrop(1000, 2000, 1920, 1080, 1, 0.5);
+  assert.ok(Math.abs(crop.sw / crop.sh - 16 / 9) < 0.001);
+  assert.ok(crop.sy > 0, "portrait source should be cropped vertically for a landscape frame");
+  console.log("PASS keeps live pricing unknown without configuration and computes distortion-free crop geometry");
+
+  const validImageRequest = { scriptApproved: true, aspectRatio: "9:16", spendingLimitMyr: 0, scenes: [{ id: "s1", prompt: "Image prompt", scriptText: "Script beat", approvalStatus: "pending" }] };
+  assert.equal(imageFlow.validateImageGenerationRequest(validImageRequest), true);
+  assert.equal(imageFlow.validateImageGenerationRequest({ ...validImageRequest, scriptApproved: false }), false);
+  assert.equal(imageFlow.validateImageGenerationRequest({ ...validImageRequest, scenes: [{ ...validImageRequest.scenes[0], approvalStatus: "approved" }] }), false);
+  assert.equal(imageFlow.validateImageGenerationRequest({ ...validImageRequest, scenes: [{ ...validImageRequest.scenes[0], id: "" }] }), false);
+  console.log("PASS rejects unapproved scripts, approved-scene regeneration, and malformed image requests");
 
   assert.equal(store.deleteProject(project.id), true);
   assert.equal(store.getProject(project.id), null);

@@ -40,8 +40,15 @@
 - Store uploaded references with the project. Prototype image limits: 2 MB per image and 12 images per project.
 - Preserve all workflow and approval gates; approved work must not be unnecessarily regenerated.
 
+## Phase 5 approved scope
+- The Image Generation Studio has an interchangeable, server-only FLUX.1 Schnell adapter. The static Pages preview uses clearly labelled simulated image placeholders at Full HD canvas sizes; each generation version has a unique identifier. The simulator costs RM0.
+- Live FLUX calls remain disabled by default and require separate approval, a server-side API key, known positive per-image MYR pricing, and a project spending limit. The RM20 test budget remains unused. Unknown live pricing is not represented as RM0.
+- FLUX.1 Schnell reference-image conditioning is not supported by this adapter and is not claimed. Manual image uploads can be cropped to 9:16 or 16:9 output without stretching.
+- Scene breakdown requires an approved script. Scene edits are explicitly saved and never auto-generate. Confirmed decisions regenerate rejected scenes only from their latest saved text and prompt. Approved scenes remain locked and unchanged, and voice remains blocked until every scene image is approved.
+- The studio tracks image versions, restoration, manual replacement, queue status/progress, retry/cancel, interrupted-job recovery, deduplication, approval progress, and simulated generation/regeneration usage. Browser-local image versions remain subject to the browser's storage quota; the SQLite payload architecture remains available for future server hosting.
+
 ## Development boundary
-- Phases 1–4 are complete as a simulated prototype. Phase 5 requires separate user approval.
+- Phases 1–5 are complete as a simulated prototype. Phase 6 requires separate user approval.
 - The GitHub Pages preview uses local simulation. Live Gemini calls are disabled by default and require separate explicit approval; no credential has been configured or used.
 - Brief/script approval is required before downstream stages. Changes to the approved brief or script clear approval and downstream state. Script versions are stored with the project payload.
 - Reference links are not fetched. Users can paste transcript/reference excerpts for context; inaccessible content is described gracefully.

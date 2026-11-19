@@ -21,7 +21,7 @@ CCAI is an AI-powered video creation application. Do not add social media automa
 Preserve the existing approval gates: approve the brief before generating a script, approve the script before creating scenes, and approve every scene before generating voice. A regeneration must be user-triggered, use the edited prompt, and affect only the selected scene.
 
 ## Approved development roadmap
-Use the 11 approved development phases in `ROADMAP.md`: Application Foundation; Multimodal Idea Input; AI Script Generation; Project and Character Management; AI Image Generation Studio; AI Voice Generation; Video Timeline and Editor; Video Rendering Engine; Post-Production Studio; Thumbnail and Publishing Kit; Final Testing and Deployment. Phases 1–4 are complete. Do not start Phase 5 without separate user approval.
+Use the 11 approved development phases in `ROADMAP.md`: Application Foundation; Multimodal Idea Input; AI Script Generation; Project and Character Management; AI Image Generation Studio; AI Voice Generation; Video Timeline and Editor; Video Rendering Engine; Post-Production Studio; Thumbnail and Publishing Kit; Final Testing and Deployment. Phases 1–5 are complete as a simulated prototype. Phase 5 was authorized on 19 November 2026 (Malaysia time). Do not start Phase 6 without separate user approval.
 
 ## Approved technology and operating constraints
 - Next.js, TypeScript, Node.js built-in SQLite (`node:sqlite`), GitHub, and the existing source files. Do not use Supabase or Cloudflare.
@@ -40,7 +40,10 @@ Use the 11 approved development phases in `ROADMAP.md`: Application Foundation; 
 - Reference images are limited to 2 MB each and 12 per project in the prototype.
 - Phase 4 provides reusable character/location/series/brand/channel libraries; project and scene assignments; continuity context; project status, search and manual queue priorities; and JSON backup/import. Imports add new records and never overwrite existing data.
 - Keep all content generation user-triggered and simulated. Project outfit overrides and scene assignments must not mutate reusable source profiles.
-- Do not add Phase 5 or later production capabilities or alter approved decisions without user approval. Update `ROADMAP.md` and `DECISIONS.md` when decisions change.
+- Phase 5 adds a scene image studio with an interchangeable, server-only FLUX.1 Schnell adapter. The GitHub Pages app uses clearly labelled simulated images only. Live image calls remain blocked unless separately approved and configured with server-only credentials and known MYR pricing.
+- Phase 5 scene breakdown requires an approved script. Scene edits never auto-generate; only confirmed rejected scenes may regenerate, approved scenes remain locked and unchanged, and voice stays blocked until every scene has an approved image.
+- Image references are retained as project context, but FLUX.1 Schnell reference-image conditioning is not supported by the adapter and must not be claimed.
+- Do not start Phase 6 or alter approved decisions without user approval. Update `ROADMAP.md` and `DECISIONS.md` when decisions change.
 
 ## Development checks
 Use Node.js 24 or newer. Run `npm ci`, `npm test`, `npm run build`, and `npm run build:static` as relevant. Keep credentials and personal information out of source, public artifacts, and logs.

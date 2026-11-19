@@ -1,6 +1,6 @@
 # Content Creator AI (CCAI)
 
-CCAI is an AI-assisted video creation workspace with a project dashboard and an approval-gated 13-stage production prototype. Phases 1–4 are implemented for the simulated preview. No paid API calls are made.
+CCAI is an AI-assisted video creation workspace with a project dashboard and an approval-gated 13-stage production prototype. Phases 1–5 are implemented for the simulated preview. No paid API calls are made.
 
 ## Preview
 
@@ -35,13 +35,17 @@ The Pages prototype creates a simulated creative brief and script, enforces brie
 
 Reference URLs are stored but not fetched automatically. Paste a transcript or reference excerpt when the material should inform the brief or script.
 
+## Phase 5 image studio
+
+The image studio builds scene plans only from approved scripts and provides editable scene prompts, character/location continuity cues, a simulated generation queue, individual review decisions, rejected-scene regeneration, version history, manual image replacement/cropping, and per-project usage tracking. Preview images are explicitly labelled as simulations and cost RM0. The server-only FLUX.1 Schnell adapter is interchangeable but disabled; live requests require separate user approval, server-side credentials, known pricing, and a project spending limit. FLUX reference-image conditioning is not supported by the adapter. The preview supports 9:16 and 16:9 frames with Full HD dimensions; browser-local image history is subject to storage quotas.
+
 ## Project records
 
 - [Project instructions](AGENTS.md)
 - [Roadmap and progress](ROADMAP.md)
 - [Approved decisions](DECISIONS.md)
 
-Do not add real provider credentials, make paid API calls, or start Phase 5 without the user's approval.
+Do not add real provider credentials or make paid API calls. Phase 6 requires the user’s approval.
 
 
 ## Phase 4 project management
@@ -50,4 +54,4 @@ The dashboard includes reusable character, location, series, brand kit, and chan
 
 On GitHub Pages, projects and libraries persist only in that browser's local storage. SQLite provides server persistence for a future Node.js deployment. AI and media responses remain simulated; the Phase 3 approval gates are unchanged. Editing a reusable profile refreshes its saved scene continuity on project reopen, invalidating only affected scene approvals.
 
-Phase 4 QA passed all 10 automated checks plus the desktop browser regression and backup round-trip checks recorded in [ROADMAP.md](ROADMAP.md). The live preview serves HTTPS. Mobile viewport testing was not available in this browser surface.
+Phase 4 QA passed all 10 automated checks plus the desktop browser regression and backup round-trip checks recorded in [ROADMAP.md](ROADMAP.md). Phase 5 automated workflow, storage, TypeScript and production build checks are recorded in [ROADMAP.md](ROADMAP.md). The live preview serves HTTPS. Mobile viewport testing was not available in this browser surface.
