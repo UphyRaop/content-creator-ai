@@ -1,6 +1,6 @@
 # CCAI Continuation Notes
 
-- Current task is Phase 11 finalization for CCAI. Workspace `/workspace/ccai-qa-checkout` contains a stale local Git history; treat GitHub `main` SHA `ba5a9d26c74355721d6a978f727b9e175ed2ce71` as the source of truth and synchronize via the GitHub connector only.
+- Current task is Phase 11 finalization for CCAI. Workspace `/workspace/ccai-qa-checkout` contains a stale local Git history; always re-read GitHub `main` before syncing and use the GitHub connector only. Latest P11 application commit is `ba5a9d26c74355721d6a978f727b9e175ed2ce71`; the deployment record follow-up is `351a4d7171062f280ff1d44c0401cc02383d2cf4`.
 - User authorized Phases 7–11 together. Phase 11 safe code fixes and automated QA are complete with PARTIAL PASS. P11 source commit `ba5a9d26c74355721d6a978f727b9e175ed2ce71` and Pages run `44517625068` succeeded; latest details are in `DEPLOYMENTS.md`. Do not begin unapproved work beyond Phase 11.
 - Phase 7 is deployed at https://ccai.ur-project.biz/ (Pages run `44492004150`, commit `9e050e77eede07a25c9236b265313190bcc7ab19`). Automated tests/builds and independent code QA passed; browser/mobile testing remains unavailable.
 - GitHub Pages is static. SQLite API and server FFmpeg cannot run there; never present a simulation as actual persistent server storage or an actual render.

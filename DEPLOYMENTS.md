@@ -23,7 +23,7 @@ GitHub Pages serves static files. It cannot run the SQLite API routes, persisten
 
 ## Phase 11 deployment verification
 - Fast-forward commit `ba5a9d26c74355721d6a978f727b9e175ed2ce71` (“Complete Phase 11 audit and safety fixes”) reached `main`; both author and committer use `355911884+UphyRaop@users.noreply.github.com`. No history rewrite or force-push occurred.
-- GitHub Actions Pages run `44517625068` completed successfully for this commit.
+- GitHub Actions Pages run `44517625068` completed successfully for this commit. Documentation follow-up commit `351a4d7171062f280ff1d44c0401cc02383d2cf4` (recording the verification) also deployed successfully in run `44518253736`; it did not change application code.
 - `https://ccai.ur-project.biz/` loaded in Chrome after deployment. The desktop DOM showed the CCAI project dashboard, seven existing browser-local projects, `All Status`, `All Series`, and the `SIMULATED · COST RM0` label. No project data was edited. This confirms the static preview is accessible and does not verify every interaction.
 - Mobile/tablet and keyboard runtime checks after deployment were not performed. The cloud browser did not expose viewport emulation; responsive behavior is source/build-tested only.
 - This is a static prototype deployment only. It does not enable or deploy the SQLite/Node API routes. Production backend remains blocked pending authentication/ownership and a supported persistent Node host.
