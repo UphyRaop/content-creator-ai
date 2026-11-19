@@ -1,0 +1,16 @@
+node_modules
+.next
+.vercel
+.dev.vars
+.env*
+!.env.example
+out
+build
+
+public/prototype.html
+
+# Local SQLite project data
+data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

@@ -1,4 +1,4 @@
-name: Deploy CCAI preview to GitHub Pages
+name: Deploy CCAI static preview
 
 on:
   push:
@@ -21,16 +21,27 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source
+      - name: Check out main
         uses: actions/checkout@v4
-      - name: Configure Pages
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Build static prototype
+        run: npm run build:static
+
+      - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
-      - name: Upload static preview
+
+      - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
