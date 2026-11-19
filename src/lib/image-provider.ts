@@ -70,13 +70,15 @@ export class FluxSchnellImageProvider implements ImageProvider {
     if (pollingUrl.protocol !== "https:" || pollingUrl.hostname !== "api.bfl.ai") throw new Error("FLUX returned an untrusted polling URL.");
 
     let sampleUrl = "";
-    for (let attempt = 0; attempt < 90; attempt++) {
-      const poll = await fetch(pollingUrl, { headers: { "x-key": key }, cache: "no-store", signal: AbortSignal.timeout(10_000) });
+    const pollDeadline=Date.now()+120_000;
+    for (let attempt = 0; attempt < 90&&Date.now()<pollDeadline; attempt++) {
+      const remaining=Math.max(1,pollDeadline-Date.now());
+      const poll = await fetch(pollingUrl, { headers: { "x-key": key }, cache: "no-store", signal: AbortSignal.timeout(Math.min(10_000,remaining)) });
       if (!poll.ok) throw new Error(`FLUX task check failed (${poll.status}).`);
       const status = await poll.json() as { status?: string; result?: { sample?: string }; error?: string };
       if (status.status === "Ready" && status.result?.sample) { sampleUrl = status.result.sample; break; }
       if (status.status && !["Pending", "Processing", "Queued"].includes(status.status)) throw new Error(status.error || `FLUX task ended with status ${status.status}.`);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, Math.min(1000,Math.max(0,pollDeadline-Date.now()))));
     }
     if (!sampleUrl) throw new Error("FLUX generation timed out. Retry the failed scene.");
     const allowedOutputHosts=(process.env.CCAI_FLUX_OUTPUT_HOSTS||"").split(",");

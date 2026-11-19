@@ -172,5 +172,6 @@ The public repository contains three older commits whose author/committer metada
 
 ### Phase 14 — Live integration and rendering preparation: PARTIAL PASS
 - Simulated provider suites remain passing; live adapters remain opt-in and no calls were made. Gemini now retains its conservative preflight cost when provider usage is absent; FLUX output URLs require exact HTTPS host allowlisting and downloads reject redirects.
+- Direct script/image APIs now return 503 for any non-simulated provider until metered durable admission is implemented; Cloud Run render submission is also blocked. Gemini/FLUX/ElevenLabs success paths are exercised with stubs only. FLUX polling has a 120-second overall deadline.
 - Local FFmpeg 7.1.5 fixture passed for a synthetic H.264 1080p landscape 30 FPS file. Requested 1/2/3/5-minute, portrait/landscape, 30/60 FPS and full effects benchmark matrix remains untested; production-scale/Cloud Run capacity is not claimed.
 - No AI/render operation is integrated with metering, idempotent durable jobs, or cancellation/reconciliation; live execution remains blocked.

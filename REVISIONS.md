@@ -18,6 +18,7 @@
 - Hardened Gemini accounting to keep the conservative preflight estimate when provider token usage is missing or malformed.
 - Hardened FLUX image retrieval: output URL must be HTTPS on an exact server-configured hostname; credentials/custom ports and redirects are rejected. Added empty `CCAI_FLUX_OUTPUT_HOSTS` configuration documentation and safety tests. No live provider calls made.
 - Added HTTP-level fail-closed gates for non-simulated script/image providers and Cloud Run render requests until metered durable admission is active; local simulated/authorized render tests remain available.
+- Added mocked Gemini, FLUX and ElevenLabs adapter tests with stubbed fetch; bounded FLUX polling to 120 seconds. No network provider access.
 - Versioned SQLite cloud-ledger migration preserves prior emergency-stop state transactionally; emergency stop is installation-wide; public reservation create/release stay disabled (503) until trusted telemetry and worker reconciliation are in place.
 - Added Google Cloud architecture readiness review and updated project status/continuity docs. No GCP resources, paid services, DNS, or API usage; RM0 spent.
 
