@@ -44,3 +44,8 @@ GitHub Pages serves static files. It cannot run the SQLite API routes, persisten
 - `https://ccai.ur-project.biz/` returned HTTP 200 after deployment. The downloaded response SHA-256 matched local `dist/index.html` (`14ec582d7ddc80ab7c5acb3c5dd9f5c75dd00bdd6fab44f9a1d857411fdfca74`). Expected CCAI title, status labels and RM0 simulation marker were present.
 - HTTPS returned 200 with `curl` verification result 0. The managed egress proxy substituted its own certificate for `ccai.ur-project.biz`, so the origin/GitHub Pages certificate chain was not independently inspected. Plain HTTP also returned 200 with zero redirects: owner must still enable Settings → Pages → Enforce HTTPS. No DNS records were changed.
 - The deployed site is desktop-accessible. Mobile/tablet viewport testing is not available through the active browser-control tools; local desktop E2E was performed separately on isolated synthetic data.
+
+
+## Phase 12 deployment boundary
+- Deployment is limited to the existing GitHub Pages static preview and its simulated usage dashboard. Do not create a GCP project, Cloud Run service/job, Cloud Billing export, logging sink, storage bucket or paid API activation.
+- Pages cannot run the persistent SQLite usage ledger, secure telemetry adapter, Cloud Run orchestration or true emergency stop. These remain server-side preparation only.

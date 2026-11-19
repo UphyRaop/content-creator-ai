@@ -87,3 +87,7 @@ Phases 1–10 are implemented and the static preview is deployed. Phase 11 now i
 
 ## Phase 11 readiness
 Automated regression suites, API security checks, TypeScript, static and Next.js builds, and the isolated 13-stage desktop workflow pass for the production-readiness continuation. Node-mode APIs require an authenticated session, scope project/entity/AI/render/voice data to its owner, and validate server-held approval records. GitHub Pages remains an interactive browser-local simulation and does not execute SQLite, Gemini, FLUX, ElevenLabs, Node APIs, or FFmpeg. No persistent Node production host is configured. Pages HTTPS enforcement still requires the repository owner, and three prior public commits retain personal author/committer email metadata; see [QA.md](QA.md) and [DEPLOYMENTS.md](DEPLOYMENTS.md).
+
+
+### Phase 12 — Google Cloud Usage & Billing
+The simulated Cloud Usage & Billing dashboard and SQLite usage ledger are implemented. The preview does not read Google billing data, and its emergency stop affects only the demo. Cloud job admission returns 503 until trusted multi-resource telemetry, a durable worker/job lifecycle, and approved hosting are available. The official free-tier and architecture review, test evidence, and remaining requirements are in `docs/google-cloud-phase12.md`, `docs/qa/phase12-test-plan.md`, `ROADMAP.md`, `DECISIONS.md`, and `TASKS.md`. No GCP resource, billing change, live API or cost was created.

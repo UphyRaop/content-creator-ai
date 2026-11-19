@@ -94,3 +94,14 @@
 - The production-readiness continuation implements session authentication, project/entity ownership, and server-held approval records with content freshness checks. These protections are covered by the API QA suite. Do not expose the Node APIs until a supported production deployment has been configured and reviewed.
 - Do not rewrite the old public Git history without separately approved history rewrite; it contains personal author/committer email metadata. New commits continue using GitHub noreply identities.
 - Keep GitHub Pages HTTPS-only enforcement enabled as an owner action; current connector cannot toggle the Pages setting.
+
+
+## Phase 12 — Google Cloud usage protection (19 November 2026)
+- Google Cloud is approved as the future hosting provider. RM0 monthly hosting is the target; this is not a promise that workloads beyond free allowances are cost-free. No Cloud project/resource, paid service, billing change or deployment is authorized by this decision.
+- Evaluate Cloud Run Services plus Cloud Run Jobs for the future architecture; 2 vCPU/4 GiB render benchmark and 300 videos/month are provisional assumptions only. Keep minimum instances at zero where supported.
+- Usage and free-tier allowances may be shared across projects/services under one billing account. Model a shared allowance pool and use official current documentation; do not count the same free quota once per CCAI service. The app's billing cycle must be explicit and historical periods retained.
+- Only fresh, verified usage telemetry may authorize cloud operations. Unknown, stale, estimated or simulated usage must not satisfy the production preflight. Track actual, reserved, remaining and estimated cost separately. Cloud operations that could incur unapproved paid usage fail closed.
+- Budget alerts notify but do not alone guarantee a hard spending cap. Strict RM0 protection requires service-specific limits plus an operational stop/disable-billing plan approved by the owner; no such cloud control is active yet.
+- The Pages section is a local simulation and must label all values simulated/estimated. No Google Cloud metrics or API credentials may be exposed in the browser.
+- Render jobs require durable database state, idempotency, bounded retries/timeouts, transactional resource reservations, and permanent media in durable object storage or persistent volumes; ephemeral Cloud Run files are temporary only. No storage product is selected until free-tier and pricing suitability are confirmed.
+- Phase 12 implementation status: SQLite metering history, Pacific billing windows, resource-unit pools, warning/projection logic and emergency-stop state are implemented and tested. Cloud reservation admission remains disabled with HTTP 503 until trusted multi-pool estimates/metrics and a durable worker can reserve all affected resources. This does not authorize live provider use or cloud resources.

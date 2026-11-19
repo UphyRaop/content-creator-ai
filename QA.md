@@ -120,3 +120,13 @@ Stages 1–13 are present in the application. Phase-specific source/helper tests
 
 ### Dependency audit
 - **PASS:** `npm audit --audit-level=high` reported 0 vulnerabilities (including production and development dependency tree).
+## Phase 12 Google Cloud usage protection — 19 November 2026
+
+- **PARTIAL PASS:** SQLite metering tracks independent CPU-seconds, GiB-seconds, GB-months, egress bytes, requests, container bytes, log bytes and other units, alongside separate MYR measures. Billing windows are server-derived Pacific time periods with PST/PDT UTC bounds and retained history. The GitHub Pages dashboard is explicitly simulated; actual provider telemetry is unavailable.
+- **PASS:** `node --experimental-strip-types scripts/test-cloud-metering.mjs` covers 80/85/90 thresholds, projected reservations, shared MYR across pools, authenticated API controls, forged-source/allowance/period/TTL rejection, Pacific rollover/DST, idempotency and SQLite reopen persistence.
+- **PASS:** independent two-process SQLite contention: one 60-unit job reserved against a 100-unit synthetic pool; the competing reservation was rejected and only one row persisted. Separate shell process launching is blocked by the managed sandbox, but QA's process executor successfully ran the two-process fixture.
+- **PASS:** after correcting the missing-pool status defect, `canReserve=false` when any required allowance/metrics are missing. Reservation projections that reach 90% of the pool or shared MYR allowance are rejected.
+- **PASS:** `npm test`, `scripts/test-auth-api.mjs`, `scripts/test-ai-routes.mjs`, `scripts/test-p11-http.mjs` (77 HTTP assertions), `scripts/test-voice-vault-security.mjs`, `scripts/test-ffmpeg-renderer.mjs`, post-production helper/render and publishing suites; `npx tsc --noEmit`; `npm run build:static`; `npm run build`; `git diff --check`.
+- **NOT TESTED:** actual GCP account metrics/billing; Cloud job failure/retry/timeout/cancel execution; mobile/tablet/desktop viewport browser interaction. UI source checks passed for simulated/unavailable labels, no network calls from dashboard, semantic status/table markup and responsive breakpoints.
+- **Production blockers:** reservation admission returns 503 until trusted multi-pool estimates/telemetry and a durable worker exist. AI/render routes are not connected to cloud reservations; the owner DELETE can release a reservation without evidence the job stopped; ledgers are per-owner and do not yet aggregate across several owners sharing a billing account. Do not enable cloud operations until these are resolved and independently tested.
+- No live Google API, paid provider, GCP resource, host or billing configuration was used. Cost RM0; RM20 remains untouched.

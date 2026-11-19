@@ -144,3 +144,16 @@ The public repository contains three older commits whose author/committer metada
 - An isolated synthetic desktop browser flow completed all 13 stages against local Node/SQLite. Local FFmpeg output, protected range preview, approved export download and non-destructive post-production were verified. Mobile/tablet runtime was not available.
 - GitHub Pages remains a static localStorage simulation; it cannot run SQLite, session routes, background jobs or FFmpeg. No persistent Node host is configured. Enforce HTTPS remains a manual Pages setting. Old public commit identity email metadata is preserved; no history rewrite was performed.
 - No paid API, hosting, or additional service was used; cost RM0 and RM20 remains untouched.
+
+
+## Phase 12 — Google Cloud Usage & Cost Protection (authorized 19 November 2026)
+
+**Objective:** prepare CCAI for future Google Cloud deployment with RM0 monthly hosting as the target, without provisioning cloud resources, enabling billing, activating provider APIs, or incurring cost. Google Cloud is approved as the future hosting provider only; deployment requires separate owner approval.
+
+- Evaluate Cloud Run Services for authenticated web/API requests and Cloud Run Jobs for isolated FFmpeg renders. Use 2 vCPU/4 GiB as a provisional render benchmark and 300 videos/month as an unverified planning target; measure real render cost/duration before relying on capacity. Keep minimum instances at zero wherever appropriate.
+- Add a persistent server-side usage ledger that distinguishes verified actual, reserved, estimated and simulated amounts; aggregates billing-account shared allowances without double counting; retains history across periods; and blocks cloud-costing work when telemetry is missing, stale or unreliable.
+- At 80% warn, at 85% issue critical warning, and at 90% or predicted safe-limit breach block the affected resource. Reserve usage transactionally before enqueue, release/settle reservations on completion/failure/cancel, bound timeouts/retries, deduplicate job requests, and provide an owner emergency stop. No paid usage without separate owner approval.
+- Build an interactive but clearly simulated GitHub Pages dashboard. Pages has no GCP telemetry or SQLite service access; never show its demo values as verified.
+- Evaluate durable job records and media storage; do not rely on Cloud Run ephemeral disk for permanent data. Document free-tier eligibility/shared account scope, budget alert limitations, and manual Google Cloud setup requirements from official documentation.
+- Acceptance: unit/API tests cover threshold boundaries, concurrent ledger reservations, idempotency, reset/history, restart persistence, unavailable metrics, emergency stop and authorization bypass; existing production workflow regressions pass; static preview deployment is verified.
+- Status: Phase 12 preparation implemented and verified. The preview and SQLite ledger are in place, but live Google Cloud admission remains disabled until a trusted multi-pool metrics importer, durable worker/job lifecycle, and approved hosting architecture exist. No Google Cloud project/resources, billing integrations, live provider APIs, DNS changes, or costs were created.

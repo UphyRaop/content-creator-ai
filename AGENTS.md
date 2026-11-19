@@ -72,3 +72,13 @@ Use Node.js 24 or newer. Run `npm ci`, `npm test`, `npm run build`, and `npm run
 
 ## Phase 11 audit status
 Phases 7–11 were authorized together by the user. Phase 11 automated fixes and audits may be completed without inter-phase approval, but do not declare production readiness while API authentication/ownership, persistent Node hosting, GitHub Pages HTTPS enforcement, and public history email metadata remain unresolved. Never rewrite history or use paid services without separate approval. Model, reasoning and Fast Mode settings are not exposed to this environment; report them as unavailable rather than asserting a configuration.
+
+
+## Phase 12 cloud-cost safeguards
+- Google Cloud is approved for future hosting, but no infrastructure, billing, budget, service account, GCP API, or paid operation may be created or activated without separate owner approval. The Phase 12 preview is a simulation.
+- Never represent simulated, estimated or stale telemetry as verified actual usage. Production cloud work must fail closed if trusted usage data or the current billing period cannot be validated.
+- Treat Free Tier allowances as shared at their documented billing-account scope; aggregate Cloud Run Services/Jobs usage and reserve transactionally before accepting work. Use verified official Google documentation; do not assume the 2 vCPU/4 GiB or 300 videos/month planning assumptions fit within free allowances.
+- Enforce 80% warning, 85% critical warning, and block affected work at 90% or whenever a job reservation would breach the safe cap. Retry/timeouts/idempotency and emergency stop must be server-enforced; UI toggles alone are not security controls.
+- Keep Cloud Run minimum instances zero where supported; never use ephemeral container storage for permanent SQLite/media. Research durable job/database/media storage and disclose any service without an applicable free allowance.
+- Budget alerts are notification mechanisms, not hard cost caps. No paid usage is allowed absent separate owner approval. No Google Cloud resources or billing configuration were approved in Phase 12.
+- The Phase 12 ledger is server-side preparation only: it is not a trusted Google billing feed or active Cloud Run worker. Keep production job admission disabled until a trusted importer, multi-pool reservation, and durable job reconciliation are connected. Never let a client release capacity for a job that may still be running.

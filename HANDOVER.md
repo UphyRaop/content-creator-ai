@@ -32,3 +32,11 @@
 - **Restrictions:** no paid APIs or hosting, no live Gemini/FLUX/ElevenLabs calls, RM20 untouched, preserve user data and private backup, no DNS changes, no force push, and noreply identity on new commits.
 - **Remaining blockers:** mobile/tablet runtime is unsupported by the available browser control; GitHub Pages Enforce HTTPS must be enabled by the owner (HTTP currently returns 200 without redirect); no persistent Node host is configured; three old public commits retain personal identity emails. The egress proxy intercepts TLS, preventing independent validation of GitHub edge certificate chain. No history rewrite or DNS changes were made.
 - **Tool limitation:** model, reasoning and Fast Mode controls are unavailable; do not claim GPT-6 Luna/Medium/Fast-Off was applied.
+
+
+## Phase 12 continuation checkpoint — 19 November 2026
+- Objective: implement Google Cloud usage/cost protection without rebuilding CCAI; deploy only the simulated GitHub Pages dashboard. No GCP infrastructure, billing, live provider API, or cost is authorized.
+- Remote public `main` at task start: `736ebbb0137218c3b28a3d9857ccf0856baea34d`. Local workspace history remains stale and contains prior Phase 11 working-tree changes already synced through GitHub; sync Phase 12 updates as a fast-forward from the current remote main.
+- Assignments: backend (SQLite ledger/guard/APIs/tests), UIUX (prototype dashboard), DevOps (official Google documentation research), QA (independent test plan then review); lead integrates. Model and Fast Mode controls are not exposed; do not claim GPT-6 Luna settings.
+- Preserve authentication, approvals, SQLite and the 13-stage workflow; preserve the private backup. RM0 budget, no Cloud resources or billing, no paid APIs, and no live Google Cloud data/API access.
+- Completed: integrated the Phase 12 dashboard, SQLite metering ledger, official free-tier/architecture review, and independent QA. Unit/regression/type/static/Next builds pass. Sync the validated changes to current public `main` as a normal noreply fast-forward, verify the Pages workflow and preview, then append the resulting commit/run/URL here. Cloud admission remains disabled.

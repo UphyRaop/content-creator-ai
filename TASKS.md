@@ -159,3 +159,41 @@ Integrated and synchronized P11 source/docs in noreply fast-forward commit `ba5a
 - Residuals: mobile/tablet runtime unavailable; owner must enable HTTPS enforcement; no persistent Node host; old public commit email metadata remains unchanged. Cost RM0; RM20 untouched; private backup unchanged.
 
 - Dependency review: `npm audit --audit-level=high` passed with 0 findings.
+
+
+## Active phase — CCAI Phase 12: Google Cloud Usage & Cost Protection
+
+### CCAI-01-LEAD — CCAI-P12-INT-01
+- Objective: integrate metering/reservation backend, simulated dashboard, verified free-tier research and independent QA; preserve existing CCAI functionality.
+- Constraints: RM0; no Google Cloud resources, billing activation, paid API, infrastructure deployment, private backup edits, or unverified metrics presented as actual.
+- Acceptance: persist allowances/usage/history; server-enforce shared reservations and 80/85/90 thresholds, fail-closed on stale/unavailable metrics and manual emergency stop; label preview simulation; regression/build passes; deploy Pages via fast-forward with noreply identity.
+- Status: implementation and regression work complete; static GitHub Pages sync/deploy verification is the final checkpoint. Production admission remains intentionally disabled (503) until trusted metrics and a durable worker exist.
+
+### CCAI-02-UIUX — CCAI-P12-UI-01
+- Objective: responsive Cloud Usage & Billing dashboard in the existing prototype.
+- Files: `prototype.html` only.
+- Acceptance: simulated/estimated/verified labels; resource bars, daily/monthly stats, history, warnings, protection state, reset and emergency stop; no external calls or claims that UI stop disables GCP.
+- Status: complete. Dashboard labels all data as simulated/unavailable, shows all eight resource pools without inventing provider limits, documents 2 vCPU/4 GiB and 300 videos as provisional assumptions, distinguishes the sample RM500 envelope from the approved RM0 goal, and makes emergency stop preview-only. Source assertions, syntax and diff checks passed; browser/device runtime was not available.
+
+### CCAI-03-BACKEND — CCAI-P12-BE-01
+- Objective: SQLite-persistent, resource-dimensional usage provenance, billing-period snapshots, and secured fail-closed reservation APIs.
+- Files: `src/lib/cloud-metering.ts`, `src/app/api/cloud/usage/**`, `scripts/test-cloud-metering.mjs`.
+- Acceptance: Pacific DST-aware billing windows with stored UTC bounds; separate per-pool units/limits and MYR actual/estimate; 80/85/90 warnings and projected 90% admission block; server-configured allowances/estimates; same-origin/session owner APIs; fail-closed pool readiness; emergency stop; no caller-forged verified data, period, TTL, or resource estimates; no Cloud calls.
+- Status: backend ledger complete; admission endpoint intentionally disabled with 503 until trusted multi-pool estimates, GCP telemetry and a durable worker exist. `node --experimental-strip-types scripts/test-cloud-metering.mjs`, `npx tsc --noEmit`, and `git diff --check` pass. Fixture covers Pacific month/DST boundaries, authentication, untrusted metrics, all-pool fail-closed summary, warning/projection thresholds, shared MYR reservation arithmetic, idempotency, release/persistence and durable no-auto-release behavior.
+- Runtime limits: no trusted GCP telemetry importer or worker is active, so metrics default unavailable and cloud operations report inactive. Current internal reservation primitive models one configured resource pool per resource type; it is not exposed as active job admission because it does not reserve all affected pools. No actual Cloud job execution, retry orchestration, or timeout enforcement is active/tested. Independent QA verified concurrent process reservations. Reservations stay reserved after the 5-minute review deadline until explicit release or verified reconciliation to avoid freeing ambiguous chargeable work. No paid APIs, GCP setup, or spending authorization.
+
+### CCAI-05-QA — CCAI-P12-QA-PLAN-01
+- Objective: independent Phase 12 test matrix and security/regression review.
+- Files: `docs/qa/phase12-test-plan.md` only during implementation.
+- Acceptance: thresholds, concurrency, failure/retry, restart, reset/history, missing metrics, bypass, responsive simulation and all existing phases.
+- Status: complete with PARTIAL PASS. Focused metering, persistence, threshold, concurrent-reservation and P1–P11 regression checks passed. Actual GCP telemetry, live worker behavior, and viewport/device runtime were not tested. See `QA.md` and `docs/qa/phase12-test-plan.md`.
+
+### CCAI-06-DEVOPS — CCAI-P12-GCP-01
+- Objective: official-source research of Google free tier, shared allowances, Cloud Run Services/Jobs, durable storage, budget alerts and cost controls.
+- Files: `docs/google-cloud-phase12.md` only during implementation.
+- Acceptance: current official sources, quota aggregation/reset caveats, pricing coverage/gaps, no resource creation or charges.
+- Status: complete. Official Google documentation review is recorded in `docs/google-cloud-phase12.md`. No account, project, billing configuration, API, resource or deployment was accessed or created.
+
+### CCAI-04-AI — CCAI-P12-SEC-01
+- Scope: read-only security/bypass review of metering APIs, estimates, reservation lifecycle, and future provider integration.
+- Status: complete. No active GCP or live-provider path exists; reservation admission remains disabled until worker/telemetry integration is implemented. Release authority, owner-scoped billing, period validation, and unconnected AI/render route admission are future production blockers.

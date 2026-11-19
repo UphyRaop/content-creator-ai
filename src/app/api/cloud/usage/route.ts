@@ -1,0 +1,5 @@
+import { NextResponse } from "next/server";
+import { getSessionUser } from "@/lib/auth";
+import { calculateMonthlyUsage, currentBillingPeriod, getEmergencyStop, listAllowanceHistory, listPoolAllowanceHistory, listReservations, listUsageHistory } from "@/lib/cloud-metering";
+export const runtime="nodejs";export const dynamic="force-dynamic";
+export async function GET(request:Request){const user=await getSessionUser(request);if(!user)return NextResponse.json({error:"Authentication required."},{status:401,headers:{"cache-control":"no-store"}});const period=new URL(request.url).searchParams.get("period")||currentBillingPeriod();try{return NextResponse.json({usage:calculateMonthlyUsage(user.id,period),allowanceHistory:listAllowanceHistory(user.id),poolAllowanceHistory:listPoolAllowanceHistory(user.id),usageHistory:listUsageHistory(user.id,period),reservations:listReservations(user.id,period),emergencyStop:getEmergencyStop(user.id),cloudOperationsActive:false},{headers:{"cache-control":"no-store"}});}catch(error){return NextResponse.json({error:error instanceof Error?error.message:"Unable to read usage."},{status:400,headers:{"cache-control":"no-store"}});}}
