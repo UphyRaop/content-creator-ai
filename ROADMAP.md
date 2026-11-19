@@ -42,11 +42,12 @@ Approval gates are mandatory: no script before brief approval; no scene breakdow
 - Remote reference URLs are stored but not crawled/fetched. Users can paste accessible transcript or reference excerpts.
 
 ## Phase 3 verification record
-- Automated test command: `npm test` (project-store and script workflow tests).
-- Type checks: `npx tsc --noEmit`.
-- Builds: `npm run build:static` and `npm run build`.
-- Browser smoke/regression checks and deployment status are recorded in the implementation handover for this phase after verification.
-- No paid API calls, hosting, or new services were used. RM20 testing budget remains untouched.
+- Verified 19 November 2026 (Malaysia time): `npm test` passed all 8 SQLite/project/script workflow checks; `npx tsc --noEmit`, `npm run build:static`, `npm run build`, and the prototype JavaScript syntax check passed.
+- Desktop browser regression on `https://ccai.ur-project.biz/` verified project creation, rename, duplication, settings and reference entry, brief generation/approval, script blocked before brief approval, Malay mixed-format simulated script generation, word/time estimate, edit/save/restore version history, script approval, scene breakdown gate, and cost tracking at RM0.
+- Latest deployed commit: `98b83f6932d0da8bce877a793a991f4d6ea3c67b`; GitHub Pages run `44452604594` completed successfully. The custom-domain preview loaded on HTTPS.
+- Mobile viewport testing remains unverified because the available browser surface does not expose viewport emulation. Responsive breakpoints and layout rules remain in source; this is not a mobile test pass.
+- Source and static artifact secret scans found no keys, credential values, personal emails, or private keys. The public repository still has three older commits with personal author/committer email metadata; history was not rewritten. New commits use the GitHub noreply address.
+- No paid API calls, hosting, or new services were used. Cost: RM0; RM20 testing budget remains untouched.
 
 ## Known repository history issue
 The public repository contains three older commits whose author/committer metadata used personal email addresses. New commits use GitHub noreply identities. History was intentionally not rewritten or force-pushed; see the security scan record in the prior migration history.
