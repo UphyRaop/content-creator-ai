@@ -1,8 +1,8 @@
 # CCAI Active and Completed Tasks
 
 ## Active phase
-### CCAI-01-LEAD — P9-INT-01
-- Status: implementation, independent code QA, security review, noreply commit `1c3fc800efa8c3de1759c3e7ffec850b463888f5`, Pages run `44507225298`, and deployed preview verification complete. Phase 9 records are being synced in a documentation-only fast-forward before Phase 10 deployment.
+### CCAI-01-LEAD — P11-INT-01
+- Status: Phase 10 implementation, independent automated QA, security review, noreply commit `8efc7b73722f29b9ae851051edf9b6a910f4c496`, Pages run `44511713809`, and live artifact verification complete. Phase 10 records are being committed and deployed before Phase 11 final audit continues.
 
 ### CCAI-02-UIUX — P9-UI-01/02/03
 - Status: complete. Responsive post-production studio supports audio upload, local waveform with decode fallback and trim markers, volume/trim/fade/nonnegative sync delay, optional ducking, non-destructive revisions, and Node-mode revised render submit/progress/cancel/retry/preview/download. Pages uses local simulation only. Latest inline syntax and diff checks passed; browser interaction remains unverified.
@@ -18,7 +18,19 @@
 - Status: complete. Read-only review confirmed no secrets, static build/deploy path, safe base tree/expected-head fast-forward plan, noreply identity, successful Pages run `44507225298`, simulation boundary and rollback. HTTPS enforcement remains disabled; owner setting is required.
 
 ### CCAI-01-LEAD — P10-INT-01
-- Status: authorized and ready to begin after Phase 9 closeout documentation deploys. Phase 10 scope remains simulated thumbnail generation plus manual upload, approval, variant selection, and publishing metadata kit; no social account connection or automatic posting.
+- Status: complete; Phase 10 source commit `8efc7b73722f29b9ae851051edf9b6a910f4c496` deployed in Pages run `44511713809`. Independent QA passed automated/code acceptance with browser limitations. Final QA/deployment documentation is being synced before proceeding with Phase 11.
+
+### CCAI-02-UIUX — P10-UI-01/02
+- Status: complete in `prototype.html`. Added simulated layout variants for both orientations, validated manual upload, edit controls, global approval locking, thumbnail PNG download, and local platform metadata kit. Fixes invalidate a prepared checklist after metadata edits or refresh. Inline script syntax and diff check passed; live artifact marker verified, full browser interaction remains not tested.
+
+### CCAI-03-BACKEND — P10-BE-01
+- Status: complete in `src/lib/publishing-kit.ts` and `scripts/test-publishing-kit.mjs`. Pure validation requires 3–5 variants in each orientation and exactly one global approval; validates images, histories, metadata and a no-auto-publish export. Focused tests and TypeScript pass.
+
+### CCAI-05-QA — P10-QA-01
+- Status: automated/code acceptance PASS with browser checks blocked. P10 helper, P8/P9 render fixtures, `npm test`, TypeScript, static and Next builds, JS syntax and diff checks passed. Clipboard/download, local-storage quota/reload, actual file chooser, mobile/touch and runtime network instrumentation remain untested. Editable title lengths use generic limits; no publishing API is present.
+
+### CCAI-06-DEVOPS — P10-SEC-01
+- Status: read-only scan complete. No source credential/email patterns, social API endpoints or OAuth calls found. Three old public commits still expose personal author/committer email metadata; no force-push/history rewrite is authorized. Pages HTTPS enforcement is still off; HTTP also returns 200.
 
 ### CCAI-01-LEAD — P8-INT-01
 - Objective: integrate Phase 8 FFmpeg renderer, approval/timing fixes, user interface and docs; resolve independent QA findings; run regression/security/build checks; synchronize verified changes to `main`; verify Pages preview.

@@ -1,6 +1,6 @@
 # Content Creator AI (CCAI)
 
-CCAI is an AI-assisted video creation workspace with a project dashboard and an approval-gated 13-stage production prototype. Phases 1–9 are implemented in source; the GitHub Pages preview simulates AI and media generation. Node source includes FFmpeg rendering and non-destructive post-production export. No paid API calls are made.
+CCAI is an AI-assisted video creation workspace with a project dashboard and an approval-gated 13-stage production prototype. Phases 1–10 are implemented in source; the GitHub Pages preview simulates AI and media generation. Node source includes FFmpeg rendering and non-destructive post-production export. No paid API calls are made.
 
 ## Preview
 
@@ -77,6 +77,9 @@ The Node.js source includes an FFmpeg renderer and `/api/render` job routes. It 
 
 GitHub Pages cannot run Node.js APIs or FFmpeg. Its render and post-production screens remain RM0 simulations and never create an MP4. The production preview does not have a Node render host configured. See the Phase 8 QA matrix in [docs/phase8-qa-plan.md](docs/phase8-qa-plan.md) and evidence in [ROADMAP.md](ROADMAP.md).
 
+## Phase 10 thumbnail and publishing kit
+The thumbnail studio builds deterministic simulated portrait and landscape layout options from approved scene references, script context, and a saved brand kit. It supports editable overlay text, fonts and colors, manual PNG/JPEG/WebP upload up to 2 MiB, selected draft regeneration, explicit approval, and PNG download. The publishing kit provides local editable metadata suggestions for YouTube, TikTok, Instagram, and Facebook, plus copy, JSON download, and an export checklist. It has no social login, API calls, analytics, posting, or scheduling. GitHub Pages produces simulated thumbnail/render content and does not create an MP4. See [QA.md](QA.md) for test evidence and limitations.
+
 
 ## Development progress
-Phases 1–9 are completed and deployed; Phase 10 is authorized and underway. See [ROADMAP.md](ROADMAP.md), [TASKS.md](TASKS.md), and [QA.md](QA.md). GitHub Pages is static and does not execute the SQLite API or FFmpeg routes. The Next.js render APIs require a Node.js host with FFmpeg/libx264 and writable temporary storage; no such production host is configured. The live Pages preview continues to simulate rendering and post-production and never claims to produce an MP4.
+Phases 1–10 are completed and deployed; Phase 11 is authorized and starts after the Phase 10 verification records finish deploying. See [ROADMAP.md](ROADMAP.md), [TASKS.md](TASKS.md), and [QA.md](QA.md). GitHub Pages is static and does not execute the SQLite API or FFmpeg routes. The Next.js render APIs require a Node.js host with FFmpeg/libx264 and writable temporary storage; no such production host is configured. The live Pages preview continues to simulate rendering and post-production and never claims to produce an MP4. Repository review also found legacy personal email metadata in three old public commits and HTTPS enforcement is currently disabled; see [DEPLOYMENTS.md](DEPLOYMENTS.md).

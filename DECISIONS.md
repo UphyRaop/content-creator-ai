@@ -82,3 +82,8 @@
 - Audio track limits: 12 tracks, 8 MiB per audio file, 24 MiB total; request JSON is limited to 32 MiB. Validate type, duration, source trim, fades, gain and duck targets before FFmpeg.
 - Node post-production uses the existing bounded local render queue, generated temporary paths, safe argv invocation, server-generated FFmpeg graph labels, and ffprobe output validation. Derived files/jobs expire after one hour and are process-local.
 - The Pages preview records local post-production settings and simulated revision history only. It does not call APIs or create an MP4. No paid APIs, hosting, storage service, or subscriptions were introduced; RM20 remains unused.
+
+## Phase 10 technical decisions
+- On GitHub Pages, thumbnail concepts are deterministic layout simulations using approved local script/scene/brand context; no image-generation provider is called. Manual thumbnail uploads are local-only, PNG/JPEG/WebP, and capped at 2 MiB.
+- Thumbnail approval is global across portrait and landscape options and is required before the publishing kit unlocks. Publishing metadata is a local suggestion/export format only; there is no social account connection, analytics, upload, scheduling or automatic posting.
+- No paid APIs, hosting, dependencies, or subscriptions were added. RM20 remains untouched.
