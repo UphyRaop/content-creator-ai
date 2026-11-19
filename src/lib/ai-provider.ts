@@ -20,8 +20,9 @@ export class GeminiScriptProvider implements ScriptProvider {
       usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };
     };
     const text=result.candidates?.[0]?.content?.parts?.map(p=>p.text||"").join("").trim();if(!text)throw new Error("Gemini returned an empty script. Please try again.");
-    const inputTokens=result.usageMetadata?.promptTokenCount||0,outputTokens=result.usageMetadata?.candidatesTokenCount||0,inputRate=Number(process.env.GEMINI_INPUT_MYR_PER_MILLION),outputRate=Number(process.env.GEMINI_OUTPUT_MYR_PER_MILLION),words=wordCount(text,request.language);
-    return {draft:{text,wordCount:words,estimatedSeconds:estimatedDurationSeconds(text,140,request.language),format:request.format},usage:{provider:this.id,inputTokens,outputTokens,estimatedCostMyr:Number.isFinite(inputRate)&&Number.isFinite(outputRate)?estimateCostMyr(inputTokens,outputTokens,inputRate,outputRate):null}};
+    const inputTokens=result.usageMetadata?.promptTokenCount||0,outputTokens=result.usageMetadata?.candidatesTokenCount||0,inputRateRaw=process.env.GEMINI_INPUT_MYR_PER_MILLION,outputRateRaw=process.env.GEMINI_OUTPUT_MYR_PER_MILLION,inputRate=inputRateRaw?.trim()?Number(inputRateRaw):undefined,outputRate=outputRateRaw?.trim()?Number(outputRateRaw):undefined,words=wordCount(text,request.language);
+    const estimatedCostMyr=inputRate!==undefined&&outputRate!==undefined&&Number.isFinite(inputRate)&&Number.isFinite(outputRate)?estimateCostMyr(inputTokens,outputTokens,inputRate,outputRate):null;
+    return {draft:{text,wordCount:words,estimatedSeconds:estimatedDurationSeconds(text,140,request.language),format:request.format},usage:{provider:this.id,inputTokens,outputTokens,estimatedCostMyr}};
   }
 }
 export function getScriptProvider():ScriptProvider{return process.env.CCAI_SCRIPT_PROVIDER==="gemini"?new GeminiScriptProvider():new SimulatedScriptProvider();}
