@@ -47,8 +47,15 @@
 - Scene breakdown requires an approved script. Scene edits are explicitly saved and never auto-generate. Confirmed decisions regenerate rejected scenes only from their latest saved text and prompt. Approved scenes remain locked and unchanged, and voice remains blocked until every scene image is approved.
 - The studio tracks image versions and restoration, manual replacement/crop/download, queue status/progress/retry/cancel, interrupted-job recovery, deduplication, approval progress, and simulated generation/regeneration usage. The workflow was regression-tested in the live desktop preview; mobile viewport behavior remains unverified. Browser-local image history is subject to the browser storage quota; SQLite remains the future server-storage architecture.
 
+## Phase 6 approved scope
+- Phase 6 is implemented as a simulated voice prototype. The preview produces clearly labelled local tone samples, not AI speech, and records zero credits/RM0. No provider call was made and the RM20 budget remains untouched.
+- Voice lines stay locked until every scene image is approved. Each scene can contain narration/dialogue lines with reusable narrator or character profiles; changes are explicitly saved, do not trigger generation, and reset approval only for the edited line. Approved audio remains locked until explicitly unlocked. Only confirmed rejected lines regenerate.
+- Manual audio uploads retain version history, use browser-measured duration, and update scene timing. Timeline access requires every voice line to be approved.
+- ElevenLabs keys are unavailable in public Pages. A future HTTPS Node.js deployment can manage multiple authorized keys through an admin-token-gated API and AES-256-GCM encrypted SQLite vault. Keys are not returned, logged, placed in source, or stored in browser storage. Server vault variables are blank in `.env.example`. No user key or account was configured.
+- Live ElevenLabs calls remain disabled unless separately approved and configured with known model credits and MYR rates. The preview reports account balance as not checked because it makes no live balance request. Emotional delivery and free-text pronunciation are not sent as unsupported ElevenLabs controls.
+
 ## Development boundary
-- Phases 1–5 are complete as a simulated prototype. Phase 6 requires separate user approval.
+- Phases 1–6 are complete as a simulated prototype. Phase 7 requires separate user approval.
 - The GitHub Pages preview uses local simulation. Live Gemini calls are disabled by default and require separate explicit approval; no credential has been configured or used.
 - Brief/script approval is required before downstream stages. Changes to the approved brief or script clear approval and downstream state. Script versions are stored with the project payload.
 - Reference links are not fetched. Users can paste transcript/reference excerpts for context; inaccessible content is described gracefully.

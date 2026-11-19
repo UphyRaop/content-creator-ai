@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -10,6 +10,14 @@ try {
   const store = await import("../src/lib/project-store.ts");
   const entities = await import("../src/lib/entity-store.ts");
   const imageFlow = await import("../src/lib/image-workflow.ts");
+  const voiceFlow = await import("../src/lib/voice-workflow.ts");
+  const prototype = readFileSync(new URL("../prototype.html", import.meta.url), "utf8");
+  assert.match(prototype, /class="project-search-top"/);
+  assert.match(prototype, />All Status<\/option>/);
+  assert.match(prototype, />All Series<\/option>/);
+  assert.match(prototype, /projectFilters\.status==='all'/);
+  assert.match(prototype, /projectFilters\.series==='all'/);
+  console.log("PASS places dashboard search above filters and preserves default labels and filter logic");
   const project = store.createProject("Demo film", { step: 2, settings: { durationMinutes: 3 } });
   assert.equal(project.title, "Demo film");
   assert.equal(project.payload.step, 2);
@@ -41,6 +49,10 @@ try {
   assert.equal(duplicate?.name, "Copy of Mira");
   assert.equal(entities.deleteEntity("characters", duplicate.id), true);
   console.log("PASS stores, validates, duplicates, and deletes reusable SQLite library records");
+  const voiceProfile = entities.saveEntity("voices", { id: "voice-1", name: "Narrator", type: "narrator", voiceId: "demo-neutral", language: "Malay", speed: 1, stability: 0.6, similarity: 0.8, styleExaggeration: 0.2 });
+  assert.equal(entities.listEntities("voices")[0].id, voiceProfile.id);
+  assert.throws(() => entities.saveEntity("voices", { id: "voice-bad", name: "Bad", type: "character", speed: 3 }), /Invalid/);
+  console.log("PASS stores reusable narrator and character voice profile metadata with bounded settings");
 
   assert.equal(store.validatePayload({ projectStatus: "Awaiting Approval", priority: 1, seriesId: "series-a", season: 2, episode: 3, characterIds: ["character-1"], locationIds: ["place-1"], storyContinuity: "Previous event" }), true);
   assert.equal(store.validatePayload({ projectStatus: "Publishing" }), false);
@@ -121,6 +133,43 @@ try {
   assert.equal(imageFlow.validateImageGenerationRequest({ ...validImageRequest, scenes: [{ ...validImageRequest.scenes[0], approvalStatus: "approved" }] }), false);
   assert.equal(imageFlow.validateImageGenerationRequest({ ...validImageRequest, scenes: [{ ...validImageRequest.scenes[0], id: "" }] }), false);
   console.log("PASS rejects unapproved scripts, approved-scene regeneration, and malformed image requests");
+
+  const audioLine = (id, overrides = {}) => ({ id, text: "A short spoken line.", role: "narration", profileId: "voice-1", status: "completed", approved: true, decision: null, needsGeneration: false, durationSeconds: 2, estimatedDurationSeconds: 2, versions: [{ id: "audio-v1", dataUrl: "data:audio/wav;base64,YQ==", durationSeconds: 2, provider: "simulated" }], ...overrides });
+  const voiceScenes = [{ id: "voice-scene-1", line: "A short spoken line.", seconds: 2, image: "approved-image", approved: true, voiceSegments: [audioLine("voice-line-1"), audioLine("voice-line-2")] }];
+  assert.equal(voiceFlow.canGenerateVoice(voiceScenes), true);
+  assert.equal(voiceFlow.voiceIsComplete(voiceScenes), true);
+  assert.equal(voiceFlow.voiceIsComplete([{ ...voiceScenes[0], voiceSegments: [audioLine("voice-line-1"), audioLine("voice-line-2", { approved: false })] }]), false);
+  assert.equal(voiceFlow.canGenerateVoice([{ ...voiceScenes[0], approved: false }]), false);
+  assert.ok(voiceFlow.estimateSpeechSeconds("One short line", 1) > voiceFlow.estimateSpeechSeconds("One short line", 1.5));
+  const synced = voiceFlow.synchronizeAudioDurations([{ ...voiceScenes[0], voiceSegments: [audioLine("voice-line-1", { durationSeconds: 2.2 }), audioLine("voice-line-2", { durationSeconds: 1.8 })] }]);
+  assert.equal(synced[0].seconds, 4);
+  assert.equal(voiceFlow.estimateVoiceCredits(150, "simulated"), 0);
+  assert.equal(voiceFlow.estimateVoiceCredits(150, "elevenlabs"), null);
+  assert.equal(voiceFlow.estimateVoiceCredits(150, "elevenlabs", 1), 150);
+  assert.equal(voiceFlow.estimateVoiceCostMyr(null, 1), null);
+  assert.equal(voiceFlow.estimateVoiceCostMyr(150, 2), .3);
+  const voiceDecision = voiceFlow.confirmVoiceDecisions([
+    { id: "already-approved", approved: true, decision: "reject" },
+    { id: "voice-reject", approved: false, decision: "reject" },
+    { id: "voice-approve", approved: false, decision: "approve" },
+  ]);
+  assert.deepEqual(voiceDecision.rejectedIds, ["voice-reject"]);
+  assert.equal(voiceDecision.scenes[0].approved, true);
+  assert.equal(voiceDecision.scenes[2].approved, true);
+  const voiceJobs = [{ id: "vjob1", sceneId: "s1", segmentId: "a1", status: "pending", progress: 0, kind: "initial", createdAt: "now" }];
+  assert.deepEqual(voiceFlow.deduplicateVoiceJobs(voiceJobs, [
+    { ...voiceJobs[0], id: "duplicate" },
+    { ...voiceJobs[0], id: "another-line", segmentId: "a2" },
+  ]).map(job => job.id), ["vjob1", "another-line"]);
+  assert.equal(voiceFlow.recoverVoiceJobs([{ ...voiceJobs[0], status: "generating", progress: 50 }])[0].status, "pending");
+  const validVoiceRequest = { provider: "simulated", projectId: "project-1", scenesApproved: true, format: "mixed", aspectRatio: "9:16", spendingLimitMyr: 0, settings: { ...voiceFlow.defaultVoiceSettings }, scenes: [{ id: "line-1", sceneId: "scene-1", text: "Hello world", voiceId: "demo-neutral", kind: "initial", imageApproved: true }] };
+  assert.equal(voiceFlow.validateVoiceGenerationRequest(validVoiceRequest), true);
+  assert.equal(voiceFlow.validateVoiceGenerationRequest({ ...validVoiceRequest, scenesApproved: false }), false);
+  assert.equal(voiceFlow.validateVoiceGenerationRequest({ ...validVoiceRequest, settings: { ...validVoiceRequest.settings, speed: 2.5 } }), false);
+  const savedAudioPayload = { scriptApproved: true, voiceSettings: { speed: 1 }, scenes: [{ id: "s1", approved: true, image: true, voiceSegments: [audioLine("line-1")] }] };
+  assert.equal(store.validatePayload(savedAudioPayload), true);
+  assert.equal(store.validatePayload({ ...savedAudioPayload, scenes: [{ ...savedAudioPayload.scenes[0], voiceSegments: [{ ...savedAudioPayload.scenes[0].voiceSegments[0], versions: [{ dataUrl: "data:text/plain;base64,YQ==" }] }] }] }), false);
+  console.log("PASS voice approval gates, scene-only decisions, audio duration sync, job recovery/deduplication, credit estimates, payload validation, and malformed request rejection");
 
   assert.equal(store.deleteProject(project.id), true);
   assert.equal(store.getProject(project.id), null);

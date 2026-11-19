@@ -95,7 +95,33 @@ export function validatePayload(payload: unknown): payload is ProjectPayload {
   }
   if (record.storyContinuity !== undefined && (typeof record.storyContinuity !== "string" || record.storyContinuity.length > 20_000)) return false;
   if (record.appearanceOverrides !== undefined && (!record.appearanceOverrides || typeof record.appearanceOverrides !== "object" || Array.isArray(record.appearanceOverrides))) return false;
-  if (record.scenes !== undefined && (!Array.isArray(record.scenes) || record.scenes.length > 100 || record.scenes.some((scene) => !scene || typeof scene !== "object" || Array.isArray(scene)))) return false;
+  if (record.scenes !== undefined) {
+    if (!Array.isArray(record.scenes) || record.scenes.length > 100 || record.scenes.some((scene) => !scene || typeof scene !== "object" || Array.isArray(scene))) return false;
+    let voiceLineCount = 0;
+    for (const rawScene of record.scenes) {
+      const scene = rawScene as Record<string, unknown>;
+      if (scene.voiceSegments === undefined) continue;
+      if (!Array.isArray(scene.voiceSegments) || scene.voiceSegments.length > 20) return false;
+      voiceLineCount += scene.voiceSegments.length;
+      if (voiceLineCount > 500) return false;
+      for (const rawLine of scene.voiceSegments) {
+        if (!rawLine || typeof rawLine !== "object" || Array.isArray(rawLine)) return false;
+        const line = rawLine as Record<string, unknown>;
+        if (typeof line.id !== "string" || line.id.length > 120 || typeof line.text !== "string" || line.text.length > 12_000 || !["narration", "dialogue"].includes(String(line.role)) || typeof line.profileId !== "string" || line.profileId.length > 120) return false;
+        if (line.status !== undefined && !["pending", "generating", "completed", "failed", "cancelled"].includes(String(line.status))) return false;
+        if (line.durationSeconds !== undefined && (!Number.isFinite(line.durationSeconds) || Number(line.durationSeconds) < 0 || Number(line.durationSeconds) > 120)) return false;
+        if (line.versions !== undefined) {
+          if (!Array.isArray(line.versions) || line.versions.length > 100) return false;
+          for (const rawVersion of line.versions) {
+            if (!rawVersion || typeof rawVersion !== "object") return false;
+            const version = rawVersion as Record<string, unknown>;
+            if (typeof version.dataUrl !== "string" || !/^data:audio\/(wav|mpeg|mp3|mp4|x-m4a|aac|ogg|webm|x-wav);base64,/i.test(version.dataUrl) || version.dataUrl.length > 14_000_000) return false;
+          }
+        }
+      }
+    }
+  }
+  if (record.voiceJobs !== undefined && (!Array.isArray(record.voiceJobs) || record.voiceJobs.length > 1000 || record.voiceJobs.some((job) => !job || typeof job !== "object" || !["pending", "generating", "completed", "failed", "cancelled"].includes(String((job as Record<string, unknown>).status))))) return false;
   const settings = record.settings;
   if (settings && typeof settings === "object") {
     const values = settings as Record<string, unknown>;

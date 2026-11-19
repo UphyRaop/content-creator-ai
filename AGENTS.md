@@ -21,7 +21,7 @@ CCAI is an AI-powered video creation application. Do not add social media automa
 Preserve the existing approval gates: approve the brief before generating a script, approve the script before creating scenes, and approve every scene before generating voice. A regeneration must be user-triggered, use the edited prompt, and affect only the selected scene.
 
 ## Approved development roadmap
-Use the 11 approved development phases in `ROADMAP.md`: Application Foundation; Multimodal Idea Input; AI Script Generation; Project and Character Management; AI Image Generation Studio; AI Voice Generation; Video Timeline and Editor; Video Rendering Engine; Post-Production Studio; Thumbnail and Publishing Kit; Final Testing and Deployment. Phases 1–5 are complete as a simulated prototype. Phase 5 was authorized on 19 November 2026 (Malaysia time). Do not start Phase 6 without separate user approval.
+Use the 11 approved development phases in `ROADMAP.md`: Application Foundation; Multimodal Idea Input; AI Script Generation; Project and Character Management; AI Image Generation Studio; AI Voice Generation; Video Timeline and Editor; Video Rendering Engine; Post-Production Studio; Thumbnail and Publishing Kit; Final Testing and Deployment. Phases 1–6 are complete as a simulated prototype. Phase 6 was authorized on 19 November 2026 (Malaysia time). Do not start Phase 7 without separate user approval.
 
 ## Approved technology and operating constraints
 - Next.js, TypeScript, Node.js built-in SQLite (`node:sqlite`), GitHub, and the existing source files. Do not use Supabase or Cloudflare.
@@ -43,7 +43,8 @@ Use the 11 approved development phases in `ROADMAP.md`: Application Foundation; 
 - Phase 5 adds a scene image studio with an interchangeable, server-only FLUX.1 Schnell adapter. The GitHub Pages app uses clearly labelled simulated images only. Live image calls remain blocked unless separately approved and configured with server-only credentials and known MYR pricing.
 - Phase 5 scene breakdown requires an approved script. Scene edits never auto-generate; only confirmed rejected scenes may regenerate, approved scenes remain locked and unchanged, and voice stays blocked until every scene has an approved image.
 - Image references are retained as project context, but FLUX.1 Schnell reference-image conditioning is not supported by the adapter and must not be claimed.
-- Do not start Phase 6 or alter approved decisions without user approval. Update `ROADMAP.md` and `DECISIONS.md` when decisions change.
+- Phase 6 provides reusable narrator/character voice profiles, secure encrypted server-side API account storage, simulated local tone clips, scene audio review and approval, duration measurement/synchronization, and a gated server-only ElevenLabs adapter. Public Pages never accepts or stores API keys.
+- Live ElevenLabs calls remain disabled. Do not start Phase 7 or alter approved decisions without user approval. Update `ROADMAP.md` and `DECISIONS.md` when decisions change.
 
 ## Development checks
 Use Node.js 24 or newer. Run `npm ci`, `npm test`, `npm run build`, and `npm run build:static` as relevant. Keep credentials and personal information out of source, public artifacts, and logs.

@@ -3,7 +3,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 
-export const entityCollections = ["characters", "locations", "series", "brandKits", "channels"] as const;
+export const entityCollections = ["characters", "locations", "series", "brandKits", "channels", "voices"] as const;
 export type EntityCollection = typeof entityCollections[number];
 export type Entity = { id: string; name: string; [key: string]: unknown };
 const globalStore = globalThis as typeof globalThis & { ccaiEntityDb?: DatabaseSync };
@@ -34,6 +34,13 @@ export function validateEntity(value: unknown): value is Entity {
   if (json.length > 40_000_000) return false;
   const refs = entity.referenceImages;
   if (refs !== undefined && (!Array.isArray(refs) || refs.length > 12 || refs.some((item) => !item || typeof item !== "object" || typeof (item as Record<string, unknown>).dataUrl !== "string" || !/^data:image\/(png|jpeg|webp|gif);base64,/i.test(String((item as Record<string, unknown>).dataUrl)) || String((item as Record<string, unknown>).dataUrl).length > 2_800_000))) return false;
+  if (entity.type !== undefined && entity.type !== "narrator" && entity.type !== "character") return false;
+  for (const key of ["speed", "stability", "similarity", "styleExaggeration"]) {
+    if (entity[key] !== undefined && (!Number.isFinite(Number(entity[key])) || Number(entity[key]) < (key === "speed" ? 0.5 : 0) || Number(entity[key]) > (key === "speed" ? 2 : 1))) return false;
+  }
+  for (const key of ["language", "style", "emotion", "voiceId", "pronunciation", "characterId"]) {
+    if (entity[key] !== undefined && (typeof entity[key] !== "string" || entity[key].length > 5000)) return false;
+  }
   return true;
 }
 

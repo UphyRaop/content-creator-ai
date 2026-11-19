@@ -1,6 +1,6 @@
 # Content Creator AI (CCAI)
 
-CCAI is an AI-assisted video creation workspace with a project dashboard and an approval-gated 13-stage production prototype. Phases 1–5 are implemented for the simulated preview. No paid API calls are made.
+CCAI is an AI-assisted video creation workspace with a project dashboard and an approval-gated 13-stage production prototype. Phases 1–6 are implemented for the simulated preview. No paid API calls are made.
 
 ## Preview
 
@@ -45,7 +45,7 @@ The image studio builds scene plans only from approved scripts and provides edit
 - [Roadmap and progress](ROADMAP.md)
 - [Approved decisions](DECISIONS.md)
 
-Do not add real provider credentials or make paid API calls. Phase 6 requires the user’s approval.
+Do not add real provider credentials or make paid API calls. Phase 7 requires the user’s approval.
 
 
 ## Phase 4 project management
@@ -59,3 +59,12 @@ Phase 4 and Phase 5 automated/regression test results are recorded in [ROADMAP.m
 
 ## Phase 5 quick review
 A browser-local QA project named **CCAI Phase 5 QA - 2026-11-19** is saved in the attached preview browser for inspection. It contains simulated scene images and one manual crop test. Existing projects were left unchanged. In the preview, verify the Scene Approval screen, per-scene prompt/version history, the RM0 usage panel, and that Voice Generation is unlocked only after all scene images are approved. Do not expect real AI images: the production provider adapter is disabled and the preview labels its simulated images.
+
+
+## Phase 6 voice studio
+
+The voice studio adds reusable narrator and character voice profiles, per-scene dialogue lines, speed/stability/similarity/emotion/style/pronunciation controls, explicit generation confirmation, simulated queue progress/retry/cancellation, per-line approval and rejected-only regeneration, audio version restore, manual recording upload, and measured audio timing for the Phase 7 timeline. The browser preview creates a labelled low-volume tone clip at an estimated speech duration; it is not spoken narration and costs RM0. Uploads are measured by the browser and limited to 1 MB in Pages preview to reduce local-storage pressure.
+
+The public Pages preview never renders an API-key input and does not write credentials to browser storage. For a future HTTPS Node.js host, multiple ElevenLabs accounts can be added, updated, selected, and removed through an administrator-token-gated endpoint; keys are encrypted with AES-256-GCM in SQLite and only a label and last four characters are returned. The server requires `CCAI_VOICE_VAULT_ENCRYPTION_KEY` and `CCAI_VOICE_VAULT_ADMIN_TOKEN`. No keys are configured. Live calls require separate user approval, and current balances are not queried while live access is disabled. Estimated usage is recorded by project/account when a server live call is explicitly enabled; actual cost stays unknown when the provider does not return it.
+
+The ElevenLabs adapter remains disabled. Unknown credits/MYR rates block live generation. This adapter does not claim a direct emotional-delivery control or free-text pronunciation dictionary; those settings are stored for the preview but are rejected for live generation unless a compatible provider capability is verified. No real ElevenLabs call was made.
