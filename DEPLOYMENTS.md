@@ -22,6 +22,9 @@ GitHub Pages serves static files. It cannot run the SQLite API routes, persisten
 - GitHub Pages remains static: thumbnail variations and render/export states are simulations and browser-local persistence. It cannot run SQLite, Node API routes or FFmpeg. GitHub API reports `https_enforced:false`; HTTP still returns 200, so owner action is required to enable HTTPS enforcement.
 
 ## Phase 11 deployment verification
-- P11 source and QA changes are ready for a noreply-identity fast-forward commit. GitHub Pages will be checked against the resulting Actions run and the custom domain after the source commit.
+- Fast-forward commit `ba5a9d26c74355721d6a978f727b9e175ed2ce71` (“Complete Phase 11 audit and safety fixes”) reached `main`; both author and committer use `355911884+UphyRaop@users.noreply.github.com`. No history rewrite or force-push occurred.
+- GitHub Actions Pages run `44517625068` completed successfully for this commit.
+- `https://ccai.ur-project.biz/` loaded in Chrome after deployment. The desktop DOM showed the CCAI project dashboard, seven existing browser-local projects, `All Status`, `All Series`, and the `SIMULATED · COST RM0` label. No project data was edited. This confirms the static preview is accessible and does not verify every interaction.
+- Mobile/tablet and keyboard runtime checks after deployment were not performed. The cloud browser did not expose viewport emulation; responsive behavior is source/build-tested only.
 - This is a static prototype deployment only. It does not enable or deploy the SQLite/Node API routes. Production backend remains blocked pending authentication/ownership and a supported persistent Node host.
-- HTTPS enforcement and legacy history email metadata remain outstanding; see `QA.md`.
+- GitHub Pages’ last verified setting is `https_enforced:false`: HTTPS responds, but HTTP also responds 200. Owner action is still needed to enforce HTTPS. Legacy personal email metadata remains in old public commits; no history rewrite occurred. See `QA.md`.
