@@ -44,7 +44,7 @@ Approval gates are mandatory: no script before brief approval; no scene breakdow
 ## Phase 3 verification record
 - Verified 19 November 2026 (Malaysia time): `npm test` passed all 8 SQLite/project/script workflow checks; `npx tsc --noEmit`, `npm run build:static`, `npm run build`, and the prototype JavaScript syntax check passed.
 - Desktop browser regression on `https://ccai.ur-project.biz/` verified project creation, rename, duplication, settings and reference entry, brief generation/approval, script blocked before brief approval, Malay mixed-format simulated script generation, word/time estimate, edit/save/restore version history, script approval, scene breakdown gate, and cost tracking at RM0.
-- Latest deployed commit: `98b83f6932d0da8bce877a793a991f4d6ea3c67b`; GitHub Pages run `44452604594` completed successfully. The custom-domain preview loaded on HTTPS.
+- Final Phase 3 source commit: `e1b896954b0723b9443cb2de948b5a26f9212121`; GitHub Pages run `44453273340` completed successfully. The custom-domain preview loaded on HTTPS.
 - Mobile viewport testing remains unverified because the available browser surface does not expose viewport emulation. Responsive breakpoints and layout rules remain in source; this is not a mobile test pass.
 - Source and static artifact secret scans found no keys, credential values, personal emails, or private keys. The public repository still has three older commits with personal author/committer email metadata; history was not rewritten. New commits use the GitHub noreply address.
 - No paid API calls, hosting, or new services were used. Cost: RM0; RM20 testing budget remains untouched.
