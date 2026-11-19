@@ -20,8 +20,14 @@ export function validateScriptRequest(value: unknown): value is ScriptRequest {
     (r.referenceVideos === undefined || (Array.isArray(r.referenceVideos) && r.referenceVideos.length <= 20 && r.referenceVideos.every(url => typeof url === "string" && isHttpsUrl(url)))) && validImages;
 }
 export function isHttpsUrl(value: string) { try { return new URL(value).protocol === "https:"; } catch { return false; } }
-export function wordCount(text: string) { return text.trim() ? text.trim().split(/\s+/u).length : 0; }
-export function estimatedDurationSeconds(text: string, wordsPerMinute = 140) { return Math.round(wordCount(text) / wordsPerMinute * 60); }
+const languageTags: Record<string, string> = { English: "en", Malay: "ms", Chinese: "zh", Tamil: "ta", Spanish: "es", French: "fr", Japanese: "ja", Arabic: "ar" };
+export function wordCount(text: string, language = "English") {
+  if (!text.trim()) return 0;
+  const locale = languageTags[language] || "en";
+  if (typeof Intl.Segmenter === "function") return [...new Intl.Segmenter(locale, { granularity: "word" }).segment(text)].filter(part => part.isWordLike).length;
+  return text.trim().split(/\s+/u).length;
+}
+export function estimatedDurationSeconds(text: string, wordsPerMinute = 140, language = "English") { return Math.round(wordCount(text, language) / wordsPerMinute * 60); }
 export function estimateCostMyr(inputTokens: number, outputTokens: number, inputRate?: number, outputRate?: number) { return inputRate === undefined || outputRate === undefined ? null : (inputTokens * inputRate + outputTokens * outputRate) / 1_000_000; }
 export function createSimulatedScript(request: ScriptRequest): ScriptDraft {
   const duration = request.durationMinutes * 60, title = request.brief.title.trim() || request.idea.trim(), topic = request.idea.trim();
@@ -37,7 +43,7 @@ export function createSimulatedScript(request: ScriptRequest): ScriptDraft {
     `[CLOSE — ${duration}]\n${narrator} What will you create next? Thanks for watching.`
   ];
   const text = lines.join("\n\n");
-  return { text, wordCount: wordCount(text), estimatedSeconds: estimatedDurationSeconds(text), format: request.format };
+  return { text, wordCount: wordCount(text, request.language), estimatedSeconds: estimatedDurationSeconds(text, 140, request.language), format: request.format };
 }
 export type ScriptVersion = { id: string; text: string; createdAt: string; reason: "generated" | "edited" | "restored" };
 export function appendScriptVersion(versions: ScriptVersion[], text: string, reason: ScriptVersion["reason"]): ScriptVersion[] { const clean=text.trim(); if(!clean || versions.at(-1)?.text===clean)return versions; return [...versions,{id:`v${versions.length+1}-${Date.now().toString(36)}`,text:clean,createdAt:new Date().toISOString(),reason}].slice(-50); }

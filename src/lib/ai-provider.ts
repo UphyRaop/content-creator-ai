@@ -1,5 +1,5 @@
 import "server-only";
-import { createSimulatedScript, estimateCostMyr, type ScriptDraft, type ScriptRequest } from "@/lib/script-workflow";
+import { createSimulatedScript, estimateCostMyr, estimatedDurationSeconds, wordCount, type ScriptDraft, type ScriptRequest } from "@/lib/script-workflow";
 export type ProviderUsage = { provider: "simulated" | "gemini"; inputTokens: number; outputTokens: number; estimatedCostMyr: number | null };
 export type ScriptProvider = { readonly id: ProviderUsage["provider"]; generate(request: ScriptRequest): Promise<{ draft: ScriptDraft; usage: ProviderUsage }> };
 export class SimulatedScriptProvider implements ScriptProvider {
@@ -20,8 +20,8 @@ export class GeminiScriptProvider implements ScriptProvider {
       usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };
     };
     const text=result.candidates?.[0]?.content?.parts?.map(p=>p.text||"").join("").trim();if(!text)throw new Error("Gemini returned an empty script. Please try again.");
-    const inputTokens=result.usageMetadata?.promptTokenCount||0,outputTokens=result.usageMetadata?.candidatesTokenCount||0,inputRate=Number(process.env.GEMINI_INPUT_MYR_PER_MILLION),outputRate=Number(process.env.GEMINI_OUTPUT_MYR_PER_MILLION),words=text.split(/\s+/u).filter(Boolean).length;
-    return {draft:{text,wordCount:words,estimatedSeconds:Math.round(words/140*60),format:request.format},usage:{provider:this.id,inputTokens,outputTokens,estimatedCostMyr:Number.isFinite(inputRate)&&Number.isFinite(outputRate)?estimateCostMyr(inputTokens,outputTokens,inputRate,outputRate):null}};
+    const inputTokens=result.usageMetadata?.promptTokenCount||0,outputTokens=result.usageMetadata?.candidatesTokenCount||0,inputRate=Number(process.env.GEMINI_INPUT_MYR_PER_MILLION),outputRate=Number(process.env.GEMINI_OUTPUT_MYR_PER_MILLION),words=wordCount(text,request.language);
+    return {draft:{text,wordCount:words,estimatedSeconds:estimatedDurationSeconds(text,140,request.language),format:request.format},usage:{provider:this.id,inputTokens,outputTokens,estimatedCostMyr:Number.isFinite(inputRate)&&Number.isFinite(outputRate)?estimateCostMyr(inputTokens,outputTokens,inputRate,outputRate):null}};
   }
 }
 export function getScriptProvider():ScriptProvider{return process.env.CCAI_SCRIPT_PROVIDER==="gemini"?new GeminiScriptProvider():new SimulatedScriptProvider();}
