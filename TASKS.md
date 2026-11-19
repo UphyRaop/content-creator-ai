@@ -1,11 +1,30 @@
 # CCAI Active and Completed Tasks
 
 ## Active phase
+### CCAI-01-LEAD — P9-INT-01
+- Objective: integrate the post-production studio, real Node FFmpeg derived export, UI, QA fixes and durable documentation; security scan, fast-forward sync to `main`, deploy Pages simulation and verify preview.
+- Files: `src/lib/post-production.ts`, render API and `src/lib/ffmpeg-renderer.ts`, `prototype.html`, focused fixtures, project records.
+- Acceptance: uploaded audio is validated; music/ducking default off; source render stays immutable; real Node output passes ffprobe; Pages remains simulation-only; independent QA and builds pass; main update is fast-forward; deployed preview is verified.
+- Status: implementation and independent code QA complete; final browser preview, security scan, GitHub synchronization and Pages deployment pending.
+
+### CCAI-02-UIUX — P9-UI-01/02/03
+- Status: complete. Responsive post-production studio supports audio upload, local waveform with decode fallback and trim markers, volume/trim/fade/nonnegative sync delay, optional ducking, non-destructive revisions, and Node-mode revised render submit/progress/cancel/retry/preview/download. Pages uses local simulation only. Latest inline syntax and diff checks passed; browser interaction remains unverified.
+
+### CCAI-03-BACKEND — P9-BE-01/02
+- Status: complete. Added validated non-destructive audio model, bounded post-production upload route, existing queue integration, actual FFmpeg audio mix and derived MP4 output while preserving the original. Fixed QA-discovered filtergraph injection using strict IDs and generated numeric filter labels. Model, media, renderer and TypeScript checks passed.
+
+### CCAI-05-QA — P9-QA-01
+- Status: code acceptance PASS with limitations. Real MP4 fixture verified audio/video streams, dimensions, duration and byte-preserved source. Project/media/regression/TypeScript/static/Next builds passed. HTTP-level post-production status/cancel/retry, sample-level fade/ducking, browser playback and mobile interaction remain untested.
+
+### CCAI-06-DEVOPS — P9-DEVOPS-01
+- Objective: read-only deployment/security review; report safe sync baseline, Pages build/deploy, rollback, HTTPS limitation and required checks.
+- Status: pending.
+
 ### CCAI-01-LEAD — P8-INT-01
 - Objective: integrate Phase 8 FFmpeg renderer, approval/timing fixes, user interface and docs; resolve independent QA findings; run regression/security/build checks; synchronize verified changes to `main`; verify Pages preview.
 - Files: render workflow/API, `prototype.html`, test suite, workflow configuration and project records.
 - Acceptance: renderer respects timeline timing and all approval gates; accepted transitions render; queue and controls are accurate; Pages remains honestly simulated; independent QA passes; builds pass; fast-forward GitHub commit and Pages deployment verified.
-- Status: source implementation and independent code QA complete; GitHub synchronization and Pages deployment pending. Local render routes remain unavailable on Pages.
+- Status: source, QA, GitHub synchronization and Pages deployment complete (commit `b6b67aaa7590b3b2a7c9613de4c3ea2c0b9e645a`, workflow run `44500600942`). Local render routes remain unavailable on Pages.
 
 ### CCAI-05-QA — P8-QA-REVIEW-01
 - Objective: independently inspect Phase 8 FFmpeg path, API security, approval gates, timing, transitions, queue, test coverage, Pages labeling and regression results.

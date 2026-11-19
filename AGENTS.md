@@ -44,6 +44,8 @@ Use the 11 approved development phases in `ROADMAP.md`: Application Foundation; 
 - Phase 5 scene breakdown requires an approved script. Scene edits never auto-generate; only confirmed rejected scenes may regenerate, approved scenes remain locked and unchanged, and voice stays blocked until every scene has an approved image.
 - Image references are retained as project context, but FLUX.1 Schnell reference-image conditioning is not supported by the adapter and must not be claimed.
 - Phase 6 provides reusable narrator/character voice profiles, secure encrypted server-side API account storage, simulated local tone clips, scene audio review and approval, duration measurement/synchronization, and a gated server-only ElevenLabs adapter. Public Pages never accepts or stores API keys.
+- Phase 8/9 FFmpeg routes are Node-only and must remain server-only. Post-production accepts only a completed in-memory render job ID/version, bounded uploaded audio, allowlisted media, and validated track settings; it must preserve the original render and use generated FFmpeg filter labels/argv arrays. Never accept a caller filesystem path. Optional music and ducking default off.
+- GitHub Pages remains local simulation-only for render and post-production: do not make API calls or imply MP4 files exist unless an actual Node render job produced one.
 - Live ElevenLabs calls remain disabled. Do not alter approved decisions outside the current authorization. Keep the RM20 API budget untouched and use no paid APIs or hosting. Update `ROADMAP.md` and `DECISIONS.md` when decisions change.
 
 ## Development checks

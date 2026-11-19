@@ -75,3 +75,10 @@
 - Enforce approved script, images and every saved approved voice segment; each voice segment must be represented exactly once in the timeline manifest. Captions and clips must fit inside the declared timeline duration. Preserve absolute scene/audio/caption timing and gaps.
 - GitHub Pages stays simulation-only and never calls the Node render routes. No real MP4 is claimed or produced on the preview site.
 - Do not introduce production hosting without separate approval. Pages HTTPS responds, but GitHub reports enforcement is disabled; HTTP is not redirected. The connected GitHub tools cannot update Pages settings, and the current browser session is signed out.
+
+## Phase 9 technical decisions
+- Post-production accepts user-uploaded music, voice recordings and sound effects only; it does not generate or add audio automatically. Music and ducking are disabled by default.
+- The source render is immutable. Every post-production export is a new derived FFmpeg job tied to the completed parent job ID and exact version.
+- Audio track limits: 12 tracks, 8 MiB per audio file, 24 MiB total; request JSON is limited to 32 MiB. Validate type, duration, source trim, fades, gain and duck targets before FFmpeg.
+- Node post-production uses the existing bounded local render queue, generated temporary paths, safe argv invocation, server-generated FFmpeg graph labels, and ffprobe output validation. Derived files/jobs expire after one hour and are process-local.
+- The Pages preview records local post-production settings and simulated revision history only. It does not call APIs or create an MP4. No paid APIs, hosting, storage service, or subscriptions were introduced; RM20 remains unused.

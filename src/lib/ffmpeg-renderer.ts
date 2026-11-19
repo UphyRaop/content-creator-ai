@@ -1,13 +1,14 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { getProject } from "./project-store";
+import { calculateDerivedAudioTimeline, createPostProductionProject, createPostProductionRevision, validatePostAudioTracks, type PostAudioTrack, type PostProductionRevision } from "./post-production";
 
 /** Node server runtime only: requires FFmpeg (libx264) and ffprobe on PATH, or CCAI_FFMPEG_PATH/CCAI_FFPROBE_PATH. Jobs are process-local; static Pages hosting cannot run these routes. */
 export type RenderStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
-export type RenderJob = { id:string; projectId:string; status:RenderStatus; progress:number; createdAt:string; updatedAt:string; error?:string; outputBytes?:number };
+export type RenderJob = { id:string; projectId:string; status:RenderStatus; progress:number; createdAt:string; updatedAt:string; error?:string; outputBytes?:number; durationSeconds?:number; kind?:"timeline"|"post-production"; parentRenderJobId?:string; parentRenderVersion?:string; revisionId?:string; revisionNumber?:number; originalRenderRef?:string; derivedVideoRef?:string|null };
 export type RenderByteRange = { valid:boolean; partial:boolean; start:number; end:number };
 /** Parse one HTTP byte range for the MP4 preview route; invalid/multiple ranges are rejected. */
 export function parseRenderByteRange(header:string|null,size:number):RenderByteRange {
@@ -21,11 +22,16 @@ export function parseRenderByteRange(header:string|null,size:number):RenderByteR
 }
 type Clip = {id:string;sourceRef:string;start:number;duration:number;sourceOffset:number;text?:string;timing:string;motion:string;transitionIn:string;transitionDuration?:number;motionIntensity?:number;motionDuration?:number;cameraStart?:{x:number;y:number;scale:number};cameraEnd?:{x:number;y:number;scale:number}};
 type Manifest = {version:1;timeUnit:"seconds";duration:number;tracks:Array<{id:string;kind:string;clips:Clip[]}>};
-type JobState = {public:RenderJob; dir:string; output:string; process?:ChildProcess; cancelled:boolean; input:{manifest:Manifest;format:"landscape"|"portrait";fps:30|60}};
+type TimelineJobInput={manifest:Manifest;format:"landscape"|"portrait";fps:30|60};
+type PostAudioFile={track:PostAudioTrack;path:string};
+type PostJobInput={sourceRenderJobId:string;parentRenderVersion:string;revisionId:string;revision:PostProductionRevision;originalDurationSeconds:number;audioFiles:PostAudioFile[]};
+export type PostProductionAudioUpload={track:PostAudioTrack;dataUrl:string};
+type JobState = {public:RenderJob; dir:string; output:string; process?:ChildProcess; cancelled:boolean; input?:TimelineJobInput; postInput?:PostJobInput};
 const globals = globalThis as typeof globalThis & {ccaiRenderJobs?:Map<string,JobState>;ccaiRenderQueue?:string[];ccaiRenderActive?:boolean};
 const jobs = globals.ccaiRenderJobs ||= new Map();
 const queue = globals.ccaiRenderQueue ||= [];
 const MAX_QUEUED=5, MAX_CLIPS=100, MAX_DURATION=300, MAX_DATA_URL=14_000_000;
+const MAX_POST_AUDIO_TRACKS=12, MAX_POST_AUDIO_BYTES=24*1024*1024, MAX_POST_AUDIO_FILE_BYTES=8*1024*1024;
 
 export function validateRenderManifest(value: unknown): value is Manifest {
   if(!value||typeof value!=="object"||Array.isArray(value))return false;
@@ -77,7 +83,7 @@ function run(args:string[],state:JobState):Promise<void>{return new Promise((res
 function escDrawtext(s:string){return s.replace(/\\/g,"\\\\").replace(/:/g,"\\:").replace(/'/g,"\\'").replace(/%/g,"\\%").replace(/\[/g,"\\[").replace(/\]/g,"\\]").replace(/,/g,"\\,");}
 async function render(state:JobState,manifest:Manifest,format:"landscape"|"portrait",fps:30|60){
   const projectId=state.public.projectId;const assets=assetsFor(projectId,manifest);const width=format==="portrait"?1080:1920,height=format==="portrait"?1920:1080;const imageTrack=manifest.tracks.find(t=>t.kind==="image")!;const imageClips=[...imageTrack.clips].sort((a,b)=>a.start-b.start);const audio=manifest.tracks.filter(t=>t.kind==="narration"||t.kind==="dialogue").flatMap(t=>t.clips);
-  state.public.status="running";state.public.progress=1;state.public.updatedAt=new Date().toISOString();let index=0,visualCursor=0;const segments:Array<{path:string;duration:number;transition:string;transitionDuration?:number}>=[];
+  state.public.status="running";state.public.progress=1;state.public.durationSeconds=manifest.duration;state.public.updatedAt=new Date().toISOString();let index=0,visualCursor=0;const segments:Array<{path:string;duration:number;transition:string;transitionDuration?:number}>=[];
   for(const clip of imageClips){
     visualCursor=Math.round(visualCursor*1000)/1000;
     if(clip.start<visualCursor)throw new Error("Overlapping image clips are not supported by the local renderer; use a transition setting on the incoming clip.");
@@ -121,7 +127,52 @@ async function render(state:JobState,manifest:Manifest,format:"landscape"|"portr
   const probe=await new Promise<string>((resolve,reject)=>{const child=spawn(process.env.CCAI_FFPROBE_PATH||"ffprobe",["-v","error","-show_entries","format=duration:stream=codec_type,width,height","-of","json",state.output],{stdio:["ignore","pipe","pipe"]});let out="",err="";child.stdout?.on("data",x=>out+=String(x));child.stderr?.on("data",x=>err+=String(x));child.on("error",reject);child.on("close",code=>code===0?resolve(out):reject(new Error(`ffprobe failed: ${err.slice(-400)}`)));});
   const metadata=JSON.parse(probe) as {format?:{duration?:string};streams?:Array<{codec_type?:string;width?:number;height?:number}>};const expectedW=format==="portrait"?1080:1920,expectedH=format==="portrait"?1920:1080;
   if(!metadata.streams?.some(s=>s.codec_type==="video"&&s.width===expectedW&&s.height===expectedH)||!Number(metadata.format?.duration)||Math.abs(Number(metadata.format!.duration)-manifest.duration)>.15||(audio.length&&!metadata.streams?.some(s=>s.codec_type==="audio")))throw new Error("FFprobe rejected the output: expected playable MP4 streams, dimensions, and duration were not present.");
-  state.public.status="completed";state.public.progress=100;state.public.outputBytes=result.size;state.public.updatedAt=new Date().toISOString();
+  state.public.status="completed";state.public.progress=100;state.public.outputBytes=result.size;state.public.derivedVideoRef=`render-job:${state.public.id}`;state.public.updatedAt=new Date().toISOString();
+}
+type ProbeInfo={format?:{duration?:string};streams?:Array<{codec_type?:string;width?:number;height?:number;duration?:string}>};
+async function probeFile(filename:string):Promise<ProbeInfo>{
+  const result=await new Promise<string>((resolve,reject)=>{const child=spawn(process.env.CCAI_FFPROBE_PATH||"ffprobe",["-v","error","-show_entries","format=duration:stream=codec_type,width,height,duration","-of","json",filename],{stdio:["ignore","pipe","pipe"]});let out="",err="";child.stdout?.on("data",chunk=>out+=String(chunk));child.stderr?.on("data",chunk=>err+=String(chunk));child.on("error",reject);child.on("close",code=>code===0?resolve(out):reject(new Error(`ffprobe failed: ${err.slice(-400)}`)));});
+  return JSON.parse(result) as ProbeInfo;
+}
+async function renderPostProduction(state:JobState,input:PostJobInput){
+  state.public.status="running";state.public.progress=Math.max(state.public.progress,1);state.public.updatedAt=new Date().toISOString();
+  const sourceJob=getRenderJob(input.sourceRenderJobId),sourcePath=getRenderOutputFile(input.sourceRenderJobId);
+  if(!sourceJob||sourceJob.status!=="completed"||!sourcePath||sourceJob.createdAt!==input.parentRenderVersion)throw new Error("The parent render is unavailable or its version changed.");
+  const baseProbe=await probeFile(sourcePath),videoStream=baseProbe.streams?.find(s=>s.codec_type==="video");
+  const videoDuration=Number(baseProbe.format?.duration);if(!videoStream||!Number.isFinite(videoDuration)||videoDuration<=0)throw new Error("The parent MP4 failed source validation.");
+  const enabled=input.audioFiles.filter(x=>x.track.enabled);
+  for(const item of input.audioFiles){if(state.cancelled)throw new Error("Render cancelled.");const probe=await probeFile(item.path),audio=probe.streams?.find(s=>s.codec_type==="audio"),measured=Number(probe.format?.duration);
+    if(!audio||!Number.isFinite(measured)||Math.abs(measured-item.track.actualDurationSeconds)>.1)throw new Error(`Uploaded audio duration or stream validation failed for track ${item.track.id}.`);
+  }
+  const postProject=createPostProductionProject({id:sourceJob.id,version:sourceJob.createdAt,sourceRef:`render-job:${sourceJob.id}`,durationSeconds:input.originalDurationSeconds});
+  const revision=input.revision;
+  const plan=calculateDerivedAudioTimeline({...postProject,revisions:[revision],activeRevisionId:revision.id});
+  const outputDuration=plan.outputDurationSeconds,videoTail=Math.max(0,outputDuration-videoDuration),audioStream=baseProbe.streams?.some(s=>s.codec_type==="audio");
+  if(!audioStream)throw new Error("The parent MP4 has no audio stream to preserve.");
+  if(state.cancelled)throw new Error("Render cancelled.");state.public.progress=Math.max(state.public.progress,2);state.public.durationSeconds=outputDuration;state.public.revisionId=revision.id;state.public.parentRenderJobId=sourceJob.id;state.public.parentRenderVersion=sourceJob.createdAt;state.public.kind="post-production";state.public.updatedAt=new Date().toISOString();
+  const args=["-y","-i",sourcePath];for(const item of enabled)args.push("-i",item.path);
+  const filters:string[]=[`[0:a]aresample=48000,aformat=channel_layouts=stereo,apad,atrim=duration=${outputDuration}[base]`];
+  const layerLabels=new Map<string,string>();let inputIndex=1;
+  for(const item of enabled){if(state.cancelled)throw new Error("Render cancelled.");const t=item.track,label=`layer_${inputIndex}`;let chain=`[${inputIndex}:a]aresample=48000,aformat=channel_layouts=stereo,atrim=start=${t.sourceOffsetSeconds}:duration=${t.durationSeconds},asetpts=PTS-STARTPTS,volume=${t.volume}`;
+    if(t.fadeInSeconds>0)chain+=`,afade=t=in:st=0:d=${t.fadeInSeconds}`;
+    if(t.fadeOutSeconds>0)chain+=`,afade=t=out:st=${Math.max(0,t.durationSeconds-t.fadeOutSeconds)}:d=${t.fadeOutSeconds}`;
+    chain+=`,adelay=${Math.round(t.startSeconds*1000)}:all=1[${label}]`;filters.push(chain);layerLabels.set(t.id,label);inputIndex++;
+  }
+  const mixedLabels:string[]=[];
+  for(let trackIndex=0;trackIndex<enabled.length;trackIndex++){const item=enabled[trackIndex],t=item.track,sourceLabel=layerLabels.get(t.id)!;if(t.ducking.enabled){const targets=t.ducking.targetTrackIds.map(id=>layerLabels.get(id));if(targets.some(x=>!x))throw new Error("Ducking target is not present in the enabled audio mix.");
+      let sidechain=targets[0]!;if(targets.length>1){sidechain=`side_${trackIndex}`;filters.push(`${targets.map(x=>`[${x}]`).join("")}amix=inputs=${targets.length}:duration=longest:normalize=0[${sidechain}]`);}
+      const ducked=`duck_${trackIndex}`,ratio=(1+t.ducking.amount*19).toFixed(3);filters.push(`[${sourceLabel}][${sidechain}]sidechaincompress=threshold=${t.ducking.threshold}:ratio=${ratio}:attack=${Math.max(.01,t.ducking.attackSeconds*1000)}:release=${Math.max(.01,t.ducking.releaseSeconds*1000)}:makeup=1[${ducked}]`);mixedLabels.push(ducked);
+    }else mixedLabels.push(sourceLabel);
+  }
+  const mixInputs=["base",...mixedLabels];filters.push(`${mixInputs.map(x=>`[${x}]`).join("")}amix=inputs=${mixInputs.length}:duration=longest:normalize=0,alimiter=limit=0.98,apad,atrim=duration=${outputDuration}[mixed]`);
+  const hasVideoTail=videoTail>.001;
+  if(hasVideoTail)filters.push(`[0:v]tpad=stop_mode=clone:stop_duration=${videoTail},trim=duration=${outputDuration}[vout]`);
+  args.push("-filter_complex",filters.join(";"),...(hasVideoTail?["-map","[vout]","-c:v","libx264","-preset","veryfast","-pix_fmt","yuv420p"]:["-map","0:v","-c:v","copy"]),"-map","[mixed]","-t",String(outputDuration),"-c:a","aac","-b:a","192k","-movflags","+faststart",state.output);
+  await run(args,state);if(state.cancelled)throw new Error("Render cancelled.");
+  const result=await stat(state.output),metadata=await probeFile(state.output);
+  if(state.cancelled)throw new Error("Render cancelled.");
+  if(result.size<1024||!metadata.streams?.some(s=>s.codec_type==="video"&&s.width===videoStream.width&&s.height===videoStream.height)||!metadata.streams?.some(s=>s.codec_type==="audio")||Math.abs(Number(metadata.format?.duration)-outputDuration)>.15)throw new Error("FFprobe rejected the derived MP4 output.");
+  state.public.status="completed";state.public.progress=100;state.public.outputBytes=result.size;state.public.derivedVideoRef=`render-job:${state.public.id}`;state.public.updatedAt=new Date().toISOString();if(state.postInput)state.postInput.revision={...state.postInput.revision,derivedVideoRef:state.public.derivedVideoRef};
 }
 function cleanupLater(state:JobState){setTimeout(()=>{if(state.dir)void rm(state.dir,{recursive:true,force:true}).catch(()=>{});jobs.delete(state.public.id);},60*60*1000).unref?.();}
 export function createRenderJob(input:{projectId:string;manifest:unknown;format:"landscape"|"portrait";fps:30|60}):RenderJob{
@@ -130,12 +181,42 @@ export function createRenderJob(input:{projectId:string;manifest:unknown;format:
   if(!validateRenderManifest(input.manifest))throw new Error("Invalid render settings or timeline manifest.");
   assetsFor(input.projectId,input.manifest);const id=randomUUID(),createdAt=new Date().toISOString();
   const renderInput={manifest:input.manifest as Manifest,format:input.format,fps:input.fps};
-  const state:JobState={public:{id,projectId:input.projectId,status:"queued",progress:0,createdAt,updatedAt:createdAt},dir:"",output:"",cancelled:false,input:renderInput};jobs.set(id,state);
+  const state:JobState={public:{id,projectId:input.projectId,status:"queued",progress:0,createdAt,updatedAt:createdAt,durationSeconds:input.manifest.duration,kind:"timeline",derivedVideoRef:null},dir:"",output:"",cancelled:false,input:renderInput};jobs.set(id,state);
   queue.push(id);scheduleNext();return state.public;
 }
-function scheduleNext(){if(globals.ccaiRenderActive)return;let id:string|undefined;while(queue.length&&!id){const candidate=queue.shift()!,state=jobs.get(candidate);if(state?.public.status==="queued"&&!state.cancelled)id=candidate;}if(!id)return;const state=jobs.get(id)!;globals.ccaiRenderActive=true;void mkdtemp(join(tmpdir(),"ccai-render-")).then(dir=>{state.dir=dir;state.output=join(dir,"output.mp4");return render(state,state.input.manifest,state.input.format,state.input.fps);}).catch(async error=>{state.public.status=state.cancelled?"cancelled":"failed";state.public.error=error instanceof Error?error.message:"Render failed.";state.public.updatedAt=new Date().toISOString();if(state.dir)await rm(state.dir,{recursive:true,force:true}).catch(()=>{});}).finally(()=>{cleanupLater(state);globals.ccaiRenderActive=false;scheduleNext();});}
+/** Stages bounded user audio against a completed in-memory render job; no caller-supplied path is accepted. */
+export async function createPostProductionExportJob(input:{sourceRenderJobId:string;parentRenderVersion:string;revisionId:string;audioAssets:PostProductionAudioUpload[]}):Promise<RenderJob>{
+  if(queue.length>=MAX_QUEUED)throw new Error("The render queue is full.");
+  if(typeof input.sourceRenderJobId!=="string"||input.sourceRenderJobId.length>120||typeof input.revisionId!=="string"||!input.revisionId||input.revisionId.length>120)throw new Error("Invalid parent render or revision ID.");
+  const source=getRenderJob(input.sourceRenderJobId),sourcePath=getRenderOutputFile(input.sourceRenderJobId);
+  if(!source||source.status!=="completed"||!sourcePath)throw new Error("The source render must be completed and available.");
+  if(input.parentRenderVersion!==source.createdAt)throw new Error("The source render version does not match the completed job.");
+  if(!Array.isArray(input.audioAssets)||input.audioAssets.length>MAX_POST_AUDIO_TRACKS)throw new Error("Post-production supports up to 12 imported audio tracks.");
+  if(input.audioAssets.some(asset=>!asset||typeof asset.dataUrl!=="string"))throw new Error("Each audio layer must include an uploaded audio file.");
+  const tracks=input.audioAssets.map(asset=>asset?.track);
+  if(!validatePostAudioTracks(tracks))throw new Error("Invalid post-production audio tracks or ducking targets.");
+  const trackIds=new Set(tracks.map(track=>track.id));if(trackIds.size!==tracks.length)throw new Error("Each audio layer must have one uploaded audio asset.");
+  const byteBuffers:Buffer[]=[];let totalBytes=0;
+  for(const asset of input.audioAssets){const data=decodeDataUrl(asset.dataUrl,"audio");if(data.length>MAX_POST_AUDIO_FILE_BYTES)throw new Error("Each uploaded audio file must be 8 MiB or smaller.");totalBytes+=data.length;if(totalBytes>MAX_POST_AUDIO_BYTES)throw new Error("Post-production audio uploads exceed the 24 MiB total limit.");byteBuffers.push(data);}
+  const sourceMetadata=await probeFile(sourcePath),duration=Number(sourceMetadata.format?.duration);if(!Number.isFinite(duration)||duration<=0||duration>3600)throw new Error("The source render has an invalid duration.");
+  const postProject=createPostProductionProject({id:source.id,version:source.createdAt,sourceRef:`render-job:${source.id}`,durationSeconds:duration});
+  const revisedProject=createPostProductionRevision(postProject,{id:input.revisionId,createdAt:new Date().toISOString(),audioTracks:tracks}),revision=revisedProject.revisions.at(-1)!;
+  const plan=calculateDerivedAudioTimeline(revisedProject);
+  if(queue.length>=MAX_QUEUED)throw new Error("The render queue is full.");
+  const dir=await mkdtemp(join(tmpdir(),"ccai-postprod-"));try{if(queue.length>=MAX_QUEUED)throw new Error("The render queue is full.");const audioFiles:PostAudioFile[]=[];for(let i=0;i<input.audioAssets.length;i++){const path=join(dir,`audio-${i}.bin`);await writeFile(path,byteBuffers[i],{flag:"wx"});audioFiles.push({track:tracks[i],path});}
+    const id=randomUUID(),createdAt=new Date().toISOString(),postInput:PostJobInput={sourceRenderJobId:source.id,parentRenderVersion:source.createdAt,revisionId:revision.id,revision,originalDurationSeconds:duration,audioFiles};
+    const state:JobState={public:{id,projectId:source.projectId,status:"queued",progress:0,createdAt,updatedAt:createdAt,durationSeconds:plan.outputDurationSeconds,kind:"post-production",parentRenderJobId:source.id,parentRenderVersion:source.createdAt,revisionId:revision.id,revisionNumber:revision.revisionNumber,originalRenderRef:revision.originalRenderRef,derivedVideoRef:null},dir,output:"",cancelled:false,postInput};jobs.set(id,state);queue.push(id);scheduleNext();return state.public;
+  }catch(error){await rm(dir,{recursive:true,force:true});throw error;}
+}
+function scheduleNext(){if(globals.ccaiRenderActive)return;let id:string|undefined;while(queue.length&&!id){const candidate=queue.shift()!,state=jobs.get(candidate);if(state?.public.status==="queued"&&!state.cancelled)id=candidate;}if(!id)return;const state=jobs.get(id)!;globals.ccaiRenderActive=true;void (state.dir?Promise.resolve(state.dir):mkdtemp(join(tmpdir(),"ccai-render-"))).then(dir=>{state.dir=dir;state.output=join(dir,"output.mp4");return state.postInput?renderPostProduction(state,state.postInput):render(state,state.input!.manifest,state.input!.format,state.input!.fps);}).catch(async error=>{state.public.status=state.cancelled?"cancelled":"failed";state.public.error=error instanceof Error?error.message:"Render failed.";state.public.updatedAt=new Date().toISOString();if(state.dir&&!state.postInput)await rm(state.dir,{recursive:true,force:true}).catch(()=>{});}).finally(()=>{cleanupLater(state);globals.ccaiRenderActive=false;scheduleNext();});}
 export function getRenderJob(id:string){return jobs.get(id)?.public||null;}
-export function cancelRenderJob(id:string){const state=jobs.get(id);if(!state||!["queued","running"].includes(state.public.status))return null;state.cancelled=true;if(state.public.status==="queued"){state.public.status="cancelled";state.public.error="Render cancelled while queued.";state.public.updatedAt=new Date().toISOString();const queuedAt=queue.indexOf(id);if(queuedAt>=0)queue.splice(queuedAt,1);scheduleNext();}else state.process?.kill("SIGTERM");return state.public;}
-export function retryRenderJob(id:string){const old=jobs.get(id);if(!old||!old.public.error||!["failed","cancelled"].includes(old.public.status))return null;return createRenderJob({projectId:old.public.projectId,...old.input});}
+export function cancelRenderJob(id:string){const state=jobs.get(id);if(!state||!["queued","running"].includes(state.public.status))return null;state.cancelled=true;if(state.public.status==="queued"){state.public.status="cancelled";state.public.error="Render cancelled while queued.";state.public.updatedAt=new Date().toISOString();const queuedAt=queue.indexOf(id);if(queuedAt>=0)queue.splice(queuedAt,1);cleanupLater(state);scheduleNext();}else state.process?.kill("SIGTERM");return state.public;}
+export function retryRenderJob(id:string){const old=jobs.get(id);if(!old||!old.public.error||!["failed","cancelled"].includes(old.public.status)||!old.input)return null;return createRenderJob({projectId:old.public.projectId,...old.input});}
+export async function retryRenderJobAsync(id:string):Promise<RenderJob|null>{const old=jobs.get(id);if(!old||!old.public.error||!["failed","cancelled"].includes(old.public.status))return null;if(!old.postInput)return retryRenderJob(id);if(queue.length>=MAX_QUEUED)throw new Error("The render queue is full.");
+  const dir=await mkdtemp(join(tmpdir(),"ccai-render-")),audioFiles:PostAudioFile[]=[];try{for(let i=0;i<old.postInput.audioFiles.length;i++){const source=old.postInput.audioFiles[i],path=join(dir,`audio-${i}.bin`);await copyFile(source.path,path);audioFiles.push({...source,path});}}
+  catch(error){await rm(dir,{recursive:true,force:true});throw error;}
+  if(queue.length>=MAX_QUEUED){await rm(dir,{recursive:true,force:true});throw new Error("The render queue is full.");}
+  const jobId=randomUUID(),createdAt=new Date().toISOString(),postInput={...old.postInput,audioFiles};const state:JobState={public:{id:jobId,projectId:old.public.projectId,status:"queued",progress:0,createdAt,updatedAt:createdAt,durationSeconds:old.public.durationSeconds,kind:"post-production",parentRenderJobId:postInput.sourceRenderJobId,parentRenderVersion:postInput.parentRenderVersion,revisionId:postInput.revisionId,revisionNumber:postInput.revision.revisionNumber,originalRenderRef:postInput.revision.originalRenderRef,derivedVideoRef:null},dir,output:"",cancelled:false,postInput};jobs.set(jobId,state);queue.push(jobId);scheduleNext();return state.public;
+}
 export function getRenderOutputFile(id:string){const state=jobs.get(id);return state?.public.status==="completed"?state.output:null;}
 export async function readRenderOutput(id:string){const state=jobs.get(id);if(!state||state.public.status!=="completed")return null;return readFile(state.output);}
