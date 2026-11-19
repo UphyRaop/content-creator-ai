@@ -111,3 +111,9 @@ Stages 1–13 are present in the application. Phase-specific source/helper tests
 - **NOT TESTED:** mobile/tablet runtime. This browser-control environment has no viewport emulation. The hosted GitHub Pages data store and the existing seven browser-local preview projects were not modified by the isolated run.
 - **BLOCKED for production:** static Pages does not run SQLite/auth APIs/background jobs/FFmpeg, no persistent Node host is configured, and Pages “Enforce HTTPS” remains an owner action. Three older public commits retain personal author/committer emails; history was not rewritten.
 - **Cost:** RM0; no paid APIs or hosting and no use of the RM20 testing budget.
+
+
+### Deployment verification after the final commit
+- **PASS:** commit `6bc9831852b7a378b500e652cb3531740ea09c65` is the current `main` head; author and committer are GitHub noreply. Pages workflow `44542558589` completed successfully.
+- **PASS:** `https://ccai.ur-project.biz/` returns HTTP 200 and its response SHA-256 matches the exact local `dist/index.html` build. Expected dashboard and simulation labels are present.
+- **PARTIAL:** curl's TLS check succeeded through the managed egress proxy, which presents its own certificate for the domain; therefore the origin GitHub Pages certificate chain was not independently verified. HTTP returns 200 without redirect, so owner Enforce HTTPS setting remains outstanding.

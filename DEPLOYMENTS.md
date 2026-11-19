@@ -35,3 +35,11 @@ GitHub Pages serves static files. It cannot run the SQLite API routes, persisten
 - Sync must use GitHub's current `main` as parent and the noreply address `355911884+UphyRaop@users.noreply.github.com`; never force-update or rewrite history. Preserve `content-creator-ai-backup`.
 - Deployment can only publish the static simulation. SQLite, authentication routes, background processing and FFmpeg require a separately approved persistent Node host.
 - Owner action remains: enable Settings → Pages → Enforce HTTPS. No DNS change was made.
+
+
+## Production readiness deployment verification — 19 November 2026
+- Commit `6bc9831852b7a378b500e652cb3531740ea09c65` was added to `main` by a fast-forward from `ab61711b1eb332a008c5e7579343f3e4dba2604b`. GitHub reports author and committer `355911884+UphyRaop@users.noreply.github.com`. No force push or history rewrite occurred.
+- Pages workflow run [`44542558589`](https://github.com/UphyRaop/content-creator-ai/actions/runs/44542558589) completed successfully; install, static build, Pages configure, artifact upload, and deploy steps all succeeded.
+- `https://ccai.ur-project.biz/` returned HTTP 200 after deployment. The downloaded response SHA-256 matched local `dist/index.html` (`14ec582d7ddc80ab7c5acb3c5dd9f5c75dd00bdd6fab44f9a1d857411fdfca74`). Expected CCAI title, status labels and RM0 simulation marker were present.
+- HTTPS returned 200 with `curl` verification result 0. The managed egress proxy substituted its own certificate for `ccai.ur-project.biz`, so the origin/GitHub Pages certificate chain was not independently inspected. Plain HTTP also returned 200 with zero redirects: owner must still enable Settings → Pages → Enforce HTTPS. No DNS records were changed.
+- The deployed site is desktop-accessible. Mobile/tablet viewport testing is not available through the active browser-control tools; local desktop E2E was performed separately on isolated synthetic data.

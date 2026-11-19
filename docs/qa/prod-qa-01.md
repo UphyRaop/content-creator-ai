@@ -76,3 +76,8 @@ QA-owned changes: `docs/qa/prod-qa-01.md`, `scripts/test-p11-http.mjs`, `scripts
 The lead completed a fresh isolated local Node/SQLite desktop run after the rebuild. Stages 1–13 completed using synthetic account/project data and simulated AI responses. The run includes actual local FFmpeg rendering, not the hosted Pages simulation. The MP4 played in-browser; an authenticated range request returned HTTP 206 (`bytes 0-1023/1161418`), and after export approval its download returned HTTP 200 with a valid MP4 signature. Post-production generated a separate completed render revision while preserving the original bytes; a thumbnail variant was approved and the export checklist was recorded. No CCAI-origin browser console warnings/errors were observed. Desktop viewport: 1212×798.
 
 This browser control could not resize/emulate mobile or tablet, so those dimensions remain NOT TESTED. The deployed preview's browser-local projects were not changed. This lead-run evidence supersedes the earlier “awaiting rebuild/media” status above; the prior note is retained as the intermediate checkpoint only.
+
+
+## Final Pages deployment verification — 19 November 2026
+
+Commit `6bc9831852b7a378b500e652cb3531740ea09c65` is on `main` as a normal fast-forward and used the GitHub noreply identity. Pages workflow run `44542558589` succeeded through deploy. The custom-domain HTTPS response returned 200, contained expected CCAI markers, and its body hash matched local `dist/index.html`. Plain HTTP returned 200 without redirect. TLS verification was successful at the managed egress proxy, whose substituted certificate prevents direct inspection of GitHub Pages' origin certificate chain. Mobile/tablet viewport testing remains unsupported.
