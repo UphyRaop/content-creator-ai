@@ -117,3 +117,6 @@ Stages 1–13 are present in the application. Phase-specific source/helper tests
 - **PASS:** commit `6bc9831852b7a378b500e652cb3531740ea09c65` is the current `main` head; author and committer are GitHub noreply. Pages workflow `44542558589` completed successfully.
 - **PASS:** `https://ccai.ur-project.biz/` returns HTTP 200 and its response SHA-256 matches the exact local `dist/index.html` build. Expected dashboard and simulation labels are present.
 - **PARTIAL:** curl's TLS check succeeded through the managed egress proxy, which presents its own certificate for the domain; therefore the origin GitHub Pages certificate chain was not independently verified. HTTP returns 200 without redirect, so owner Enforce HTTPS setting remains outstanding.
+
+### Dependency audit
+- **PASS:** `npm audit --audit-level=high` reported 0 vulnerabilities (including production and development dependency tree).
