@@ -5,6 +5,7 @@ import { getSessionUser, isSameOriginMutation } from "@/lib/auth";
 import { hasProjectApproval } from "@/lib/approval-store";
 import { imageRequestFromSavedProject } from "@/lib/ai-generation-gates";
 import { validateImageGenerationRequest } from "@/lib/image-workflow";
+import { providerAdmissionBlock } from "@/lib/provider-admission";
 
 export const runtime = "nodejs";
 
@@ -41,6 +42,8 @@ export async function POST(request: Request) {
     if (!validateImageGenerationRequest(generationRequest)) return NextResponse.json({ error: "Saved image inputs are incomplete or invalid." }, { status: 400 });
 
     const provider = getImageProvider();
+    const admissionBlock=providerAdmissionBlock(provider.id);
+    if(admissionBlock)return NextResponse.json({error:admissionBlock},{status:503,headers:{"cache-control":"no-store"}});
     if (generationRequest.scenes.length > provider.capabilities.maxBatchSize) return NextResponse.json({ error: `This provider supports batches of up to ${provider.capabilities.maxBatchSize} images.` }, { status: 400 });
     const estimatedCostMyr = provider.estimateCost(generationRequest.scenes.length);
     if (estimatedCostMyr === null) return NextResponse.json({ error: "Provider pricing is unknown. Live generation is blocked until a per-image MYR price is configured." }, { status: 503 });

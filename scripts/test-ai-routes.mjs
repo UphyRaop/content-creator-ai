@@ -3,6 +3,8 @@ import { scriptRequestFromSavedProject, imageRequestFromSavedProject } from "../
 import { fetchGeminiWithCostPreflight } from "../src/lib/gemini-cost-preflight.ts";
 import { validateScriptRequest } from "../src/lib/script-workflow.ts";
 import { validateImageGenerationRequest } from "../src/lib/image-workflow.ts";
+import { validateFluxOutputUrl } from "../src/lib/flux-url-safety.ts";
+import { providerAdmissionBlock, cloudRenderAdmissionBlock } from "../src/lib/provider-admission.ts";
 
 const saved = {
   idea: "A family bakery",
@@ -62,3 +64,17 @@ assert.equal(fetchCalls, 1);
 assert.equal(allowed.estimatedInputTokens, 100, "UTF-8 bytes are used as the conservative text token estimate");
 assert.equal(allowed.estimatedCostMyr, (100 + 200) / 1_000_000);
 console.log("PASS configured under-ceiling preflight calls only the supplied test fetcher and returns a conservative estimate");
+
+assert.equal(validateFluxOutputUrl("https://images.example.test/object?sig=redacted",["images.example.test"]).hostname,"images.example.test");
+for(const url of ["http://images.example.test/a","https://127.0.0.1/a","https://images.example.test:8443/a","https://user@images.example.test/a","https://evil.example.test/a"]){
+  assert.throws(()=>validateFluxOutputUrl(url,["images.example.test"]),/untrusted image URL/);
+}
+assert.throws(()=>validateFluxOutputUrl("https://images.example.test/a",[]),/untrusted image URL/);
+console.log("PASS FLUX output downloads require a configured exact HTTPS host without credentials or custom ports");
+assert.equal(providerAdmissionBlock("simulated"),null);
+assert.match(providerAdmissionBlock("gemini"),/metered admission/);
+assert.match(providerAdmissionBlock("flux-schnell"),/durable job reconciliation/);
+assert.equal(cloudRenderAdmissionBlock({}),null);
+assert.match(cloudRenderAdmissionBlock({K_SERVICE:"ccai"}),/durable job records/);
+assert.match(cloudRenderAdmissionBlock({K_JOB:"render"}),/usage reservations/);
+console.log("PASS direct API provider and Cloud Run render admission remain fail-closed until durable metering is active");

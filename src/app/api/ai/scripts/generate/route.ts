@@ -5,6 +5,7 @@ import { getSessionUser, isSameOriginMutation } from "@/lib/auth";
 import { hasProjectApproval } from "@/lib/approval-store";
 import { scriptRequestFromSavedProject } from "@/lib/ai-generation-gates";
 import { validateScriptRequest } from "@/lib/script-workflow";
+import { providerAdmissionBlock } from "@/lib/provider-admission";
 
 export const runtime = "nodejs";
 
@@ -25,7 +26,10 @@ export async function POST(request: Request) {
     const payload = { ...project.payload, brief: { ...(project.payload.brief as Record<string, unknown>), approved: true } };
     const savedRequest = scriptRequestFromSavedProject(payload);
     if (!validateScriptRequest(savedRequest)) return NextResponse.json({ error: "Saved project inputs are incomplete or invalid." }, { status: 400 });
-    return NextResponse.json(await getScriptProvider().generate(savedRequest));
+    const provider=getScriptProvider();
+    const admissionBlock=providerAdmissionBlock(provider.id);
+    if(admissionBlock)return NextResponse.json({error:admissionBlock},{status:503,headers:{"cache-control":"no-store"}});
+    return NextResponse.json(await provider.generate(savedRequest));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Script generation failed. Please try again.";
     const status = message.includes("Approve the saved") ? 409

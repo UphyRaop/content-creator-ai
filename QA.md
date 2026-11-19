@@ -130,3 +130,27 @@ Stages 1–13 are present in the application. Phase-specific source/helper tests
 - **NOT TESTED:** actual GCP account metrics/billing; Cloud job failure/retry/timeout/cancel execution; mobile/tablet viewport runtime. **PASS (desktop preview):** the deployed dashboard loaded in Chrome at 1168×735, displayed the simulated/unavailable labels and eight unknown resource meters, and its emergency-stop demo control changed the preview status. No CCAI page-origin console errors were recorded; reported errors were from a browser extension. This was a dashboard smoke check, not the full workflow.
 - **Production blockers:** reservation admission returns 503 until trusted multi-pool estimates/telemetry and a durable worker exist. AI/render routes are not connected to cloud reservations; the owner DELETE can release a reservation without evidence the job stopped; ledgers are per-owner and do not yet aggregate across several owners sharing a billing account. Do not enable cloud operations until these are resolved and independently tested.
 - No live Google API, paid provider, GCP resource, host or billing configuration was used. Cost RM0; RM20 remains untouched.
+# Phase 12–14 continuation QA — 19 November 2026
+
+## Automated checks
+- `scripts/test-cloud-metering.mjs` — PASS. Checks Pacific month/DST boundaries, SQLite persistence/reopen, historical periods, source provenance and auth, fail-closed missing pools, 80/85 warnings and 90% block, idempotency, emergency-stop behavior, and ambiguous reservation retention.
+- Two-process SQLite reservation fixture — PASS. Competing 60/100 admissions yielded one accepted and one denied; concurrent identical idempotency keys returned one canonical reservation and one row.
+- `scripts/test-ai-routes.mjs` — PASS. Script/image saved-approval gates, Gemini cost preflight no-fetch rejection, and new FLUX exact HTTPS host allowlist checks passed. No live provider calls.
+- Provider-admission safety helper tests — PASS. Non-simulated providers and Cloud Run render entrypoints are rejected until durable metering is active; local simulated and non-Cloud Run rendering remain available.
+- Phase 1–11 regression suites — PASS per independent QA: `npm test`, auth API, 77-check P11 HTTP harness, AI routes, voice-vault security, FFmpeg, post-production render/workflow, publishing; TypeScript and `git diff --check` passed.
+- UI assertions — PASS in source only; browser, mobile and tablet runtime tests not performed in this continuation.
+- FFmpeg — PASS, fixture only: FFmpeg/ffprobe 7.1.5 produced/probed synthetic H.264 1920x1080 at 30 FPS. No production-scale duration/effects matrix.
+
+## Not tested or blocked
+- Real GCP billing or telemetry, configured Google account, budget alerts, any cloud resource, Cloud Run restart/worker lifecycle, object/database migration, and GCP cost — NOT TESTED (no account access or resources).
+- Full 1/2/3/5 minute x 1080p landscape/portrait x 30/60 FPS benchmark with captions, motion, transitions, and audio mixing — NOT TESTED.
+- Gemini/FLUX/ElevenLabs live and provider-stub adapter success paths, job cancellation, retries after ambiguous responses, and usage reconciliation — NOT TESTED. No live API request was made.
+- Production API security still has a blocker: server routes do not use a centralized metered admission/job lifecycle, so live provider/rendering must remain disabled. AI audit found missing route idempotency/rate limiting/cancellation, unbounded FLUX polling exposure, no Gemini timeout before this continuation, and FLUX output SSRF exposure. This continuation added a 45-second Gemini client timeout and output URL allowlist/redirect blocking, but still lacks durable provider-job state/reconciliation.
+- No browser console or mobile/tablet CUA test during this continuation. Static Pages cannot exercise SQLite APIs, AI keys, or FFmpeg.
+
+## Public repository privacy scan
+- Current workspace high-confidence key/token/private-key scan: PASS, no matches. Current source/config audit: PASS for no live keys or provider credentials; fake/placeholder test addresses are confined to fixtures and examples.
+- GitHub `main` commit metadata scan: **FAIL for historical privacy**. Three historical commits on the already-public main history use non-noreply personal email metadata. Recent commits use the repository owner's GitHub noreply identity. No attempt was made to rewrite history because the project restrictions prohibit unauthorized history rewriting/force-push. This issue needs an explicit separate owner decision; deleting or rewriting history is not part of this task.
+- `npm audit --audit-level=high`: NOT VERIFIED. The npm advisory endpoint was unreachable from the environment (network request failed with `EPERM`); this is not a clean audit result.
+
+Cost: RM0; the RM20 provider-testing budget remains untouched.

@@ -105,3 +105,9 @@
 - The Pages section is a local simulation and must label all values simulated/estimated. No Google Cloud metrics or API credentials may be exposed in the browser.
 - Render jobs require durable database state, idempotency, bounded retries/timeouts, transactional resource reservations, and permanent media in durable object storage or persistent volumes; ephemeral Cloud Run files are temporary only. No storage product is selected until free-tier and pricing suitability are confirmed.
 - Phase 12 implementation status: SQLite metering history, Pacific billing windows, resource-unit pools, warning/projection logic and emergency-stop state are implemented and tested. Cloud reservation admission remains disabled with HTTP 503 until trusted multi-pool estimates/metrics and a durable worker can reserve all affected resources. This does not authorize live provider use or cloud resources.
+
+## Phase 13–14 readiness findings (19 November 2026)
+- Existing decision to use SQLite remains unchanged for local development and current app data. Cloud Run's ephemeral filesystem and FUSE/NFS storage semantics are not safe for this SQLite database or permanent media.
+- Architecture alternatives have not been approved: (A) one VM plus persistent POSIX disk to preserve SQLite, with ongoing host cost; or (B) Cloud Run Service/Jobs plus Cloud SQL/PostgreSQL, Cloud Storage, and durable job records/queue, with a data migration and persistent service charges. Review `docs/phase13-cloud-architecture-review.md` before selecting either.
+- No architecture switch, GCP deployment, billing activation, live API, or credential configuration is authorized by this preparation task. RM0 remains a design goal, not a guarantee or verified bill.
+- Phase 14 adapters remain disabled. Provider and renderer actions must not be enabled until cloud metering, idempotency, durable job state, and ambiguous-outcome reconciliation are connected and verified.

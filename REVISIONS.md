@@ -14,3 +14,10 @@
 - Preserve RM0 cost, leave RM20 unused, keep current static Pages preview and private backup, use noreply commits, and never rewrite history without approval.
 - Report actual model/reasoning/Fast Mode only if the runtime exposes them; otherwise state not verifiable.
 - Final QA exposed public-history personal email metadata, disabled HTTPS enforcement, unauthenticated SQLite CRUD APIs, and no persistent Node production host. These remain release blockers; do not declare production readiness.
+# 2026-11-19 — Phase 12–14 production readiness continuation
+- Hardened Gemini accounting to keep the conservative preflight estimate when provider token usage is missing or malformed.
+- Hardened FLUX image retrieval: output URL must be HTTPS on an exact server-configured hostname; credentials/custom ports and redirects are rejected. Added empty `CCAI_FLUX_OUTPUT_HOSTS` configuration documentation and safety tests. No live provider calls made.
+- Added HTTP-level fail-closed gates for non-simulated script/image providers and Cloud Run render requests until metered durable admission is active; local simulated/authorized render tests remain available.
+- Versioned SQLite cloud-ledger migration preserves prior emergency-stop state transactionally; emergency stop is installation-wide; public reservation create/release stay disabled (503) until trusted telemetry and worker reconciliation are in place.
+- Added Google Cloud architecture readiness review and updated project status/continuity docs. No GCP resources, paid services, DNS, or API usage; RM0 spent.
+

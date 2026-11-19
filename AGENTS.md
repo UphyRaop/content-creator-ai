@@ -82,3 +82,11 @@ Phases 7–11 were authorized together by the user. Phase 11 automated fixes and
 - Keep Cloud Run minimum instances zero where supported; never use ephemeral container storage for permanent SQLite/media. Research durable job/database/media storage and disclose any service without an applicable free allowance.
 - Budget alerts are notification mechanisms, not hard cost caps. No paid usage is allowed absent separate owner approval. No Google Cloud resources or billing configuration were approved in Phase 12.
 - The Phase 12 ledger is server-side preparation only: it is not a trusted Google billing feed or active Cloud Run worker. Keep production job admission disabled until a trusted importer, multi-pool reservation, and durable job reconciliation are connected. Never let a client release capacity for a job that may still be running.
+
+## Phase 12–14 continuation boundaries
+- Current work authorized preparation and tests only: no Google Cloud account access, project/resource creation, billing activation, live provider calls, DNS changes, or hosting migration. GitHub Pages is a simulation only.
+- Keep Cloud Usage metrics explicitly unavailable until a trusted billing source is connected. Do not infer a verified RM0 bill from missing data.
+- Never connect Gemini/FLUX/ElevenLabs or rendering to production admission until server-owned idempotent jobs reserve every affected resource and ambiguous outcomes reconcile safely. Provider adapters remain disabled; no credentials in browser or repository.
+- Cloud Run is not a safe home for current SQLite, media files, or the in-memory renderer queue. Do not enable it until durable database, object storage, queue, identity, secrets, rollback, and spend controls are designed and separately approved.
+- Do not create cloud deployment templates that can provision resources by default. Any future scripts must require explicit owner action and clearly show potentially billable services before execution.
+- Current local FFmpeg fixture is not a production-scale benchmark. Report its resolution/fps and environment only; do not extrapolate it as Cloud Run capacity.

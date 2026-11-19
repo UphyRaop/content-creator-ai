@@ -91,3 +91,8 @@ Automated regression suites, API security checks, TypeScript, static and Next.js
 
 ### Phase 12 — Google Cloud Usage & Billing
 The simulated Cloud Usage & Billing dashboard and SQLite usage ledger are implemented. The preview does not read Google billing data, and its emergency stop affects only the demo. Cloud job admission returns 503 until trusted multi-resource telemetry, a durable worker/job lifecycle, and approved hosting are available. The official free-tier and architecture review, test evidence, and remaining requirements are in `docs/google-cloud-phase12.md`, `docs/qa/phase12-test-plan.md`, `ROADMAP.md`, `DECISIONS.md`, and `TASKS.md`. No GCP resource, billing change, live API or cost was created.
+
+### Phase 13–14 readiness
+The current app's project data and media depend on SQLite/local files, while render jobs live in process memory. Cloud Run's ephemeral runtime is therefore not production-ready for CCAI. Review [Phase 13 architecture](docs/phase13-cloud-architecture-review.md) for SQLite-versus-network-database choices and cost limits. Cloud migration and provider execution remain disabled. Gemini underreported-cost fallback and FLUX output URL allowlisting are hardened in server-side adapters; no provider request was made. Phase 14 uses simulated providers only, and no full production-scale render benchmark has been run. See `QA.md`, `DEPLOYMENTS.md`, and `HANDOVER.md` for status and owner actions.
+
+The consolidated owner actions, including links, steps, cost expectations, billing risks and dependencies, are in [docs/owner-action-checklist.md](docs/owner-action-checklist.md).

@@ -157,3 +157,20 @@ The public repository contains three older commits whose author/committer metada
 - Evaluate durable job records and media storage; do not rely on Cloud Run ephemeral disk for permanent data. Document free-tier eligibility/shared account scope, budget alert limitations, and manual Google Cloud setup requirements from official documentation.
 - Acceptance: unit/API tests cover threshold boundaries, concurrent ledger reservations, idempotency, reset/history, restart persistence, unavailable metrics, emergency stop and authorization bypass; existing production workflow regressions pass; static preview deployment is verified.
 - Status: Phase 12 preparation implemented, tested and deployed to the existing static preview. The preview and SQLite ledger are in place, but live Google Cloud admission remains disabled until a trusted multi-pool metrics importer, durable worker/job lifecycle, and approved hosting architecture exist. No Google Cloud project/resources, billing integrations, live provider APIs, DNS changes, or costs were created.
+
+## Phase 12–14 continuation checkpoint — 19 November 2026
+
+### Phase 12 — Usage and cost protection: PARTIAL PASS
+- Implemented SQLite usage history, reservation primitives, Pacific billing periods, resource-pool thresholds, fail-closed summaries, emergency-stop records, preview dashboard, and test fixtures.
+- Follow-up hardening adds versioned transactional migration preserving legacy emergency-stop state; emergency stop is installation-wide; public reservation creation/release routes remain HTTP 503 while trusted telemetry and worker reconciliation are absent.
+- Still blocked: actual trusted GCP telemetry, account-wide aggregation across owners, multi-pool atomic reservation admission, integrated AI/render admission, durable job completion/retry/cancel lifecycle, and server-enforced emergency stop on all operations.
+
+### Phase 13 — Google Cloud migration: BLOCKED for deployment
+- Source review and official-document research are in `docs/phase13-cloud-architecture-review.md` and `docs/google-cloud-phase12.md`.
+- Current SQLite/local media and process-memory render queue cannot move safely to Cloud Run. Two viable paths require owner decision: a single VM with persistent POSIX disk (preserves SQLite but is continuously billable), or Cloud Run + relational durable database + object storage + durable job orchestration (closer to scale-to-zero compute, but changes architecture and introduces persistent service costs).
+- No migrations, infrastructure templates, Docker deployment, credentials, resource creation, budget or billing settings were activated. RM0 cannot be guaranteed.
+
+### Phase 14 — Live integration and rendering preparation: PARTIAL PASS
+- Simulated provider suites remain passing; live adapters remain opt-in and no calls were made. Gemini now retains its conservative preflight cost when provider usage is absent; FLUX output URLs require exact HTTPS host allowlisting and downloads reject redirects.
+- Local FFmpeg 7.1.5 fixture passed for a synthetic H.264 1080p landscape 30 FPS file. Requested 1/2/3/5-minute, portrait/landscape, 30/60 FPS and full effects benchmark matrix remains untested; production-scale/Cloud Run capacity is not claimed.
+- No AI/render operation is integrated with metering, idempotent durable jobs, or cancellation/reconciliation; live execution remains blocked.

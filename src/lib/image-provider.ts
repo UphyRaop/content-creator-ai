@@ -1,5 +1,6 @@
 import "server-only";
 import { estimateImageCostMyr, type AspectRatio } from "@/lib/image-workflow";
+import { validateFluxOutputUrl } from "@/lib/flux-url-safety";
 
 export type ImageRequest = { id: string; prompt: string; scriptText: string; aspectRatio: AspectRatio; spendingLimitMyr: number };
 export type ImageResult = { id: string; imageDataUrl: string; provider: "simulated" | "flux-schnell"; nativeWidth: number; nativeHeight: number; requestedWidth: number; requestedHeight: number; estimatedCostMyr: number | null; actualCostMyr: number | null };
@@ -78,9 +79,9 @@ export class FluxSchnellImageProvider implements ImageProvider {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
     if (!sampleUrl) throw new Error("FLUX generation timed out. Retry the failed scene.");
-    const imageUrl = new URL(sampleUrl);
-    if (imageUrl.protocol !== "https:") throw new Error("FLUX returned an insecure image URL.");
-    const imageResponse = await fetch(imageUrl, { cache: "no-store", signal: AbortSignal.timeout(20_000) });
+    const allowedOutputHosts=(process.env.CCAI_FLUX_OUTPUT_HOSTS||"").split(",");
+    const imageUrl=validateFluxOutputUrl(sampleUrl,allowedOutputHosts);
+    const imageResponse = await fetch(imageUrl, { cache: "no-store", redirect:"error", signal: AbortSignal.timeout(20_000) });
     if (!imageResponse.ok) throw new Error("Could not retrieve the generated image. Retry the scene.");
     const type = imageResponse.headers.get("content-type") || "";
     if (!/^image\/(png|jpeg|webp)$/.test(type)) throw new Error("FLUX returned an unsupported image format.");

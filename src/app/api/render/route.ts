@@ -3,6 +3,7 @@ import { cancelRenderJob, createRenderJob, hashRenderManifest } from "@/lib/ffmp
 import { hasProjectApproval } from "@/lib/approval-store";
 import { getOwnedProject } from "@/lib/project-store";
 import { crossOriginResponse, notFoundResponse, ownedRenderJob, requireRenderUser, sameOriginMutation } from "./access";
+import { cloudRenderAdmissionBlock } from "@/lib/provider-admission";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,6 +49,8 @@ export async function POST(request: Request) {
     const format = settings.aspectRatio === "9:16" ? "portrait" : settings.aspectRatio === "16:9" ? "landscape" : null;
     if (!format) return NextResponse.json({ error: "Saved project aspect ratio is invalid." }, { status: 400 });
     const fps = project.payload.renderFps === 60 ? 60 : 30;
+    const admissionBlock=cloudRenderAdmissionBlock(process.env);
+    if(admissionBlock)return NextResponse.json({error:admissionBlock},{status:503,headers:{"cache-control":"no-store"}});
     const job = createRenderJob({ projectId: project.id, manifest: body.manifest, format, fps });
     return NextResponse.json({ job }, { status: 202, headers: { "cache-control": "no-store" } });
   } catch (error) {

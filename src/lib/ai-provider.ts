@@ -18,7 +18,8 @@ export class GeminiScriptProvider implements ScriptProvider {
     const apiBody={systemInstruction:{parts:[{text:`Write a production-ready ${request.format} video script in ${request.language}, about ${request.durationMinutes} minutes. Visual style: ${request.visualStyle}. Return script text only and follow the approved brief.`}]},contents:[{role:"user",parts:[{text:JSON.stringify({idea:request.idea,brief:request.brief,referenceNotes:request.referenceNotes,referenceText:request.referenceText,referenceImages:(request.referenceImages||[]).map(({dataUrl,...metadata})=>metadata),referenceVideos:request.referenceVideos})},...(request.referenceImages||[]).filter(image=>image.dataUrl).map(image=>({inlineData:{mimeType:image.mimeType||image.dataUrl!.slice(5,image.dataUrl!.indexOf(";")),data:image.dataUrl!.slice(image.dataUrl!.indexOf(",")+1)}}))]}],generationConfig:{temperature:.7,maxOutputTokens}};
     const body=JSON.stringify(apiBody);
     const referenceImageCount=(request.referenceImages||[]).length;
-    const {response}=await fetchGeminiWithCostPreflight(fetch,`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{method:"POST",headers:{"content-type":"application/json","x-goog-api-key":key},body,cache:"no-store"},new TextEncoder().encode(body).length,maxOutputTokens,referenceImageCount,process.env);
+    const preflight=await fetchGeminiWithCostPreflight(fetch,`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{method:"POST",headers:{"content-type":"application/json","x-goog-api-key":key},body,cache:"no-store",signal:AbortSignal.timeout(45_000)},new TextEncoder().encode(body).length,maxOutputTokens,referenceImageCount,process.env);
+    const {response}=preflight;
     if(!response.ok)throw new Error(`Gemini request failed (${response.status}). Check server configuration and retry.`);
     const result=await response.json() as {
       candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
@@ -28,8 +29,12 @@ export class GeminiScriptProvider implements ScriptProvider {
     const inputTokens=result.usageMetadata?.promptTokenCount||0,outputTokens=result.usageMetadata?.candidatesTokenCount||0,inputRate=Number(process.env.GEMINI_INPUT_MYR_PER_MILLION),outputRate=Number(process.env.GEMINI_OUTPUT_MYR_PER_MILLION),words=wordCount(text,request.language);
     const imageRateRaw=process.env.GEMINI_REFERENCE_IMAGE_MYR_PER_IMAGE;
     const imageRate=imageRateRaw?.trim()?Number(imageRateRaw):0;
-    const tokenCost=estimateCostMyr(inputTokens,outputTokens,inputRate,outputRate);
-    const estimatedCostMyr=tokenCost===null?null:tokenCost+referenceImageCount*imageRate;
+    // Use provider usage when present. If the provider omits/malforms usage metadata,
+    // keep the conservative preflight estimate instead of recording a misleading RM0.
+    const usage=result.usageMetadata;
+    const hasUsage=Number.isSafeInteger(usage?.promptTokenCount)&&Number(usage?.promptTokenCount)>=0&&Number.isSafeInteger(usage?.candidatesTokenCount)&&Number(usage?.candidatesTokenCount)>=0;
+    const tokenCost=hasUsage?estimateCostMyr(inputTokens,outputTokens,inputRate,outputRate):null;
+    const estimatedCostMyr=tokenCost===null?preflight.estimatedCostMyr:tokenCost+referenceImageCount*imageRate;
     return {draft:{text,wordCount:words,estimatedSeconds:estimatedDurationSeconds(text,140,request.language),format:request.format},usage:{provider:this.id,inputTokens,outputTokens,estimatedCostMyr}};
   }
 }
