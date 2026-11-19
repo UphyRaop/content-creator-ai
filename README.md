@@ -79,4 +79,4 @@ GitHub Pages cannot run Node.js APIs or FFmpeg. Its render and post-production s
 
 
 ## Development progress
-Phases 1–8 are completed and deployed; Phase 9 implementation and independent QA are complete with sync/deployment pending. See [ROADMAP.md](ROADMAP.md), [TASKS.md](TASKS.md), and [QA.md](QA.md). GitHub Pages is static and does not execute the SQLite API or FFmpeg routes. The Next.js render APIs require a Node.js host with FFmpeg/libx264 and writable temporary storage; no such production host is configured. The live Pages preview continues to simulate rendering and post-production and never claims to produce an MP4.
+Phases 1–9 are completed and deployed; Phase 10 is authorized and underway. See [ROADMAP.md](ROADMAP.md), [TASKS.md](TASKS.md), and [QA.md](QA.md). GitHub Pages is static and does not execute the SQLite API or FFmpeg routes. The Next.js render APIs require a Node.js host with FFmpeg/libx264 and writable temporary storage; no such production host is configured. The live Pages preview continues to simulate rendering and post-production and never claims to produce an MP4.

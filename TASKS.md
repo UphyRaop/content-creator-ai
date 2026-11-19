@@ -2,10 +2,7 @@
 
 ## Active phase
 ### CCAI-01-LEAD — P9-INT-01
-- Objective: integrate the post-production studio, real Node FFmpeg derived export, UI, QA fixes and durable documentation; security scan, fast-forward sync to `main`, deploy Pages simulation and verify preview.
-- Files: `src/lib/post-production.ts`, render API and `src/lib/ffmpeg-renderer.ts`, `prototype.html`, focused fixtures, project records.
-- Acceptance: uploaded audio is validated; music/ducking default off; source render stays immutable; real Node output passes ffprobe; Pages remains simulation-only; independent QA and builds pass; main update is fast-forward; deployed preview is verified.
-- Status: implementation and independent code QA complete; final browser preview, security scan, GitHub synchronization and Pages deployment pending.
+- Status: implementation, independent code QA, security review, noreply commit `1c3fc800efa8c3de1759c3e7ffec850b463888f5`, Pages run `44507225298`, and deployed preview verification complete. Phase 9 records are being synced in a documentation-only fast-forward before Phase 10 deployment.
 
 ### CCAI-02-UIUX — P9-UI-01/02/03
 - Status: complete. Responsive post-production studio supports audio upload, local waveform with decode fallback and trim markers, volume/trim/fade/nonnegative sync delay, optional ducking, non-destructive revisions, and Node-mode revised render submit/progress/cancel/retry/preview/download. Pages uses local simulation only. Latest inline syntax and diff checks passed; browser interaction remains unverified.
@@ -18,7 +15,10 @@
 
 ### CCAI-06-DEVOPS — P9-DEVOPS-01
 - Objective: read-only deployment/security review; report safe sync baseline, Pages build/deploy, rollback, HTTPS limitation and required checks.
-- Status: pending.
+- Status: complete. Read-only review confirmed no secrets, static build/deploy path, safe base tree/expected-head fast-forward plan, noreply identity, successful Pages run `44507225298`, simulation boundary and rollback. HTTPS enforcement remains disabled; owner setting is required.
+
+### CCAI-01-LEAD — P10-INT-01
+- Status: authorized and ready to begin after Phase 9 closeout documentation deploys. Phase 10 scope remains simulated thumbnail generation plus manual upload, approval, variant selection, and publishing metadata kit; no social account connection or automatic posting.
 
 ### CCAI-01-LEAD — P8-INT-01
 - Objective: integrate Phase 8 FFmpeg renderer, approval/timing fixes, user interface and docs; resolve independent QA findings; run regression/security/build checks; synchronize verified changes to `main`; verify Pages preview.
