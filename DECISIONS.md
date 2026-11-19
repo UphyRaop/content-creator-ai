@@ -45,7 +45,7 @@
 - Live FLUX calls remain disabled by default and require separate approval, a server-side API key, known positive per-image MYR pricing, and a project spending limit. The RM20 test budget remains unused. Unknown live pricing is not represented as RM0.
 - FLUX.1 Schnell reference-image conditioning is not supported by this adapter and is not claimed. Manual image uploads can be cropped to 9:16 or 16:9 output without stretching.
 - Scene breakdown requires an approved script. Scene edits are explicitly saved and never auto-generate. Confirmed decisions regenerate rejected scenes only from their latest saved text and prompt. Approved scenes remain locked and unchanged, and voice remains blocked until every scene image is approved.
-- The studio tracks image versions, restoration, manual replacement, queue status/progress, retry/cancel, interrupted-job recovery, deduplication, approval progress, and simulated generation/regeneration usage. Browser-local image versions remain subject to the browser's storage quota; the SQLite payload architecture remains available for future server hosting.
+- The studio tracks image versions and restoration, manual replacement/crop/download, queue status/progress/retry/cancel, interrupted-job recovery, deduplication, approval progress, and simulated generation/regeneration usage. The workflow was regression-tested in the live desktop preview; mobile viewport behavior remains unverified. Browser-local image history is subject to the browser storage quota; SQLite remains the future server-storage architecture.
 
 ## Development boundary
 - Phases 1–5 are complete as a simulated prototype. Phase 6 requires separate user approval.

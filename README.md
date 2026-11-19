@@ -54,4 +54,8 @@ The dashboard includes reusable character, location, series, brand kit, and chan
 
 On GitHub Pages, projects and libraries persist only in that browser's local storage. SQLite provides server persistence for a future Node.js deployment. AI and media responses remain simulated; the Phase 3 approval gates are unchanged. Editing a reusable profile refreshes its saved scene continuity on project reopen, invalidating only affected scene approvals.
 
-Phase 4 QA passed all 10 automated checks plus the desktop browser regression and backup round-trip checks recorded in [ROADMAP.md](ROADMAP.md). Phase 5 automated workflow, storage, TypeScript and production build checks are recorded in [ROADMAP.md](ROADMAP.md). The live preview serves HTTPS. Mobile viewport testing was not available in this browser surface.
+Phase 4 and Phase 5 automated/regression test results are recorded in [ROADMAP.md](ROADMAP.md). The latest Phase 5 preview is live at the HTTPS custom domain. Desktop interactive QA passed; mobile viewport testing remains unverified because the browser tool did not expose viewport resizing.
+
+
+## Phase 5 quick review
+A browser-local QA project named **CCAI Phase 5 QA - 2026-11-19** is saved in the attached preview browser for inspection. It contains simulated scene images and one manual crop test. Existing projects were left unchanged. In the preview, verify the Scene Approval screen, per-scene prompt/version history, the RM0 usage panel, and that Voice Generation is unlocked only after all scene images are approved. Do not expect real AI images: the production provider adapter is disabled and the preview labels its simulated images.
