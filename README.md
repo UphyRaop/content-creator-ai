@@ -70,3 +70,7 @@ The public Pages preview never renders an API-key input and does not write crede
 The ElevenLabs adapter remains disabled. Unknown credits/MYR rates block live generation, and the server checks aggregate batch cost against both the request and saved project limits before any provider call. This adapter does not claim a direct emotional-delivery control or free-text pronunciation dictionary; those settings are stored for the preview but are rejected for live generation unless a compatible provider capability is verified. No real ElevenLabs call was made.
 
 Phase 6 automated checks and desktop preview QA passed on 19 November 2026. GitHub Pages deployed commit `5dd708e35357311b4a93969f475eeea36cf86b01`. The current browser tool does not expose mobile viewport emulation. See [ROADMAP.md](ROADMAP.md) for evidence and limits.
+
+
+## Development progress
+Phases 1–6 are completed as a no-cost simulated preview with server-only provider boundaries. Phases 7–11 are authorized and in progress; see [ROADMAP.md](ROADMAP.md) and [TASKS.md](TASKS.md). GitHub Pages is static and does not execute the SQLite API or FFmpeg renderer. No real paid AI or rendering service is configured.

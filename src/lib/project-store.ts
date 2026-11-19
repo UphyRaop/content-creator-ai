@@ -12,6 +12,49 @@ export type ProjectRow = {
   payload: ProjectPayload;
 };
 
+function validTimeline(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const t = value as Record<string, unknown>;
+  if (t.version !== 1 || t.timeUnit !== "seconds" || !Array.isArray(t.tracks) || t.tracks.length < 1 || t.tracks.length > 16) return false;
+  if (!Number.isFinite(t.estimatedDuration) || Number(t.estimatedDuration) < 0 || Number(t.estimatedDuration) > 3600) return false;
+  if (t.actualAudioDuration !== null && (!Number.isFinite(t.actualAudioDuration) || Number(t.actualAudioDuration) < 0 || Number(t.actualAudioDuration) > 3600)) return false;
+  const approval = t.renderApproval;
+  if (!approval || typeof approval !== "object" || Array.isArray(approval) || typeof (approval as Record<string, unknown>).approved !== "boolean") return false;
+  const a = approval as Record<string, unknown>;
+  if ([a.approvedAt, a.manifestHash].some(x => x !== undefined && (typeof x !== "string" || x.length > 200))) return false;
+  const ids = new Set<string>(); let clips = 0; const speech: Array<{start:number;end:number}> = [];
+  for (const rawTrack of t.tracks) {
+    if (!rawTrack || typeof rawTrack !== "object" || Array.isArray(rawTrack)) return false;
+    const track = rawTrack as Record<string, unknown>;
+    if (typeof track.id !== "string" || !track.id || track.id.length > 120 || ids.has(track.id) || !["image", "narration", "dialogue", "caption"].includes(String(track.kind)) || !Array.isArray(track.clips) || track.clips.length > 1000) return false;
+    ids.add(track.id);
+    for (const rawClip of track.clips) {
+      clips++;
+      if (clips > 1000 || !rawClip || typeof rawClip !== "object" || Array.isArray(rawClip)) return false;
+      const c = rawClip as Record<string, unknown>;
+      if (typeof c.id !== "string" || !c.id || c.id.length > 120 || ids.has(c.id) || typeof c.sourceRef !== "string" || !c.sourceRef || c.sourceRef.length > 500) return false;
+      ids.add(c.id);
+      if (![c.start, c.duration, c.sourceOffset].every(x => typeof x === "number" && Number.isFinite(x) && Math.abs(Number(x)*1000-Math.round(Number(x)*1000))<1e-7) || Number(c.start) < 0 || Number(c.duration) <= 0 || Number(c.sourceOffset) < 0 || Number(c.start)+Number(c.duration)>3600) return false;
+      if (!["estimated", "word-level"].includes(String(c.timing)) || !["none", "zoom-in", "zoom-out", "pan-left", "pan-right", "pan-up", "pan-down"].includes(String(c.motion)) || !["cut", "crossfade", "fade-black", "wipe", "slide", "zoom"].includes(String(c.transitionIn))) return false;
+      if (c.transitionDuration !== undefined && (!Number.isFinite(c.transitionDuration) || Number(c.transitionDuration) < 0 || Number(c.transitionDuration) > 5 || Math.abs(Number(c.transitionDuration)*1000-Math.round(Number(c.transitionDuration)*1000))>=1e-7)) return false;
+      if (c.motionIntensity !== undefined && (!Number.isFinite(c.motionIntensity) || Number(c.motionIntensity) < 0 || Number(c.motionIntensity) > 1)) return false;
+      if (c.motionDuration !== undefined && (!Number.isFinite(c.motionDuration) || Number(c.motionDuration) < 0.1 || Number(c.motionDuration) > 120 || Math.abs(Number(c.motionDuration)*1000-Math.round(Number(c.motionDuration)*1000))>=1e-7)) return false;
+      const validPoint = (point: unknown) => {
+        if (!point || typeof point !== "object" || Array.isArray(point)) return false;
+        const p = point as Record<string, unknown>;
+        return Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.scale) && Number(p.x)>=0 && Number(p.x)<=1 && Number(p.y)>=0 && Number(p.y)<=1 && Number(p.scale)>=0.1 && Number(p.scale)<=10;
+      };
+      if ((c.cameraStart !== undefined && !validPoint(c.cameraStart)) || (c.cameraEnd !== undefined && !validPoint(c.cameraEnd))) return false;
+      if (track.kind !== "image" && (c.motionIntensity !== undefined || c.motionDuration !== undefined || c.cameraStart !== undefined || c.cameraEnd !== undefined)) return false;
+      if (c.text !== undefined && (typeof c.text !== "string" || c.text.length > 12000)) return false;
+      if (track.kind === "narration" || track.kind === "dialogue") speech.push({start:Number(c.start),end:Number(c.start)+Number(c.duration)});
+    }
+  }
+  speech.sort((x,y)=>x.start-y.start);
+  for(let i=1;i<speech.length;i++) if(speech[i-1].end>speech[i].start) return false;
+  return true;
+}
+
 const globalStore = globalThis as typeof globalThis & { ccaiDb?: DatabaseSync };
 
 function database() {
@@ -85,6 +128,8 @@ export function deleteProject(id: string) {
 export function validatePayload(payload: unknown): payload is ProjectPayload {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return false;
   const record = payload as ProjectPayload;
+  // Older projects omit timeline; when present, accept only the bounded v1 schema.
+  if (record.timeline !== undefined && !validTimeline(record.timeline)) return false;
   if (record.projectStatus !== undefined && !["Draft", "In Progress", "Awaiting Approval", "Completed", "Archived"].includes(String(record.projectStatus))) return false;
   if (record.priority !== undefined && (!Number.isInteger(record.priority) || Number(record.priority) < 1 || Number(record.priority) > 5)) return false;
   for (const key of ["characterIds", "locationIds"]) {

@@ -11,6 +11,7 @@ try {
   const entities = await import("../src/lib/entity-store.ts");
   const imageFlow = await import("../src/lib/image-workflow.ts");
   const voiceFlow = await import("../src/lib/voice-workflow.ts");
+  const timelineFlow = await import("../src/lib/timeline-workflow.ts");
   const prototype = readFileSync(new URL("../prototype.html", import.meta.url), "utf8");
   assert.match(prototype, /class="project-search-top"/);
   assert.match(prototype, />All Status<\/option>/);
@@ -170,6 +171,84 @@ try {
   assert.equal(store.validatePayload(savedAudioPayload), true);
   assert.equal(store.validatePayload({ ...savedAudioPayload, scenes: [{ ...savedAudioPayload.scenes[0], voiceSegments: [{ ...savedAudioPayload.scenes[0].voiceSegments[0], versions: [{ dataUrl: "data:text/plain;base64,YQ==" }] }] }] }), false);
   console.log("PASS voice approval gates, scene-only decisions, audio duration sync, job recovery/deduplication, credit estimates, payload validation, and malformed request rejection");
+
+  const readyScenes = [{ id: "scene-a", seconds: 2, line: "First line", image: "data:image/png;base64,aA==", approved: true, voiceSegments: [
+    { id: "line-a", role: "narration", text: "First line", status: "completed", approved: true, durationSeconds: 2, dataUrl: "data:audio/wav;base64,YQ==" },
+    { id: "line-b", role: "dialogue", text: "Second line", status: "completed", approved: true, durationSeconds: 1.5, dataUrl: "data:audio/wav;base64,YQ==" },
+  ] }];
+  assert.equal(timelineFlow.canCreateTimeline({ scriptApproved: false, scenes: readyScenes }), false);
+  assert.equal(timelineFlow.canCreateTimeline({ scriptApproved: true, scenes: [{ ...readyScenes[0], approved: false }] }), false);
+  assert.equal(timelineFlow.canCreateTimeline({ scriptApproved: true, scenes: [{ ...readyScenes[0], voiceSegments: [{ ...readyScenes[0].voiceSegments[0], approved: false }] }] }), false);
+  const timeline = timelineFlow.buildTimelineFromProject({ scriptApproved: true, scenes: readyScenes });
+  const sceneTimed = timelineFlow.buildTimelineFromProject({ scriptApproved: true, scenes: [
+    { ...readyScenes[0], seconds: 4, voiceSegments: [readyScenes[0].voiceSegments[0]] },
+    { id: "scene-b", seconds: 3, line: "Next", image: "data:image/png;base64,Yg==", approved: true, voiceSegments: [{ ...readyScenes[0].voiceSegments[0], id: "line-b2", durationSeconds: 1 }] },
+  ] });
+  assert.equal(sceneTimed.tracks.find(track => track.kind === "image").clips[1].start, 4);
+  assert.equal(sceneTimed.tracks.find(track => track.kind === "narration").clips[1].start, 4);
+  const movedTrack = timelineFlow.moveClipToTrack(timeline, "track-narration", "track-dialogue", "voice-line-a", 0);
+  assert.equal(movedTrack.tracks.find(track => track.id === "track-dialogue").clips[0].id, "voice-line-a");
+  assert.equal(timeline.tracks.find(track => track.id === "track-narration").clips.length, 1, "cross-track operations must preserve the input timeline");
+  assert.throws(() => timelineFlow.moveClipToTrack(timeline, "track-narration", "track-image", "voice-line-a", 0), /Only speech clips/);
+  assert.equal(prototype.includes("core.moveClipToTrack(t,source.id,target.id,clip.id,start)"), true);
+  assert.equal(prototype.includes("event.clientX-rect.left-labelWidth"), false);
+  const silenceEdited = timelineFlow.applySilenceRanges(timeline, "track-narration", "voice-line-a", [{ start: .5, end: 1 }]);
+  assert.equal(silenceEdited.tracks.find(track => track.kind === "caption").clips[0].duration, 1.5);
+  assert.equal(silenceEdited.tracks.find(track => track.kind === "narration").clips.length, 2);
+  assert.equal(silenceEdited.tracks.find(track => track.kind === "narration").clips[1].sourceOffset, 1);
+  const consecutiveNarration = timelineFlow.buildTimelineFromProject({ scriptApproved: true, scenes: [{ ...readyScenes[0], voiceSegments: readyScenes[0].voiceSegments.map(line => ({ ...line, role: "narration" })) }] });
+  const shortened = timelineFlow.applySilenceRanges(consecutiveNarration, "track-narration", "voice-line-a", [{ start: .5, end: 1 }]);
+  assert.equal(shortened.tracks.find(track => track.kind === "narration").clips.find(clip => clip.id === "voice-line-b").start, 1.5, "later narration must close the removed gap");
+  assert.equal(prototype.includes("core.applySilenceRanges(next,track.id,item.clipId,item.ranges)"), true);
+  assert.equal(prototype.includes("fullPcm.slice(from,to)"), true);
+  assert.equal(prototype.includes("id=\"timelineMoveTime\""), true);
+  assert.equal(prototype.includes("function applyCaptionPreset(name)"), true);
+  assert.equal(prototype.includes("||clips[0]"), false, "timeline gaps should not fall back to the first scene");
+  assert.equal(prototype.includes("timelinePreviewGap"), true);
+  assert.equal(prototype.includes("analyzeTimelineSilence('all')"), true);
+  assert.equal(prototype.includes("Snap</label>"), true);
+  assert.equal(timeline.timeUnit, "seconds");
+  assert.equal(timeline.estimatedDuration, 3.5);
+  assert.deepEqual(timeline.tracks.find(track => track.kind === "caption").clips.map(clip => clip.text), ["First line", "Second line"]);
+  assert.throws(() => timelineFlow.moveClip(timeline, "track-dialogue", "voice-line-b", 0.5), /cannot overlap/);
+  const edited = timelineFlow.trimClip(timeline, "track-image", "image-scene-a", 0.25, 2.5);
+  assert.equal(edited.tracks.find(track => track.kind === "image").clips[0].sourceOffset, 0.25);
+  assert.throws(() => timelineFlow.trimClip(timeline, "track-image", "image-scene-a", 0, 0), /duration/);
+  const split = timelineFlow.splitClip(edited, "track-image", "image-scene-a", 1.25, "image-scene-a-split");
+  assert.equal(split.tracks.find(track => track.kind === "image").clips.length, 2);
+  const timelineDuplicate = timelineFlow.duplicateClip(split, "track-image", "image-scene-a", "image-copy", 3);
+  assert.equal(timelineDuplicate.tracks.find(track => track.kind === "image").clips.length, 3);
+  const automaticTransitions = timelineFlow.assignAutomaticTransitions(timelineDuplicate, "crossfade", .75);
+  assert.equal(automaticTransitions.tracks.find(track => track.kind === "image").clips[0].transitionIn, "cut");
+  assert.equal(automaticTransitions.tracks.find(track => track.kind === "image").clips[1].transitionIn, "crossfade");
+  assert.equal(automaticTransitions.tracks.find(track => track.kind === "image").clips[1].transitionDuration, .75);
+  const deleted = timelineFlow.deleteClip(timelineDuplicate, "track-image", "image-copy");
+  assert.equal(deleted.tracks.find(track => track.kind === "image").clips.length, 2);
+  const replaced = timelineFlow.replaceClipAsset(deleted, "track-image", "image-scene-a", "asset:replacement");
+  assert.equal(replaced.tracks.find(track => track.kind === "image").clips[0].sourceRef, "asset:replacement");
+  assert.throws(() => timelineFlow.replaceClipAsset(timeline, "track-image", "image-scene-a", " "), /required/);
+  const instructed = timelineFlow.setClipInstructions(timeline, "track-image", "image-scene-a", { motion: "zoom-in", transitionIn: "crossfade", transitionDuration: 0.5, cameraStart: { x: .5, y: .5, scale: 1 }, cameraEnd: { x: .5, y: .5, scale: 1.2 } });
+  assert.equal(instructed.tracks[0].clips[0].motion, "zoom-in");
+  assert.throws(() => timelineFlow.setClipInstructions(timeline, "track-image", "image-scene-a", { transitionIn: "explode" }), /Invalid/);
+  const automatic = timelineFlow.assignAutomaticCameraMotion(timeline);
+  assert.ok(automatic.tracks.find(track => track.kind === "image").clips[0].cameraEnd.scale > 1);
+  assert.equal(timelineFlow.estimateTimelineDuration(timeline), 3.5);
+  assert.equal(timelineFlow.prepareRenderManifest(timeline).timeUnit, "seconds");
+  const undoStack = timelineFlow.pushTimelineUndo([], timeline), redone = timelineFlow.redoTimeline([], timeline, undoStack);
+  assert.equal(redone.timeline.estimatedDuration, timeline.estimatedDuration);
+  const restored = timelineFlow.undoTimeline(undoStack, edited, []);
+  assert.equal(restored.timeline.estimatedDuration, timeline.estimatedDuration);
+  const silence = new Float32Array(8000 * 2); silence.fill(.4, 0, 4000); silence.fill(.4, 12000);
+  assert.equal(timelineFlow.suggestSilenceRanges(silence, 8000, { sensitivity: .02, minSilenceSeconds: .5, paddingSeconds: 0 }).length, 1);
+  assert.throws(() => timelineFlow.suggestSilenceRanges(silence, 8000, { sensitivity: 2, minSilenceSeconds: .5, paddingSeconds: 0 }), /out of range/);
+  assert.equal(store.validatePayload({ timeline }), true);
+  assert.equal(store.updateProject(project.id, { payload: { timeline } })?.payload.timeline.estimatedDuration, timeline.estimatedDuration);
+  assert.equal(store.getProject(project.id)?.payload.timeline.estimatedDuration, timeline.estimatedDuration, "timeline survives SQLite reload");
+  assert.equal(prototype.includes("decodeTimelineWaveform(url,clip.sourceOffset,clip.duration)"), true);
+  assert.equal(store.validatePayload({ timeline: { ...timeline, timeUnit: "frames" } }), false);
+  const overlaps = structuredClone(timeline); overlaps.tracks.find(track => track.kind === "dialogue").clips[0].start = 1;
+  assert.equal(store.validatePayload({ timeline: overlaps }), false);
+  console.log("PASS timeline approval gates, exact audio timing, caption mapping, non-destructive editing, overlap prevention, undo/redo, motion, captions, silence analysis, and bounded persistence");
 
   assert.equal(store.deleteProject(project.id), true);
   assert.equal(store.getProject(project.id), null);

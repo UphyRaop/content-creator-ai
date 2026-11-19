@@ -61,3 +61,10 @@
 - Brief/script approval is required before downstream stages. Changes to the approved brief or script clear approval and downstream state. Script versions are stored with the project payload.
 - Reference links are not fetched. Users can paste transcript/reference excerpts for context; inaccessible content is described gracefully.
 - No real AI, image, voice, or FFmpeg rendering integration is active. All provider/media responses remain simulated.
+
+
+## Phase 7–11 authorization (19 November 2026, Malaysia time)
+- The user authorized autonomous development through Phases 7–11 under the attached multi-agent protocol.
+- Keep RM20 testing budget untouched. No paid APIs, subscriptions, hosting, or external providers. Simulations must be labeled.
+- Preserve the existing SQLite backend, browser-local Pages preview, public main, and private backup. Do not rewrite Git history or force-push.
+- Each phase must pass its appropriate QA and deployment checkpoint before the next phase; Pages cannot run the Node/SQLite API or server-side FFmpeg.

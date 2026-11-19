@@ -27,11 +27,21 @@ Approval gates are mandatory: no script before brief approval; no scene breakdow
 4. **Project and Character Management** — complete. Reusable asset libraries, project/scene assignments, episodic continuity, project organization and manual queue, and non-overwriting backups are implemented. Includes reusable character/location/series/brand/channel records, project and scene assignments, episode continuity context, search/status/priority queue, and non-overwriting JSON import/export.
 5. **AI Image Generation Studio** — complete for the no-cost simulated preview and server provider boundary. Includes approved-script scene breakdowns; editable scene cards, prompts and continuity assignments; individual/batch queueing; approval/rejection and rejected-scene-only regeneration; unique simulated image versions; restore/download/manual replacement with aspect-ratio cropping; queue recovery/retry/cancellation; RM usage controls; and a server-only FLUX.1 Schnell adapter that remains disabled. Reference-image conditioning is not supported. See Phase 5 verification record below.
 6. **AI Voice Generation** — complete for the RM0 simulated preview and server-only adapter/key-vault boundary. Includes reusable narrator/character profiles, mixed narration/dialogue lines, saved voice controls, explicit queue confirmation, per-line review and rejected-only regeneration, version history, manual audio upload, measured duration synchronization, aggregate project cost checks, and timeline lock until all lines are approved. No live ElevenLabs calls were made.
-7. **Video Timeline and Editor** — not started.
-8. **Video Rendering Engine** — not started.
-9. **Post-Production Studio** — not started.
-10. **Thumbnail and Publishing Kit** — not started.
-11. **Final Testing and Deployment** — not started.
+7. **Video Timeline and Editor** — implementation and independent automated/code QA passed; GitHub Pages deployment verification is pending. Browser playback and touch QA are unavailable in this environment and remain explicitly unverified.
+8. **Video Rendering Engine** — authorized; awaiting Phase 7 QA and deployment.
+9. **Post-Production Studio** — authorized; sequentially follows Phase 8 QA and deployment.
+10. **Thumbnail and Publishing Kit** — authorized; sequentially follows Phase 9 QA and deployment.
+11. **Final Testing and Deployment** — authorized; follows Phase 10 QA and deployment.
+
+## Current authorization
+- On 19 November 2026 (Malaysia time), the user authorized autonomous completion of Phases 7–11 under the attached multi-agent protocol. Continue phases sequentially without requesting inter-phase approval.
+- Cost controls remain RM0: no paid APIs, subscriptions, external hosting, or use of the RM20 testing budget. Simulated providers remain simulated. The private backup repository must be preserved.
+- Phase 7 is gated on independent QA and deployment before Phase 8 begins. Later phases follow the same gate. GitHub Pages can publish static preview behavior only; server FFmpeg remains a separate local/server capability and must not be represented as available on Pages.
+
+## Phase 7 verification record
+- The editor and pure timeline workflow have been implemented locally. The timeline requires approved script, scene images, and measured approved audio. Tracks cover images, narration, dialogue, and estimated captions. Edits are non-destructive; the persisted manifest uses seconds at 1 ms resolution. Trimming/splitting/rearranging, snap points, scene navigation, auto transitions and camera motion, captions/presets, clip and whole-timeline silence suggestions, source-preserving cuts, and undo/redo are included.
+- Automated checks: the new timeline workflow suite and all existing project/script/image/voice regression checks pass; `npx tsc --noEmit`, `npm run build:static`, `npm run build`, and the inline prototype JavaScript syntax check pass.
+- Independent CCAI-05-QA review passed after several defects were fixed. Browser UI QA is blocked by unavailable CUA and denied local Chromium/server startup; this limitation is recorded in `QA.md`. Deployment verification is still required before Phase 8.
 
 ## Architecture and deployment
 - Public main repository: `UphyRaop/content-creator-ai`.
@@ -79,7 +89,7 @@ The public repository contains three older commits whose author/committer metada
 
 
 ## Phase 6 verification record
-- User authorized Phase 6 and the small dashboard adjustments on 19 November 2026 (Malaysia time); Phase 7 remains unstarted.
+- User authorized Phase 6 and the small dashboard adjustments on 19 November 2026 (Malaysia time); Phase 7 is underway under the later 19 November 2026 authorization.
 - Desktop dashboard QA verified search above filters, defaults “All Status” and “All Series”, “Imported” search returning 3 cards, status “In Progress” narrowing those to 1, series filtering, and reset to all seven cards.
 - Voice library adds reusable narrator/character profiles and character links. Every approved scene can contain multiple saved narration/dialogue segments with per-line voice profiles and speed, stability, similarity, emotion, style, and pronunciation settings. Saving edits only invalidates the affected line and never starts generation.
 - The Pages preview creates clearly labelled playable tone files matched to estimated speech timing; these are not spoken voice generation. Users must confirm the simulated queue, can monitor/retry/cancel jobs, approve/reject each line, and only confirmed rejected lines regenerate. Approved lines stay unchanged. Uploaded recordings are measured, versioned, and update scene timing. The timeline is locked until every line has approved audio; chronological clips use measured scene durations.
