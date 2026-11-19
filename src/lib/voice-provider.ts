@@ -24,7 +24,7 @@ export class SimulatedVoiceProvider implements VoiceProvider {
 /** Server-only ElevenLabs adapter. It is deliberately blocked until separately approved. */
 export class ElevenLabsVoiceProvider implements VoiceProvider {
   readonly id = "elevenlabs" as const;
-  readonly capabilities = { speed: true, stability: true, similarity: true, emotion: false, styleExaggeration: true, pronunciation: true, multilingual: true };
+  readonly capabilities = { speed: true, stability: true, similarity: true, emotion: false, styleExaggeration: true, pronunciation: false, multilingual: true };
   async generate(input: VoiceGenerationInput): Promise<VoiceGenerationResult> {
     if (process.env.CCAI_ENABLE_LIVE_VOICE !== "true" || process.env.CCAI_LIVE_VOICE_APPROVED !== "true") throw new Error("Live voice generation is disabled. Use the simulated preview or obtain separate approval before enabling API calls.");
     if (!/^[A-Za-z0-9_-]{1,100}$/.test(input.voiceId)) throw new Error("Choose an authorized ElevenLabs voice profile.");

@@ -53,6 +53,7 @@
 - Manual audio uploads retain version history, use browser-measured duration, and update scene timing. Timeline access requires every voice line to be approved.
 - ElevenLabs keys are unavailable in public Pages. A future HTTPS Node.js deployment can manage multiple authorized keys through an admin-token-gated API and AES-256-GCM encrypted SQLite vault. Keys are not returned, logged, placed in source, or stored in browser storage. Server vault variables are blank in `.env.example`. No user key or account was configured.
 - Live ElevenLabs calls remain disabled unless separately approved and configured with known model credits and MYR rates. The preview reports account balance as not checked because it makes no live balance request. Emotional delivery and free-text pronunciation are not sent as unsupported ElevenLabs controls.
+- Before future live batch generation, the server estimates aggregate batch credits and MYR cost and compares that amount against the saved project limit. Unknown rates or over-limit batches are rejected before contacting the provider. Phase 6 verification is recorded in `ROADMAP.md`; the RM20 budget remains untouched.
 
 ## Development boundary
 - Phases 1–6 are complete as a simulated prototype. Phase 7 requires separate user approval.

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getVoiceProvider, SimulatedVoiceProvider } from "@/lib/voice-provider";
-import { validateVoiceGenerationRequest } from "@/lib/voice-workflow";
+import { estimateVoiceCostMyr, estimateVoiceCredits, validateVoiceGenerationRequest } from "@/lib/voice-workflow";
 import { getProject } from "@/lib/project-store";
 import { recordVoiceUsage, verifyVoiceVaultAdminToken } from "@/lib/voice-vault";
 
@@ -29,6 +29,13 @@ export async function POST(request: Request) {
       const authorization = request.headers.get("authorization") || "";
       const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : null;
       if (!verifyVoiceVaultAdminToken(token)) return NextResponse.json({ error: "Voice generation requires secure administrator authorization." }, { status: 401 });
+      const creditsPerCharacter = Number(process.env.CCAI_ELEVENLABS_CREDITS_PER_CHARACTER || "");
+      const myrPerThousandCredits = Number(process.env.CCAI_ELEVENLABS_MYR_PER_1000_CREDITS || "");
+      const totalCharacters = input.scenes.reduce((sum, scene) => sum + scene.text.length, 0);
+      const totalCredits = estimateVoiceCredits(totalCharacters, "elevenlabs", creditsPerCharacter);
+      const totalCostMyr = estimateVoiceCostMyr(totalCredits, myrPerThousandCredits);
+      if (totalCredits === null || totalCostMyr === null) return NextResponse.json({ error: "Current ElevenLabs credit and MYR pricing are unknown; live generation is blocked." }, { status: 503 });
+      if (input.spendingLimitMyr <= 0 || totalCostMyr > input.spendingLimitMyr || totalCostMyr > projectLimit) return NextResponse.json({ error: "Estimated batch voice cost exceeds the saved project spending limit." }, { status: 402 });
     }
     const provider = input.provider === "simulated" ? new SimulatedVoiceProvider() : getVoiceProvider();
     if (input.provider === "elevenlabs" && provider.id !== "elevenlabs") return NextResponse.json({ error: "ElevenLabs is not the selected provider." }, { status: 503 });
