@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { registerHooks } from "node:module";
 
-registerHooks({resolve(specifier,context,nextResolve){if(specifier==="./project-store"&&context.parentURL?.endsWith("/src/lib/ffmpeg-renderer.ts"))return nextResolve("./project-store.ts",context);if(specifier==="./post-production"&&context.parentURL?.endsWith("/src/lib/ffmpeg-renderer.ts"))return nextResolve("./post-production.ts",context);return nextResolve(specifier,context);}});
+registerHooks({resolve(specifier,context,nextResolve){if(specifier==="./project-store"&&context.parentURL?.endsWith("/src/lib/ffmpeg-renderer.ts"))return nextResolve("./project-store.ts",context);if(specifier==="./post-production"&&context.parentURL?.endsWith("/src/lib/ffmpeg-renderer.ts"))return nextResolve("./post-production.ts",context);if(specifier==="./approval-store"&&context.parentURL?.endsWith("/src/lib/project-store.ts"))return nextResolve("./approval-store.ts",context);if(specifier==="./project-store"&&context.parentURL?.endsWith("/src/lib/approval-store.ts"))return nextResolve("./project-store.ts",context);return nextResolve(specifier,context);}});
 const root=mkdtempSync(join(tmpdir(),"ccai-postprod-render-test-"));process.env.CCAI_DATABASE_PATH=join(root,"projects.sqlite");
 try{
   const store=await import("../src/lib/project-store.ts"),renderer=await import("../src/lib/ffmpeg-renderer.ts"),post=await import("../src/lib/post-production.ts");

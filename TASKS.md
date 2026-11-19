@@ -1,6 +1,9 @@
 # CCAI Active and Completed Tasks
 
-## Active phase
+## Active objective — CCAI Production Readiness / final sync
+- Code implementation and local QA are complete. Final regression/security checks are being repeated; remaining work is public `main` fast-forward sync, Pages workflow/preview verification, and recording the verified commit/run. No additional feature phase is in scope.
+
+## Historical active phase record
 ### CCAI-01-LEAD — P11-INT-01
 - Status: Phase 10 implementation, independent automated QA, security review, noreply commit `8efc7b73722f29b9ae851051edf9b6a910f4c496`, Pages run `44511713809`, and live artifact verification complete. Phase 10 records are being committed and deployed before Phase 11 final audit continues.
 
@@ -95,6 +98,13 @@ Record phase completion, repository commit, Actions run, preview verification, a
 
 
 ## Phase 11 final assignments
+### CCAI-03-BACKEND — PROD-SEC-01 — complete
+- Objective: add self-hosted SQLite sessions, one-time first-owner bootstrap with legacy-row claiming, owner-scoped project/entity APIs, and server-authoritative content-hash approval records.
+- Files: auth/approval stores and helpers, auth/project/entity API routes, project/entity stores, focused auth/API and DB tests; no external auth services or commit/push.
+- Dependencies: AI agent owns AI/render route guards and voice-vault migration; UI agent integrates session and approval responses; QA provides HTTP route harness.
+- Acceptance: passwords salted/hashed with scrypt; opaque hashed session tokens and HttpOnly/SameSite cookie lifecycle; same-origin mutation checks, login rate limits, owner isolation, bootstrap-disabled after first user, legacy owner claim in one transaction, stage/upstream gates, and changed-content invalidation without trusting payload booleans.
+- Status: complete. Added one-time bootstrap/legacy claiming, hashed scrypt credentials and opaque sessions, same-origin mutation checks, rate limiting, tenant-scoped CRUD, SQLite server approval records with stage gates and content-hash cascade invalidation, and `imageData`/`imageVersions` support. Focused auth/API and project-store fixtures plus TypeScript passed. UI and AI route agents integrated the contracts; final cross-workstream HTTP QA is running.
+
 ### CCAI-02-UIUX — P11-UI-FIX-02/03 — complete
 Added skip-to-main, visible focus, accessible locked-step indication, tablet/mobile legibility, normalized timeline hash approval, render confirmation, and correct downstream invalidation. Saving notes alone no longer clears a still-valid approval. Static build and inline JavaScript syntax passed; browser runtime testing not done. Files: `prototype.html`, `dist/index.html`.
 
@@ -104,11 +114,46 @@ Renderer requires a persisted approved timeline with matching canonical SHA-256 
 ### CCAI-04-AI — P11-AI-FIX-02 — complete
 Script/image routes derive generation requests from saved SQLite project payloads; Gemini preflight requires prices, request cap, and image price when applicable before fetch. Helper tests show no fetch for blocked requests. No provider calls. Project APIs remain unauthenticated, a release blocker. Files: AI routes/provider, `src/lib/ai-generation-gates.ts`, `src/lib/gemini-cost-preflight.ts`, `scripts/test-ai-routes.mjs`, `.env.example`.
 
-### CCAI-05-QA — P11-FINAL-QA-02 — complete, PARTIAL PASS
+### CCAI-04-AI — PROD-AI-SEC-01 — active
+- Objective: harden AI/voice credential/render API routes with session, same-origin mutation, owner-scoped project access, and server-recorded approval gates; preserve disabled live providers and migrate the encrypted voice vault without data loss.
+- Files: `src/app/api/ai/**`, `src/app/api/render/**`, `src/app/api/render/access.ts`, `src/lib/voice-vault.ts`, `src/lib/voice-provider.ts`, `scripts/test-voice-vault-security.mjs`, and loader helpers for Node tests.
+- Dependencies: CCAI-03-BACKEND exports `getSessionUser`, `isSameOriginMutation`, `getOwnedProject`, and `hasProjectApproval` for `brief|script|image|voice|timeline|thumbnail|export` stages.
+- Status: complete; no provider calls or commits/pushes. AI endpoints require session and same-origin on writes, use owner-scoped project reads, and gate script/image/voice generation on server-recorded approvals; client approval flags/prompts/settings/provider choices are ignored where server state is authoritative. Voice generation is simulated-only. Render submit/status/cancel/retry/stream/download/post-production require sessions and owner match; writes check same-origin; timeline render approval/hash freshness and export download approval are enforced. Voice credential APIs and usage storage are owner-scoped. Transactional migration adds nullable owner IDs and rebuilds composite-key settings while preserving legacy ciphertext, settings and usage for bootstrap claim; migration fails closed. Tests: `npm test` PASS (19 existing checks); `node --experimental-strip-types scripts/test-ai-routes.mjs` PASS (four saved-data/no-fetch checks); `node --experimental-strip-types --import ./scripts/register-server-only-test-loader.mjs scripts/test-voice-vault-security.mjs` PASS (legacy migration/isolation plus route-source checks); `npx tsc --noEmit` PASS; `git diff --check` PASS. In-process authenticated HTTP handler tests remain with CCAI-05-QA for final confirmation.
+
+### CCAI-05-QA — P11-FINAL-QA-02 — initial code review checkpoint; latest results follow
 Full automated suites/builds/typecheck/static checks passed after test fixture correction. Route HTTP integration, browser/mobile post-change testing remain untested. Identified unauthenticated project APIs as release-blocking because saved approvals can be forged.
 
-### CCAI-06-DEVOPS — P11-SEC-DEPLOY-01 — complete, FAIL for release posture
+### CCAI-05-QA — PROD-QA-01 — automated PASS; final lead browser E2E PASS (desktop)
+- Objective: verify owner/session isolation, approval freshness, simulated AI and render API behavior, and 13-stage UI on isolated synthetic data. No app-source edits, paid calls, deployment, or preview-user data changes.
+- Availability: Node 24.22.1, npm 11.9.0, Next 15.5.29, SQLite 3.53.4, FFmpeg/ffprobe 7.1.5, Chromium 156. Playwright/Puppeteer packages are absent. Controlled local-only loopback was enabled for the audit.
+- Artifacts: `scripts/test-p11-http.mjs`, `docs/qa/prod-qa-01.md`; Node strip-types resolver added to `scripts/test-project-store.mjs` so `npm test` follows extensionless TypeScript imports.
+- Status: 77/77 in-process route checks, auth/AI/voice-vault/render/post-production/publishing fixtures, npm test, TypeScript, static build, Next build, inline-script syntax, and diff checks pass. Actual HTTP smoke passed 6/6 on loopback with a temporary SQLite DB and simulated providers. Lead-reported CUA flow passed bootstrap/project creation and reached stage 10; validator, timeline UI adapter, and renderer image source compatibility issues were fixed. Current run awaits app rebuild and a valid test-media path; render and later stages are NOT VERIFIED. QA did not run browser/mobile UI. Full evidence/limits are in `docs/qa/prod-qa-01.md`.
+
+### CCAI-06-DEVOPS — P11-SEC-DEPLOY-01 — reviewed with remaining production blockers
 Source credential scan passed; legacy author/committer personal email metadata in public Git history and Pages HTTPS enforcement disabled; backend host absent. Backup remains private and untouched.
 
-### CCAI-01-LEAD — P11-INT-01 — complete, PARTIAL PASS
+### CCAI-01-LEAD — P11-INT-01 — initial checkpoint; resumed completion in final checkpoint below
 Integrated and synchronized P11 source/docs in noreply fast-forward commit `ba5a9d26c74355721d6a978f727b9e175ed2ce71`; Pages run `44517625068` succeeded and desktop custom-domain preview loaded. Do not begin further phases outside this 11-phase roadmap.
+
+### CCAI-02-UIUX — PROD-UI-01 — complete
+- Objective: add authenticated Node-mode login/bootstrap/logout and server-backed explicit approvals while preserving Pages local-only simulation.
+- Files: `prototype.html`, `dist/index.html`, `TASKS.md`; no auth/backend/API edits.
+- Contract: same-origin auth session/bootstrap/login/logout; approvals call `POST /api/projects/:id/approvals` with stage/resource IDs after saving the draft; UI loads active server approval records separately from project payload.
+- Status: complete. Focused auth/approval source assertions, inline JavaScript syntax check, static build, and diff checks passed. No live API or browser/device runtime tests performed.
+
+## Production Readiness continuation — final status (19 November 2026)
+- **CCAI-01-LEAD / PROD-SEC-01 integration:** completed implementation verification, fixed UI/timeline/media compatibility issues, ran local 13-stage desktop flow, and prepared source/docs for fast-forward sync and preview deployment. GitHub sync/deploy verification is the remaining action in this recovery checkpoint.
+- **CCAI-02-UIUX:** completed auth/approval screen integration; final browser run exercised all 13 stages through local Node render and export.
+- **CCAI-03-BACKEND:** completed auth/session, project/entity ownership, server approval freshness and cascade invalidation, SQLite schema migration, and HTTP handlers.
+- **CCAI-04-AI:** completed session/owner checks on AI and render paths, disabled live providers, voice credential vault and migration.
+- **CCAI-05-QA:** completed 77 in-process route assertions, API/security/renderer regressions, and independent isolated browser walkthrough; report is updated in `QA.md` and `docs/qa/prod-qa-01.md`.
+- **CCAI-06-DEVOPS:** hosting options review and HTTPS/Pages boundary documented in `docs/hosting-options.md` and `DEPLOYMENTS.md`; no hosting selected, no DNS changes, no cost.
+- Residual verification: tablet/mobile runtime testing unsupported by the active browser control; GitHub Pages Enforce HTTPS remains a manual owner setting; old author emails in public history are preserved because history rewriting was not authorized; no persistent Node host is configured.
+- Costs: RM0; no paid API calls, no host/subscription, RM20 testing budget untouched; private backup unchanged.
+
+
+### Final continuation checkpoint — 19 November 2026
+- Code and local verification complete. Current task is syncing reviewed changes to public `main` with a GitHub noreply identity, then checking the Pages run and deployed preview. Do not start another feature phase.
+- Recovered team roles: UIUX, backend, AI/security, QA and DevOps work is reported complete; lead integration and isolated desktop workflow are complete. No agents remain active; hidden agent contexts are not claimed as recovered.
+- Tests repeated: 19 project-store checks, 77 API checks, auth/AI/vault/renderer/post-production/publishing suites, TypeScript, Next and static builds, diff check and source/artifact credential-pattern scan passed.
+- Residuals: mobile/tablet runtime unavailable; owner must enable HTTPS enforcement; no persistent Node host; old public commit email metadata remains unchanged. Cost RM0; RM20 untouched; private backup unchanged.

@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { registerHooks } from "node:module";
 
-registerHooks({resolve(specifier,context,nextResolve){if(context.parentURL?.endsWith("/src/lib/ffmpeg-renderer.ts")&&["./project-store","./post-production"].includes(specifier))return nextResolve(`${specifier}.ts`,context);return nextResolve(specifier,context);}});
+registerHooks({resolve(specifier,context,nextResolve){if((context.parentURL?.endsWith("/src/lib/ffmpeg-renderer.ts")&&["./project-store","./post-production"].includes(specifier))||(context.parentURL?.endsWith("/src/lib/project-store.ts")&&specifier==="./approval-store"))return nextResolve(`${specifier}.ts`,context);return nextResolve(specifier,context);}});
 const root=mkdtempSync(join(tmpdir(),"ccai-render-test-"));process.env.CCAI_DATABASE_PATH=join(root,"projects.sqlite");
 try{
   const store=await import("../src/lib/project-store.ts"),renderer=await import("../src/lib/ffmpeg-renderer.ts");
@@ -26,6 +26,9 @@ try{
     {id:"dialogue",kind:"dialogue",clips:[]},
   ]};
   assert.equal(renderer.validateRenderManifest(manifest),true,"every accepted transition should validate");
+  const longSequence=Array.from({length:15},(_,i)=>({id:`long-${i}`,sourceRef:`voice:long-${i}`,start:Math.round(i*4.4*1000)/1000,duration:4.4,sourceOffset:0,text:"Measured narration",timing:"estimated",motion:"none",transitionIn:"cut"}));
+  const repeatedSequenceManifest={version:1,timeUnit:"seconds",duration:66,tracks:[{id:"images",kind:"image",clips:longSequence.map((clip,i)=>({...clip,id:`image-long-${i}`,sourceRef:`image:scene-${i}`,text:undefined}))},{id:"narration",kind:"narration",clips:longSequence},{id:"dialogue",kind:"dialogue",clips:[]},{id:"captions",kind:"caption",clips:[]}]};
+  assert.equal(renderer.validateRenderManifest(repeatedSequenceManifest),true,"floating-point noise at boundaries between 4.4-second speech clips must not block rendering");
   assert.throws(()=>renderer.createRenderJob({projectId:project.id,manifest,format:"landscape",fps:30}),/Approve this exact timeline manifest/,"legacy project without a saved timeline approval cannot render");
   setTimelineApproval(project.id,manifest,false);
   assert.throws(()=>renderer.createRenderJob({projectId:project.id,manifest,format:"landscape",fps:30}),/Approve this exact timeline manifest/,"an unapproved timeline cannot render");

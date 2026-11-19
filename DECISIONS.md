@@ -91,6 +91,6 @@
 
 ## Phase 11 decisions and constraints
 - Automated AI script/image and FFmpeg render routes now use saved project data and a canonical approved timeline hash; Gemini also requires positive prices and a per-request MYR ceiling before network access. Live provider switches remain disabled and no calls were made.
-- This does not make the Node API safe for public hosting: project/entity CRUD endpoints have no authentication/ownership and can be used to forge persisted approval fields. A production authentication approach and ownership model must be approved/configured before any public Node deployment.
+- The production-readiness continuation implements session authentication, project/entity ownership, and server-held approval records with content freshness checks. These protections are covered by the API QA suite. Do not expose the Node APIs until a supported production deployment has been configured and reviewed.
 - Do not rewrite the old public Git history without separately approved history rewrite; it contains personal author/committer email metadata. New commits continue using GitHub noreply identities.
 - Keep GitHub Pages HTTPS-only enforcement enabled as an owner action; current connector cannot toggle the Pages setting.

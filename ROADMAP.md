@@ -31,7 +31,7 @@ Approval gates are mandatory: no script before brief approval; no scene breakdow
 8. **Video Rendering Engine** — implementation, independent QA, and GitHub Pages deployment complete. A local/server Node/FFmpeg renderer produces H.264/AAC MP4 at 1080p, portrait or landscape, 30 or 60 FPS. GitHub Pages remains an explicit simulation; it cannot execute this renderer.
 9. **Post-Production Studio** — complete and deployed. Node mode creates derived FFmpeg MP4s from uploaded audio while preserving the parent render; Pages records a simulation only.
 10. **Thumbnail and Publishing Kit** — implementation, independent automated QA, and GitHub Pages deployment complete. Browser interaction remains partially unverified.
-11. **Final Testing and Deployment** — audit/fixes and static Pages deployment complete with PARTIAL PASS (`ba5a9d26c74355721d6a978f727b9e175ed2ce71`, run `44517625068`). Desktop dashboard loaded at the custom domain. Production release is blocked pending server API authentication, owner HTTPS enforcement, and resolution of legacy public-history personal email metadata. Post-change mobile/browser interaction testing was not available.
+11. **Final Testing and Deployment** — initial static Pages deployment completed with PARTIAL PASS (`ba5a9d26c74355721d6a978f727b9e175ed2ce71`, run `44517625068`). The production-readiness continuation adds session authentication, ownership enforcement, server-side approval validation, API integration tests and isolated 13-stage desktop evidence. Its final source sync/deployment verification is being completed; remaining boundaries include static-only Pages, owner-managed HTTPS enforcement, no mobile viewport runtime check, and legacy public commit email metadata.
 
 ## Current authorization
 - On 19 November 2026 (Malaysia time), the user authorized autonomous completion of Phases 7–11 under the attached multi-agent protocol. Continue phases sequentially without requesting inter-phase approval.
@@ -135,3 +135,12 @@ The public repository contains three older commits whose author/committer metada
 - Security: no credentials found in source files in the independent repository scan. Repository security is not fully PASS: old public commits disclose personal author/committer email metadata; GitHub Pages `https_enforced` is false; project CRUD APIs and entities remain unauthenticated.
 - Do not deploy the Node APIs to an internet-accessible server until authentication and project ownership are enforced for reads, updates, approvals, generation, render, and library endpoints. No production Node host is configured.
 - Costs: RM0; Gemini, FLUX, ElevenLabs, and the RM20 test budget were not used.
+
+
+## Phase 11 production-readiness continuation — 19 November 2026
+
+- Session authentication, project/entity ownership, server-authoritative approval freshness and downstream invalidation, secured AI/render routes, and owner-scoped voice credential access are implemented and covered by isolated API tests. Live AI providers remain disabled.
+- QA passed: 19 project checks; 77 HTTP-level API assertions; auth, AI pricing/gate, credential migration, render, post-production and publishing suites; TypeScript; Next/static builds; and source/artifact credential-pattern scan.
+- An isolated synthetic desktop browser flow completed all 13 stages against local Node/SQLite. Local FFmpeg output, protected range preview, approved export download and non-destructive post-production were verified. Mobile/tablet runtime was not available.
+- GitHub Pages remains a static localStorage simulation; it cannot run SQLite, session routes, background jobs or FFmpeg. No persistent Node host is configured. Enforce HTTPS remains a manual Pages setting. Old public commit identity email metadata is preserved; no history rewrite was performed.
+- No paid API, hosting, or additional service was used; cost RM0 and RM20 remains untouched.

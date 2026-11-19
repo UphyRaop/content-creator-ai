@@ -1,5 +1,6 @@
 # CCAI Continuation Notes
 
+
 - Current task is Phase 11 finalization for CCAI. Workspace `/workspace/ccai-qa-checkout` contains a stale local Git history; always re-read GitHub `main` before syncing and use the GitHub connector only. Latest P11 application commit is `ba5a9d26c74355721d6a978f727b9e175ed2ce71`; the deployment record follow-up is `351a4d7171062f280ff1d44c0401cc02383d2cf4`.
 - User authorized Phases 7–11 together. Phase 11 safe code fixes and automated QA are complete with PARTIAL PASS. P11 source commit `ba5a9d26c74355721d6a978f727b9e175ed2ce71` and Pages run `44517625068` succeeded; latest details are in `DEPLOYMENTS.md`. Do not begin unapproved work beyond Phase 11.
 - Phase 7 is deployed at https://ccai.ur-project.biz/ (Pages run `44492004150`, commit `9e050e77eede07a25c9236b265313190bcc7ab19`). Automated tests/builds and independent code QA passed; browser/mobile testing remains unavailable.
@@ -14,8 +15,19 @@
 
 ## Phase 11 handover
 - Preview: https://ccai.ur-project.biz/ ; public repository: `UphyRaop/content-creator-ai`; private backup `UphyRaop/content-creator-ai-backup` remains intact.
-- Phase 11 audit, automated fixes, sync and Pages deployment are complete with PARTIAL PASS; source commit `ba5a9d26c74355721d6a978f727b9e175ed2ce71`, run `44517625068`. Dashboard loaded in desktop Chrome; post-change mobile and interaction testing remain untested.
-- Static GitHub Pages is simulation-only. It does not run SQLite, Node APIs, AI providers, background jobs, or FFmpeg.
-- Production release blockers: unauthenticated project/entity APIs can disclose or overwrite records and forge stored approval states; no persistent Node host; Pages HTTPS enforcement is disabled; three old public commits contain personal author/committer email metadata.
-- Do not configure a public Node server until authentication and per-user/project ownership are implemented. Do not rewrite Git history without separate approval. Owner must enable Pages “Enforce HTTPS” in repository Settings → Pages.
+- The production-readiness continuation below adds authentication, ownership, server-authoritative approval checks, and isolated API/browser evidence. Its local code still awaits the final fast-forward sync and Pages verification recorded in that checkpoint.
+- Static GitHub Pages remains simulation-only. It cannot run SQLite, Node APIs, AI providers, background jobs, or FFmpeg.
+- Remaining production blockers: no persistent Node host; Pages HTTPS enforcement is disabled; three old public commits contain personal author/committer email metadata. Do not rewrite history or change DNS. Owner must enable Pages “Enforce HTTPS” in repository Settings → Pages.
 - Costs RM0; RM20 budget remains unused. Live Gemini/FLUX/ElevenLabs calls were not made.
+
+## Production readiness continuation checkpoint — 19 November 2026
+
+- **Current objective:** finish the already authorized CCAI production-readiness security and QA task. The interrupted implementation and testing are complete locally; remaining work is documentation cleanup, a fresh public-source security scan, fast-forward sync, and Pages deployment verification. No new feature phase is in scope.
+- **Workspace:** `/workspace/ccai-qa-checkout`. Local Git history is stale and must not be pushed. Fetch the actual `UphyRaop/content-creator-ai` `main` head and tree with the GitHub connector immediately before constructing the commit. Use the GitHub noreply identity, one parent, and update `main` with the exact expected SHA and `force:false`. Do not use local `git push`, rewrite history, or touch `content-creator-ai-backup`.
+- **Recovered assignments:** all established roles are accounted for without claiming their hidden reasoning contexts were restored. CCAI-02-UIUX, CCAI-03-BACKEND, CCAI-04-AI and CCAI-05-QA reported completed work; CCAI-06-DEVOPS completed the hosting/Pages review; the lead integrated changes and ran the isolated desktop workflow. No agent is currently active.
+- **Completed implementation and verification:** authentication/session bootstrap and logout; owner-scoped projects, entities, AI/render routes and voice credentials; server-owned approval records with freshness/cascade invalidation; Pages-only local simulation; protected render routes; 77 HTTP API assertions; isolated 13-stage desktop browser workflow with a local FFmpeg render and approved export; project, AI, vault, renderer, post-production, publishing, TypeScript and production/static build checks. Evidence and boundaries are recorded in `QA.md`, `docs/qa/prod-qa-01.md`, and `TASKS.md`.
+- **Final tests being repeated:** `npm test`, auth/AI/voice-vault route suites, the 77-check HTTP suite, FFmpeg/post-production/publishing fixtures, `npx tsc --noEmit`, Next and Pages builds, diff validation, and source/artifact credential-pattern scan. Distinguish local SQLite/FFmpeg behavior from the static Pages simulation.
+- **Deployment blockers:** Pages can host only the local-storage simulation; it cannot execute SQLite, sessions/API routes, background jobs, or FFmpeg. No persistent Node host is selected. GitHub Pages HTTPS enforcement requires the owner to enable Settings → Pages → Enforce HTTPS; do not change DNS or unrelated settings. Older public history retains personal author/committer email metadata; do not rewrite it.
+- **Restrictions:** no paid APIs or hosting, no live Gemini/FLUX/ElevenLabs calls, RM20 untouched, preserve user data and private backup, no DNS changes, no force push, and noreply identity on new commits.
+- **Remaining steps:** correct stale handover/task/roadmap/deployment wording, scan deployable source/artifacts, sync checked files as a normal fast-forward commit to public `main`, verify the Pages workflow, HTTPS URL and deployed desktop view, then record exact commit/run and the mobile/HTTPS/hosting blockers. If sync or deployment fails, record the failure and do not claim success.
+- **Tool limitation:** model, reasoning and Fast Mode controls are unavailable; do not claim GPT-6 Luna/Medium/Fast-Off was applied.

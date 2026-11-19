@@ -28,3 +28,10 @@ GitHub Pages serves static files. It cannot run the SQLite API routes, persisten
 - Mobile/tablet and keyboard runtime checks after deployment were not performed. The cloud browser did not expose viewport emulation; responsive behavior is source/build-tested only.
 - This is a static prototype deployment only. It does not enable or deploy the SQLite/Node API routes. Production backend remains blocked pending authentication/ownership and a supported persistent Node host.
 - GitHub Pages’ last verified setting is `https_enforced:false`: HTTPS responds, but HTTP also responds 200. Owner action is still needed to enforce HTTPS. Legacy personal email metadata remains in old public commits; no history rewrite occurred. See `QA.md`.
+
+
+## Production readiness continuation checkpoint — 19 November 2026
+- Local source and regression verification are complete. The next deployment record must name the exact fast-forward commit, Actions run result, and accessible preview response.
+- Sync must use GitHub's current `main` as parent and the noreply address `355911884+UphyRaop@users.noreply.github.com`; never force-update or rewrite history. Preserve `content-creator-ai-backup`.
+- Deployment can only publish the static simulation. SQLite, authentication routes, background processing and FFmpeg require a separately approved persistent Node host.
+- Owner action remains: enable Settings → Pages → Enforce HTTPS. No DNS change was made.

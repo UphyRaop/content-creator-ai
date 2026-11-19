@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import { getScriptProvider } from "@/lib/ai-provider";
-import { getProject } from "@/lib/project-store";
+import { getOwnedProject } from "@/lib/project-store";
+import { getSessionUser, isSameOriginMutation } from "@/lib/auth";
+import { hasProjectApproval } from "@/lib/approval-store";
 import { scriptRequestFromSavedProject } from "@/lib/ai-generation-gates";
 import { validateScriptRequest } from "@/lib/script-workflow";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  const user = await getSessionUser(request);
+  if (!user) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  if (!isSameOriginMutation(request)) return NextResponse.json({ error: "Cross-origin mutation rejected." }, { status: 403 });
   try {
     const raw = await request.text();
     if (Buffer.byteLength(raw, "utf8") > 16 * 1024) return NextResponse.json({ error: "Script request is too large." }, { status: 413 });
@@ -14,9 +19,11 @@ export async function POST(request: Request) {
     if (!body || typeof body !== "object" || Array.isArray(body) || typeof (body as Record<string, unknown>).projectId !== "string" || !(body as Record<string, unknown>).projectId) {
       return NextResponse.json({ error: "A saved project ID is required." }, { status: 400 });
     }
-    const project = getProject((body as { projectId: string }).projectId);
+    const project = getOwnedProject(user.id, (body as { projectId: string }).projectId);
     if (!project) return NextResponse.json({ error: "Saved project not found." }, { status: 404 });
-    const savedRequest = scriptRequestFromSavedProject(project.payload);
+    if (!hasProjectApproval(user.id, project.id, "brief")) return NextResponse.json({ error: "Approve the current saved brief before generating a script." }, { status: 409 });
+    const payload = { ...project.payload, brief: { ...(project.payload.brief as Record<string, unknown>), approved: true } };
+    const savedRequest = scriptRequestFromSavedProject(payload);
     if (!validateScriptRequest(savedRequest)) return NextResponse.json({ error: "Saved project inputs are incomplete or invalid." }, { status: 400 });
     return NextResponse.json(await getScriptProvider().generate(savedRequest));
   } catch (error) {

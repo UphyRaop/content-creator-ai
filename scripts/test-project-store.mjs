@@ -1,7 +1,18 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync, readFileSync } from "node:fs";
+import { mkdtempSync, rmSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { registerHooks } from "node:module";
+
+// Node's strip-types mode does not resolve TypeScript's extensionless imports.
+registerHooks({ resolve(specifier, context, nextResolve) {
+  if (context.parentURL?.includes("/src/") && (specifier.startsWith("./") || specifier.startsWith("../")) && !/\.[cm]?[jt]sx?$/.test(specifier)) {
+    const candidate = resolve(dirname(fileURLToPath(context.parentURL)), `${specifier}.ts`);
+    if (existsSync(candidate)) return nextResolve(`${specifier}.ts`, context);
+  }
+  return nextResolve(specifier, context);
+} });
 
 const directory = mkdtempSync(join(tmpdir(), "ccai-sqlite-test-"));
 process.env.CCAI_DATABASE_PATH = join(directory, "projects.sqlite");
@@ -180,6 +191,11 @@ try {
   assert.equal(timelineFlow.canCreateTimeline({ scriptApproved: true, scenes: [{ ...readyScenes[0], approved: false }] }), false);
   assert.equal(timelineFlow.canCreateTimeline({ scriptApproved: true, scenes: [{ ...readyScenes[0], voiceSegments: [{ ...readyScenes[0].voiceSegments[0], approved: false }] }] }), false);
   const timeline = timelineFlow.buildTimelineFromProject({ scriptApproved: true, scenes: readyScenes });
+  const consecutiveTimeline = timelineFlow.buildTimelineFromProject({ scriptApproved: true, scenes: Array.from({ length: 15 }, (_, index) => ({
+    ...readyScenes[0], id: `scene-${index}`, seconds: 4.4,
+    voiceSegments: [{ ...readyScenes[0].voiceSegments[0], id: `line-${index}`, durationSeconds: 4.4 }],
+  })) });
+  assert.equal(store.validatePayload({ timeline: consecutiveTimeline }), true, "floating-point noise between adjacent generated clips must not reject an otherwise valid timeline");
   const sceneTimed = timelineFlow.buildTimelineFromProject({ scriptApproved: true, scenes: [
     { ...readyScenes[0], seconds: 4, voiceSegments: [readyScenes[0].voiceSegments[0]] },
     { id: "scene-b", seconds: 3, line: "Next", image: "data:image/png;base64,Yg==", approved: true, voiceSegments: [{ ...readyScenes[0].voiceSegments[0], id: "line-b2", durationSeconds: 1 }] },

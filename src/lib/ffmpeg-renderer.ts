@@ -42,7 +42,7 @@ export function validateRenderManifest(value: unknown): value is Manifest {
   for(const rt of m.tracks){if(!rt||typeof rt!=="object"||Array.isArray(rt))return false;const t=rt as Record<string,unknown>;
     if(typeof t.id!=="string"||!t.id||! ["image","narration","dialogue","caption"].includes(String(t.kind))||!Array.isArray(t.clips))return false;
     for(const rc of t.clips){count++;if(count>MAX_CLIPS||!rc||typeof rc!=="object"||Array.isArray(rc))return false;const c=rc as Record<string,unknown>;
-      if(typeof c.id!=="string"||!c.id||ids.has(c.id)||typeof c.sourceRef!=="string"||c.sourceRef.length>500||!c.sourceRef||!Number.isFinite(c.start)||!Number.isFinite(c.duration)||!Number.isFinite(c.sourceOffset)||Number(c.start)<0||Number(c.duration)<=0||Number(c.start)+Number(c.duration)>MAX_DURATION||Number(c.start)+Number(c.duration)>Number(m.duration)||Number(c.sourceOffset)<0||![c.start,c.duration,c.sourceOffset].every(n=>Math.abs(Number(n)*1000-Math.round(Number(n)*1000))<1e-7))return false;
+      if(typeof c.id!=="string"||!c.id||ids.has(c.id)||typeof c.sourceRef!=="string"||c.sourceRef.length>500||!c.sourceRef||!Number.isFinite(c.start)||!Number.isFinite(c.duration)||!Number.isFinite(c.sourceOffset)||Number(c.start)<0||Number(c.duration)<=0||Number(c.start)+Number(c.duration)>MAX_DURATION+1e-9||Number(c.start)+Number(c.duration)>Number(m.duration)+1e-9||Number(c.sourceOffset)<0||![c.start,c.duration,c.sourceOffset].every(n=>Math.abs(Number(n)*1000-Math.round(Number(n)*1000))<1e-7))return false;
       ids.add(c.id);
       if(c.text!==undefined&&(typeof c.text!=="string"||c.text.length>12000))return false;
       if(c.transitionDuration!==undefined&&(!Number.isFinite(c.transitionDuration)||Number(c.transitionDuration)<0||Number(c.transitionDuration)>5))return false;
@@ -58,7 +58,7 @@ export function validateRenderManifest(value: unknown): value is Manifest {
       if(t.kind==="narration"||t.kind==="dialogue")speech.push({start:Number(c.start),end:Number(c.start)+Number(c.duration)});
     }
   }
-  speech.sort((a,b)=>a.start-b.start);for(let i=1;i<speech.length;i++)if(speech[i-1].end>speech[i].start)return false;
+  speech.sort((a,b)=>a.start-b.start);for(let i=1;i<speech.length;i++)if(speech[i-1].end>speech[i].start+1e-9)return false;
   return m.tracks.some((x:any)=>x.kind==="image"&&x.clips.length>0);
 }
 
@@ -107,7 +107,11 @@ function assetsFor(projectId:string,manifest:Manifest) {
   const scenes=Array.isArray(p.scenes)?p.scenes as Array<Record<string,any>>:[];
   if(!scenes.length||scenes.some(s=>s.approved!==true||!s.image))throw new Error("Every image must be approved before rendering.");
   const voice=new Map<string,string>();for(const s of scenes){const lines=Array.isArray(s.voiceSegments)?s.voiceSegments:[];if(!lines.length)throw new Error("Every scene needs approved completed speech audio before rendering.");for(const v of lines){const src=typeof v.dataUrl==="string"?v.dataUrl:v.versions?.find((x:any)=>typeof x.dataUrl==="string")?.dataUrl;if(v.approved!==true||v.status!=="completed"||v.needsGeneration||!src)throw new Error("Every scene voice segment must be approved, completed, and backed by audio before rendering.");voice.set(`voice:${v.id}`,src);}}
-  const images=new Map(scenes.map(s=>[`image:${s.id}`,s.image as string]));
+  const images=new Map<string,string>(scenes.map(s=>{
+    const version=Array.isArray(s.imageVersions)?[...s.imageVersions].reverse().find((item:any)=>typeof item?.image==="string"):null;
+    const data=typeof s.imageData==="string"&&s.imageData?s.imageData:typeof version?.image==="string"?version.image:typeof s.image==="string"?s.image:"";
+    return [`image:${s.id}`,data] as const;
+  }));
   const wanted=[...manifest.tracks.flatMap(t=>t.clips.map(c=>({kind:t.kind,ref:c.sourceRef})))];
   for(const item of wanted){if(item.kind==="image"&&!images.has(item.ref))throw new Error("Manifest references an image outside this project.");if((item.kind==="narration"||item.kind==="dialogue")&&!voice.has(item.ref))throw new Error("Manifest references audio that is not approved and complete.");}
   const referenced=wanted.filter(x=>x.kind==="narration"||x.kind==="dialogue").map(x=>x.ref);

@@ -2,10 +2,12 @@ import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
+import { invalidateChangedProjectApprovals } from "./approval-store";
 
 export type ProjectPayload = Record<string, unknown>;
 export type ProjectRow = {
   id: string;
+  ownerId?: string | null;
   title: string;
   createdAt: string;
   updatedAt: string;
@@ -51,7 +53,11 @@ function validTimeline(value: unknown): boolean {
     }
   }
   speech.sort((x,y)=>x.start-y.start);
-  for(let i=1;i<speech.length;i++) if(speech[i-1].end>speech[i].start) return false;
+  // Timeline values are millisecond-rounded, but JS addition can make two
+  // adjacent clips appear to overlap by a few floating-point ulps (e.g.
+  // 8.8 + 4.4 becomes 13.200000000000001). Allow only that representation
+  // noise; real overlaps remain rejected.
+  for(let i=1;i<speech.length;i++) if(speech[i-1].end>speech[i].start+1e-9) return false;
   return true;
 }
 
@@ -70,6 +76,9 @@ function database() {
     updated_at TEXT NOT NULL,
     payload TEXT NOT NULL
   )`);
+  const columns=db.prepare("PRAGMA table_info(projects)").all() as Array<{name:string}>;
+  if(!columns.some(column=>column.name==="owner_id"))db.exec("ALTER TABLE projects ADD COLUMN owner_id TEXT");
+  db.exec("CREATE INDEX IF NOT EXISTS projects_owner_id_idx ON projects(owner_id)");
   globalStore.ccaiDb = db;
   return db;
 }
@@ -77,6 +86,7 @@ function database() {
 function parseRow(row: Record<string, unknown>): ProjectRow {
   return {
     id: String(row.id),
+    ownerId: row.owner_id===null||row.owner_id===undefined?null:String(row.owner_id),
     title: String(row.title),
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
@@ -84,8 +94,9 @@ function parseRow(row: Record<string, unknown>): ProjectRow {
   };
 }
 
-export function listProjects() {
-  return database().prepare("SELECT id,title,created_at,updated_at,CAST(COALESCE(json_extract(payload,'$.step'),0) AS INTEGER) AS step,COALESCE(json_extract(payload,'$.projectStatus'),'Draft') AS project_status,CAST(COALESCE(json_extract(payload,'$.priority'),3) AS INTEGER) AS priority,COALESCE(json_extract(payload,'$.seriesId'),'') AS series_id,COALESCE(json_extract(payload,'$.channelId'),'') AS channel_id,COALESCE(json_extract(payload,'$.brandKitId'),'') AS brand_kit_id FROM projects ORDER BY updated_at DESC").all()
+export function listProjects(ownerId?:string) {
+  const sql="SELECT id,title,created_at,updated_at,CAST(COALESCE(json_extract(payload,'$.step'),0) AS INTEGER) AS step,COALESCE(json_extract(payload,'$.projectStatus'),'Draft') AS project_status,CAST(COALESCE(json_extract(payload,'$.priority'),3) AS INTEGER) AS priority,COALESCE(json_extract(payload,'$.seriesId'),'') AS series_id,COALESCE(json_extract(payload,'$.channelId'),'') AS channel_id,COALESCE(json_extract(payload,'$.brandKitId'),'') AS brand_kit_id FROM projects"+(ownerId===undefined?"":" WHERE owner_id=?")+" ORDER BY updated_at DESC";
+  return (ownerId===undefined?database().prepare(sql).all():database().prepare(sql).all(ownerId))
     .map((row) => ({
       id: String(row.id), title: String(row.title),
       createdAt: String(row.created_at), updatedAt: String(row.updated_at),
@@ -99,14 +110,18 @@ export function getProject(id: string): ProjectRow | null {
   const row = database().prepare("SELECT * FROM projects WHERE id = ?").get(id);
   return row ? parseRow(row as Record<string, unknown>) : null;
 }
+export function getOwnedProject(ownerId:string,id:string):ProjectRow|null{
+  const row=database().prepare("SELECT * FROM projects WHERE id=? AND owner_id=?").get(id,ownerId);
+  return row?parseRow(row as Record<string,unknown>):null;
+}
 
-export function createProject(title: string, payload: ProjectPayload = {}) {
+export function createProject(title: string, payload: ProjectPayload = {}, ownerId:string|null=null) {
   const cleanTitle = title.trim();
   if (!cleanTitle || cleanTitle.length > 120) throw new Error("Project title must contain 1–120 characters.");
   const now = new Date().toISOString();
   const id = randomUUID();
-  database().prepare("INSERT INTO projects(id,title,created_at,updated_at,payload) VALUES(?,?,?,?,?)")
-    .run(id, cleanTitle, now, now, JSON.stringify(payload));
+  database().prepare("INSERT INTO projects(id,title,created_at,updated_at,payload,owner_id) VALUES(?,?,?,?,?,?)")
+    .run(id, cleanTitle, now, now, JSON.stringify(payload),ownerId);
   return getProject(id)!;
 }
 
@@ -117,19 +132,31 @@ export function updateProject(id: string, values: { title?: string; payload?: Pr
   if (!title || title.length > 120) throw new Error("Project title must contain 1–120 characters.");
   const payload = values.payload === undefined ? current.payload : values.payload;
   database().prepare("UPDATE projects SET title=?,payload=?,updated_at=? WHERE id=?")
-    .run(title, JSON.stringify(payload), new Date().toISOString(), id);
+    .run(title, JSON.stringify(payload), nextUpdatedAt(current.updatedAt), id);
+  if(current.ownerId)invalidateChangedProjectApprovals(current.ownerId,id,current.payload,payload);
   return getProject(id);
 }
+export function updateOwnedProject(ownerId:string,id:string,values:{title?:string;payload?:ProjectPayload}){
+  const current=getOwnedProject(ownerId,id);if(!current)return null;
+  const title=values.title===undefined?current.title:values.title.trim();if(!title||title.length>120)throw new Error("Project title must contain 1–120 characters.");
+  const payload=values.payload===undefined?current.payload:values.payload;
+  const result=database().prepare("UPDATE projects SET title=?,payload=?,updated_at=? WHERE id=? AND owner_id=?").run(title,JSON.stringify(payload),nextUpdatedAt(current.updatedAt),id,ownerId);
+  if(!Number(result.changes))return null;invalidateChangedProjectApprovals(ownerId,id,current.payload,payload);return getOwnedProject(ownerId,id);
+}
+function nextUpdatedAt(previous:string){const now=Date.now(),last=Date.parse(previous);return new Date(Math.max(now,Number.isFinite(last)?last+1:now)).toISOString();}
 
 export function deleteProject(id: string) {
   return Number(database().prepare("DELETE FROM projects WHERE id=?").run(id).changes) > 0;
 }
+export function deleteOwnedProject(ownerId:string,id:string){return Number(database().prepare("DELETE FROM projects WHERE id=? AND owner_id=?").run(id,ownerId).changes)>0;}
 
 export function validatePayload(payload: unknown): payload is ProjectPayload {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return false;
   const record = payload as ProjectPayload;
   // Older projects omit timeline; when present, accept only the bounded v1 schema.
-  if (record.timeline !== undefined && !validTimeline(record.timeline)) return false;
+  // New drafts serialize timeline:null until the voice stage creates one.
+  // Accept that empty draft state, while validating every populated timeline.
+  if (record.timeline !== undefined && record.timeline !== null && !validTimeline(record.timeline)) return false;
   if (record.projectStatus !== undefined && !["Draft", "In Progress", "Awaiting Approval", "Completed", "Archived"].includes(String(record.projectStatus))) return false;
   if (record.priority !== undefined && (!Number.isInteger(record.priority) || Number(record.priority) < 1 || Number(record.priority) > 5)) return false;
   for (const key of ["characterIds", "locationIds"]) {

@@ -2,7 +2,7 @@ import "server-only";
 import { getSelectedVoiceAccountSecret } from "@/lib/voice-vault";
 import { estimateVoiceCostMyr, estimateVoiceCredits, type VoiceSettings } from "@/lib/voice-workflow";
 
-export type VoiceGenerationInput = { id: string; text: string; voiceId: string; settings: VoiceSettings; spendingLimitMyr: number };
+export type VoiceGenerationInput = { ownerId: string; id: string; text: string; voiceId: string; settings: VoiceSettings; spendingLimitMyr: number };
 export type VoiceGenerationResult = { id: string; audioDataUrl: string; durationSeconds: number | null; provider: "simulated" | "elevenlabs"; accountId: string; characters: number; credits: number | null; estimatedCostMyr: number | null; actualCostMyr: number | null };
 export interface VoiceProvider { readonly id: "simulated" | "elevenlabs"; readonly capabilities: { speed: boolean; stability: boolean; similarity: boolean; emotion: boolean; styleExaggeration: boolean; pronunciation: boolean; multilingual: boolean }; generate(input: VoiceGenerationInput): Promise<VoiceGenerationResult> }
 function simulatedTone(id: string, durationSeconds: number) {
@@ -31,7 +31,7 @@ export class ElevenLabsVoiceProvider implements VoiceProvider {
     if (input.settings.speed < 0.7 || input.settings.speed > 1.2) throw new Error("The selected ElevenLabs model supports speed from 0.7 to 1.2.");
     if (input.settings.emotion !== "Neutral") throw new Error("This ElevenLabs adapter has no verified direct emotional-delivery control. Choose Neutral or use simulated audio.");
     if (input.settings.pronunciation.trim()) throw new Error("Free-text pronunciation notes are not sent to ElevenLabs because a verified pronunciation dictionary is not configured.");
-    const account = getSelectedVoiceAccountSecret();
+    const account = getSelectedVoiceAccountSecret(input.ownerId);
     if (!account) throw new Error("Select a securely stored ElevenLabs account first.");
     const creditRateText = process.env.CCAI_ELEVENLABS_CREDITS_PER_CHARACTER || "";
     const creditRate = creditRateText.trim() ? Number(creditRateText) : undefined;

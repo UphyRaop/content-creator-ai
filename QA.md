@@ -70,3 +70,44 @@ Stages 1–13 are present in the application. Phase-specific source/helper tests
 - **BLOCKED:** durable production hosting is not configured. Pages cannot run SQLite, server routes, background work, or FFmpeg.
 
 **Disposition:** Phase 11 audit and safe code fixes complete with PARTIAL PASS. Do not call CCAI production-ready or expose Node routes until the release blockers are resolved.
+
+## Production Readiness continuation — final local QA, 19 November 2026
+
+### Automated and HTTP API evidence
+- **PASS:** `npm test` (19 workflow/storage checks), `npx tsc --noEmit`, `git diff --check`, `npm run build`, and `npm run build:static`.
+- **PASS:** `scripts/test-auth-api.mjs` (session/bootstrap/same-origin/tenant isolation/content hashes/cascade/request bounds); `scripts/test-ai-routes.mjs` (saved source, disabled live providers and no-fetch pricing gates); `scripts/test-voice-vault-security.mjs` (data-preserving owner migration and account isolation); `scripts/test-p11-http.mjs` (77 route assertions); `scripts/test-ffmpeg-renderer.mjs` (real FFmpeg output and render gate/range/queue fixtures); post-production and publishing-kit fixtures.
+- **PASS:** Local HTTP UI setup, synthetic owner login, project save, brief approval, simulated script and script approval, scene breakdown, simulated unique images, all-scene approval, simulated audio and all-line approval, timeline construction/review, actual local render, post-production revision, thumbnail approval and export checklist. The test used a disposable SQLite database and synthetic content. Deployed preview localStorage and the private backup were not accessed.
+- **PASS:** Local FFmpeg produced a 1920×1080 H.264/AAC MP4, 62.1 seconds, 1,161,418 bytes. `ffprobe` verified streams, dimensions and duration. Protected render streaming returned HTTP 206 for bytes 0–1023; after export approval, download returned HTTP 200 and a valid `ftyp` MP4 signature. Post-production produced a separate completed MP4; the original render remained unchanged.
+- **PASS:** Browser console had no CCAI-origin JavaScript errors/warnings in the inspected runtime. Extension errors were excluded. Desktop screen tested at 1212×798.
+
+### Defects fixed during final verification
+- Accepted `timeline:null` for new draft projects while retaining schema checks for populated timelines.
+- Restored the missing scene-card renderer and image-queue processing flag; corrected the timeline adapter to use the existing scene-image resolver.
+- Reduced simulated Full HD image storage from PNG data URLs (about 27 MB for 15 images in the test) to JPEG at quality 0.78 (about 1.52 MB for the same 15 images). Dimensions and unique preview labels remain unchanged; renderer accepts the raster output.
+- Bulk scene/audio approval now saves the current project payload once before recording per-item server approvals, avoiding repeated multi-megabyte writes.
+- Timeline normalization passes the current scene image bytes and audio data URLs to the timeline builder.
+- Project and render validators tolerate only floating-point representation noise at adjacent clip boundaries; genuine overlaps remain rejected. Tests cover fifteen adjacent 4.4-second clips.
+- FFmpeg resolves scene image data from the stored data URL or latest saved image version, instead of reading the boolean image flag as media.
+
+### Security, deployment and limits
+- Source safety scan: no populated provider-key/token patterns or private-key blocks found. `.env.example` contains only blank secret variables, including `CCAI_BOOTSTRAP_TOKEN=`. Synthetic test credentials were confined to `/tmp` commands and were not committed. Provider switches stayed false; no external provider requests were sent.
+- Authentication/ownership protections and server-authoritative approvals are exercised in the API suites. GitHub Pages remains a static, browser-local simulation and cannot run SQLite, auth routes, background workers, or server FFmpeg. A persistent Node host has not been selected or deployed.
+- Tablet/mobile viewport interaction remains **NOT TESTED** because the available browser control exposes no viewport resizing/emulation. Responsive CSS is present; that source check is not a mobile runtime pass.
+- GitHub Pages reports `https_enforced:false`; HTTPS works, but HTTP does not redirect. Owner must enable **Settings → Pages → Enforce HTTPS**. No DNS or unrelated settings were changed.
+- Three old public commits contain personal author/committer email metadata. No history rewrite was authorized or performed; future commits continue with GitHub noreply identities.
+- Hosting options are researched in `docs/hosting-options.md`. No host/account/resource was created and no additional cost was incurred.
+- Cost RM0. Gemini, FLUX, ElevenLabs, and the RM20 API testing budget were not used.
+
+**Updated disposition:** local API security and the full desktop workflow are verified. The hosted preview still runs only in static simulation mode. Production readiness remains **BLOCKED** by absent persistent Node hosting and Pages HTTPS-enforcement setting; mobile/tablet runtime remains unverified and legacy public commit metadata remains unchanged.
+
+
+## Production readiness continuation — final regression rerun (19 November 2026)
+
+- **PASS:** `npm test` (19 project, phase-gate and workflow checks), `scripts/test-auth-api.mjs`, `scripts/test-ai-routes.mjs`, `scripts/test-voice-vault-security.mjs`, and `scripts/test-p11-http.mjs` (77/77 HTTP API assertions). These use isolated synthetic data; they do not contact a paid provider.
+- **PASS:** `scripts/test-ffmpeg-renderer.mjs`, `scripts/test-post-production.mjs`, `scripts/test-post-production-render.mjs` (actual local derived MP4 fixture and source preservation), and `scripts/test-publishing-kit.mjs`. A test-only resolver was corrected so the post-production fixture can import the project approval module under Node's strip-types runtime.
+- **PASS:** `npx tsc --noEmit`, `npm run build:static`, `npm run build` (Next.js 15.5.29; API routes compiled), and `git diff --check`. Node emitted only the non-fatal module-type warning in test execution.
+- **PASS:** final regex scan of workspace source, docs, and deployable static artifacts found no common API-key/token patterns, JWT-shaped values, cloud access key IDs, or private-key blocks. `.env.example` contains blank placeholders only. This scan does not erase or rewrite old Git identity metadata.
+- **PASS (isolated desktop E2E):** all 13 production stages completed on local Node/SQLite with synthetic owner/project data. Local FFmpeg produced and played the approved 1080p MP4; protected byte-range preview and approved export download worked; post-production kept the source render intact; thumbnail approval and export checklist completed. CCAI console errors/warnings were not observed. Desktop viewport was 1212×798.
+- **NOT TESTED:** mobile/tablet runtime. This browser-control environment has no viewport emulation. The hosted GitHub Pages data store and the existing seven browser-local preview projects were not modified by the isolated run.
+- **BLOCKED for production:** static Pages does not run SQLite/auth APIs/background jobs/FFmpeg, no persistent Node host is configured, and Pages “Enforce HTTPS” remains an owner action. Three older public commits retain personal author/committer emails; history was not rewritten.
+- **Cost:** RM0; no paid APIs or hosting and no use of the RM20 testing budget.

@@ -22,6 +22,9 @@ function database() {
     updated_at TEXT NOT NULL,
     PRIMARY KEY(collection,id)
   )`);
+  const columns=db.prepare("PRAGMA table_info(workspace_entities)").all() as Array<{name:string}>;
+  if(!columns.some(column=>column.name==="owner_id"))db.exec("ALTER TABLE workspace_entities ADD COLUMN owner_id TEXT");
+  db.exec("CREATE INDEX IF NOT EXISTS workspace_entities_owner_id_idx ON workspace_entities(owner_id)");
   globalStore.ccaiEntityDb = db;
   return db;
 }
@@ -47,25 +50,26 @@ export function validateEntity(value: unknown): value is Entity {
 function validCollection(collection: string): collection is EntityCollection {
   return (entityCollections as readonly string[]).includes(collection);
 }
-export function listEntities(collection: string): Entity[] {
+export function listEntities(collection: string,ownerId?:string): Entity[] {
   if (!validCollection(collection)) throw new Error("Unknown collection.");
-  return database().prepare("SELECT data FROM workspace_entities WHERE collection=? ORDER BY name COLLATE NOCASE").all(collection)
+  return (ownerId===undefined?database().prepare("SELECT data FROM workspace_entities WHERE collection=? ORDER BY name COLLATE NOCASE").all(collection):database().prepare("SELECT data FROM workspace_entities WHERE collection=? AND owner_id=? ORDER BY name COLLATE NOCASE").all(collection,ownerId))
     .map((row) => JSON.parse(String((row as { data: unknown }).data)) as Entity);
 }
-export function saveEntity(collection: string, value: unknown): Entity {
+export function saveEntity(collection: string, value: unknown,ownerId:string|null=null): Entity {
   if (!validCollection(collection) || !validateEntity(value)) throw new Error("Invalid library record.");
   const entity = value;
-  database().prepare("INSERT INTO workspace_entities(collection,id,name,data,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(collection,id) DO UPDATE SET name=excluded.name,data=excluded.data,updated_at=excluded.updated_at")
-    .run(collection, entity.id, entity.name.trim(), JSON.stringify(entity), new Date().toISOString());
+  const result=database().prepare("INSERT INTO workspace_entities(collection,id,name,data,updated_at,owner_id) VALUES(?,?,?,?,?,?) ON CONFLICT(collection,id) DO UPDATE SET name=excluded.name,data=excluded.data,updated_at=excluded.updated_at WHERE workspace_entities.owner_id IS excluded.owner_id")
+    .run(collection, entity.id, entity.name.trim(), JSON.stringify(entity), new Date().toISOString(),ownerId);
+  if(!Number(result.changes))throw new Error("Library record not found.");
   return entity;
 }
-export function deleteEntity(collection: string, id: string): boolean {
+export function deleteEntity(collection: string, id: string,ownerId?:string): boolean {
   if (!validCollection(collection)) throw new Error("Unknown collection.");
-  return Number(database().prepare("DELETE FROM workspace_entities WHERE collection=? AND id=?").run(collection, id).changes) > 0;
+  return Number((ownerId===undefined?database().prepare("DELETE FROM workspace_entities WHERE collection=? AND id=?").run(collection,id):database().prepare("DELETE FROM workspace_entities WHERE collection=? AND id=? AND owner_id=?").run(collection,id,ownerId)).changes) > 0;
 }
-export function duplicateEntity(collection: string, id: string): Entity | null {
-  const source = listEntities(collection).find((item) => item.id === id);
+export function duplicateEntity(collection: string, id: string,ownerId:string|null=null): Entity | null {
+  const source = listEntities(collection,ownerId===null?undefined:ownerId).find((item) => item.id === id);
   if (!source) return null;
   const copy = { ...source, id: randomUUID(), name: `Copy of ${source.name}` };
-  return saveEntity(collection, copy);
+  return saveEntity(collection, copy,ownerId);
 }

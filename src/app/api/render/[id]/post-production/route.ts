@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createPostProductionExportJob, type PostProductionAudioUpload } from "@/lib/ffmpeg-renderer";
+import { hasProjectApproval } from "@/lib/approval-store";
+import { crossOriginResponse, notFoundResponse, ownedRenderJob, requireRenderUser, sameOriginMutation } from "../../access";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 const MAX_BODY=32*1024*1024;
@@ -13,8 +15,14 @@ async function readBoundedBody(request:Request){
 }
 /** Creates a non-destructive derived MP4 from an existing completed render-job ID. */
 export async function POST(request:Request,{params}:Context){
+  const user=await requireRenderUser(request);if(user instanceof NextResponse)return user;
+  if(!sameOriginMutation(request))return crossOriginResponse();
+  const {id}=await params,source=ownedRenderJob(user.id,id);
+  if(!source)return notFoundResponse();
+  if(source.job.status!=="completed")return NextResponse.json({error:"The source render must be complete."},{status:409,headers:{"cache-control":"no-store"}});
+  if(!hasProjectApproval(user.id,source.project.id,"timeline"))return NextResponse.json({error:"The current timeline approval is stale."},{status:409,headers:{"cache-control":"no-store"}});
   try{
-    const {id}=await params,body=JSON.parse(await readBoundedBody(request)) as Record<string,unknown>;
+    const body=JSON.parse(await readBoundedBody(request)) as Record<string,unknown>;
     if(typeof body.parentRenderVersion!=="string"||typeof body.revisionId!=="string"||!Array.isArray(body.audioAssets))return NextResponse.json({error:"Parent version, revision ID, and audio assets are required."},{status:400});
     const job=await createPostProductionExportJob({sourceRenderJobId:id,parentRenderVersion:body.parentRenderVersion,revisionId:body.revisionId,audioAssets:body.audioAssets as PostProductionAudioUpload[]});
     return NextResponse.json({job},{status:202,headers:{"cache-control":"no-store"}});
