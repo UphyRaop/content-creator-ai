@@ -56,11 +56,11 @@
 - Before future live batch generation, the server estimates aggregate batch credits and MYR cost and compares that amount against the saved project limit. Unknown rates or over-limit batches are rejected before contacting the provider. Phase 6 verification is recorded in `ROADMAP.md`; the RM20 budget remains untouched.
 
 ## Development boundary
-- Phases 1–6 are complete as a simulated prototype. Phase 7 requires separate user approval.
+- Phases 1–6 are complete as a simulated prototype. The user authorized Phases 7–11 for autonomous sequential development on 19 November 2026.
 - The GitHub Pages preview uses local simulation. Live Gemini calls are disabled by default and require separate explicit approval; no credential has been configured or used.
 - Brief/script approval is required before downstream stages. Changes to the approved brief or script clear approval and downstream state. Script versions are stored with the project payload.
 - Reference links are not fetched. Users can paste transcript/reference excerpts for context; inaccessible content is described gracefully.
-- No real AI, image, voice, or FFmpeg rendering integration is active. All provider/media responses remain simulated.
+- No live AI, image, or voice provider call is authorized. Phase 8 adds real local/server FFmpeg rendering, while GitHub Pages continues to simulate rendering. No rendering service is configured in production.
 
 
 ## Phase 7–11 authorization (19 November 2026, Malaysia time)
@@ -68,3 +68,10 @@
 - Keep RM20 testing budget untouched. No paid APIs, subscriptions, hosting, or external providers. Simulations must be labeled.
 - Preserve the existing SQLite backend, browser-local Pages preview, public main, and private backup. Do not rewrite Git history or force-push.
 - Each phase must pass its appropriate QA and deployment checkpoint before the next phase; Pages cannot run the Node/SQLite API or server-side FFmpeg.
+
+## Phase 8 technical decisions
+- Render locally/server-side with the system FFmpeg executable plus libx264 and ffprobe; do not add a hosted render provider or dependency. Use 1080p H.264/AAC MP4, 9:16 or 16:9, at 30 or 60 FPS.
+- Run one FFmpeg render at a time with at most five queued jobs. Jobs, status history and temp outputs are process-local and retained for up to one hour; persistent render jobs require a single-process host with durable storage or a future database-backed queue.
+- Enforce approved script, images and every saved approved voice segment; each voice segment must be represented exactly once in the timeline manifest. Captions and clips must fit inside the declared timeline duration. Preserve absolute scene/audio/caption timing and gaps.
+- GitHub Pages stays simulation-only and never calls the Node render routes. No real MP4 is claimed or produced on the preview site.
+- Do not introduce production hosting without separate approval. Pages HTTPS responds, but GitHub reports enforcement is disabled; HTTP is not redirected. The connected GitHub tools cannot update Pages settings, and the current browser session is signed out.

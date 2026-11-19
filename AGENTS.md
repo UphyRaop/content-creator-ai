@@ -48,3 +48,21 @@ Use the 11 approved development phases in `ROADMAP.md`: Application Foundation; 
 
 ## Development checks
 Use Node.js 24 or newer. Run `npm ci`, `npm test`, `npm run build`, and `npm run build:static` as relevant. Keep credentials and personal information out of source, public artifacts, and logs.
+
+## Autonomous development team
+- `CCAI-01-LEAD` — project manager, architect, integrator, reviewer, and direct contact for the user.
+- `CCAI-02-UIUX` — responsive frontend, navigation, accessibility, themes, and interaction states.
+- `CCAI-03-BACKEND` — APIs, SQLite, workflow logic, validation, persistence, and server security.
+- `CCAI-04-AI` — provider adapters and content-generation workflow; no live generation or paid calls without approval.
+- `CCAI-05-QA` — independent automated/browser QA, regression, approval gates, and issue reports.
+- `CCAI-06-DEVOPS` — GitHub, CI/CD, Pages, security, deployment, rollback, and operational documentation.
+- The team has at most six agents including the lead. Activate only roles required for the current phase and prefer non-overlapping file assignments.
+- Preferred agent configuration is GPT-6 Luna, medium reasoning, fast mode off wherever the interface supports configuration. Report unsupported or undisclosed settings plainly; never claim a configuration that was not actually applied.
+- Every assignment records role label, task ID, objective, project context, files/components, dependencies, acceptance criteria, deliverables, status, tests, and blockers in `TASKS.md`.
+- Agents report their label, status, files, implementation, checks, issues, and blockers. QA reviews independently and returns failed work for correction.
+- Complete phases sequentially. Require QA evidence, regression checks, a production build, deployment verification, and documentation before moving to the next phase. Browser testing limitations must be recorded, never represented as a pass.
+
+## Git and deployment safeguards
+- Commit only verified changes to `main` using the GitHub noreply identity. Do not rewrite history, force-push, delete the private backup, expose credentials, change repository visibility, or introduce paid services without explicit approval.
+- GitHub Pages is static. It cannot run SQLite persistence, background workers, private API-key vaults, or server-side FFmpeg. Label preview simulations accurately and keep server functionality in the Next.js source for a separately approved persistent host.
+- Maintain `ROADMAP.md`, `DECISIONS.md`, `REVISIONS.md`, `TASKS.md`, `QA.md`, `DEPLOYMENTS.md`, and `HANDOVER.md` as the durable project record. Reuse equivalent documentation if it already exists.

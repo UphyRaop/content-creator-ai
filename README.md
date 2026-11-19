@@ -1,6 +1,6 @@
 # Content Creator AI (CCAI)
 
-CCAI is an AI-assisted video creation workspace with a project dashboard and an approval-gated 13-stage production prototype. Phases 1–6 are implemented for the simulated preview. No paid API calls are made.
+CCAI is an AI-assisted video creation workspace with a project dashboard and an approval-gated 13-stage production prototype. Phases 1–7 are implemented in the simulated preview; Phase 8 adds a local/server FFmpeg render API. No paid API calls are made.
 
 ## Preview
 
@@ -45,7 +45,7 @@ The image studio builds scene plans only from approved scripts and provides edit
 - [Roadmap and progress](ROADMAP.md)
 - [Approved decisions](DECISIONS.md)
 
-Do not add real provider credentials or make paid API calls. Phase 7 requires the user’s approval.
+Do not add real provider credentials or make paid API calls. Phases 7–11 are authorized for sequential development; retain all content approval gates.
 
 
 ## Phase 4 project management
@@ -71,6 +71,12 @@ The ElevenLabs adapter remains disabled. Unknown credits/MYR rates block live ge
 
 Phase 6 automated checks and desktop preview QA passed on 19 November 2026. GitHub Pages deployed commit `5dd708e35357311b4a93969f475eeea36cf86b01`. The current browser tool does not expose mobile viewport emulation. See [ROADMAP.md](ROADMAP.md) for evidence and limits.
 
+## Phase 8 video rendering
+
+The Node.js source includes an FFmpeg renderer and `/api/render` job routes. It renders 1080p MP4 at 30/60 FPS in 16:9 or 9:16, with supported still-image motion, transitions, estimated captions, narration and dialogue. It enforces script/image/voice approval and the saved timeline manifest, and supports job progress, bounded queueing, cancel/retry, streamed preview and download. Run on a Node.js single-process host with FFmpeg/libx264, ffprobe, temporary disk and SQLite storage. Job history and outputs are process-local and expire after one hour.
+
+GitHub Pages cannot run Node.js APIs or FFmpeg. Its render screen remains an RM0 simulation and never creates an MP4. The production preview does not have a Node render host configured. See the Phase 8 QA matrix in [docs/phase8-qa-plan.md](docs/phase8-qa-plan.md) and evidence in [ROADMAP.md](ROADMAP.md).
+
 
 ## Development progress
-Phases 1–6 are completed as a no-cost simulated preview with server-only provider boundaries. Phases 7–11 are authorized and in progress; see [ROADMAP.md](ROADMAP.md) and [TASKS.md](TASKS.md). GitHub Pages is static and does not execute the SQLite API or FFmpeg renderer. No real paid AI or rendering service is configured.
+Phases 1–7 are completed as a no-cost preview with server-only provider boundaries. Phase 8 implementation and QA are complete; repository sync and Pages deployment are pending. See [ROADMAP.md](ROADMAP.md), [TASKS.md](TASKS.md), and [docs/phase8-qa-plan.md](docs/phase8-qa-plan.md). GitHub Pages is static and does not execute the SQLite API or FFmpeg renderer. The Next.js render API requires a Node.js host with FFmpeg/libx264 and writable temporary storage; no such production host is configured. The live Pages preview continues to simulate rendering and never claims to produce an MP4.
