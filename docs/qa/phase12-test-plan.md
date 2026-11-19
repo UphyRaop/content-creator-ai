@@ -17,7 +17,8 @@ Independent acceptance run for allowance enforcement, concurrent reservations, p
 | Idempotency/review state | PASS | Identical reservation/event requests deduplicate; conflicting use is rejected; ambiguous reservations remain reserved beyond the review deadline rather than being silently released. |
 | Failed jobs, real retries, timeouts, cancellation | NOT TESTED | There is no active Cloud job worker and reservation admission is disabled. A future worker must implement bounded timeout/retry/idempotency and reconcile terminal state before release. |
 | Real provider metrics and billing accuracy | NOT TESTED | No billing account, API, metrics importer, invoice or resource was connected. Demo values are not Google telemetry. |
-| Responsive UI/browser/device runtime | NOT TESTED | Source assertions confirmed labels, no dashboard external calls, accessible table/status markup and responsive CSS breakpoints. No browser viewport/device run was available. |
+| Desktop preview smoke | PASS | Deployed custom-domain dashboard loaded in Chrome at 1168×735; simulated labels, resource-unavailable rows and the demo emergency-stop toggle were observed. This is not a full workflow test. |
+| Mobile/tablet runtime | NOT TESTED | Source assertions confirmed responsive CSS breakpoints. The available browser surface did not provide viewport/device emulation. |
 | Phase 1–11 regression/builds | PASS | Project/workflow, auth/approval, AI preflight, voice vault, render, post-production and publishing suites, TypeScript, static build and Next production build passed. |
 | Cost/resource usage | PASS | RM0. No GCP resource, paid API or external host was created or called. |
 

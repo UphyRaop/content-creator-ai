@@ -167,7 +167,7 @@ Integrated and synchronized P11 source/docs in noreply fast-forward commit `ba5a
 - Objective: integrate metering/reservation backend, simulated dashboard, verified free-tier research and independent QA; preserve existing CCAI functionality.
 - Constraints: RM0; no Google Cloud resources, billing activation, paid API, infrastructure deployment, private backup edits, or unverified metrics presented as actual.
 - Acceptance: persist allowances/usage/history; server-enforce shared reservations and 80/85/90 thresholds, fail-closed on stale/unavailable metrics and manual emergency stop; label preview simulation; regression/build passes; deploy Pages via fast-forward with noreply identity.
-- Status: implementation and regression work complete; static GitHub Pages sync/deploy verification is the final checkpoint. Production admission remains intentionally disabled (503) until trusted metrics and a durable worker exist.
+- Status: complete for Phase 12 preparation. Fast-forward commit `dd4c08340f6680e00809176f2d20982b18ba9f6c` uses GitHub noreply identity; Pages run `44563461113` succeeded; the dashboard was verified at the custom domain. Production admission remains intentionally disabled (503) until trusted metrics and a durable worker exist.
 
 ### CCAI-02-UIUX — CCAI-P12-UI-01
 - Objective: responsive Cloud Usage & Billing dashboard in the existing prototype.

@@ -49,3 +49,10 @@ GitHub Pages serves static files. It cannot run the SQLite API routes, persisten
 ## Phase 12 deployment boundary
 - Deployment is limited to the existing GitHub Pages static preview and its simulated usage dashboard. Do not create a GCP project, Cloud Run service/job, Cloud Billing export, logging sink, storage bucket or paid API activation.
 - Pages cannot run the persistent SQLite usage ledger, secure telemetry adapter, Cloud Run orchestration or true emergency stop. These remain server-side preparation only.
+
+## Phase 12 preview verification — 19 November 2026
+- Fast-forward commit `dd4c08340f6680e00809176f2d20982b18ba9f6c` (“Implement Phase 12 cloud usage protection”) reached `main`; both author and committer use `355911884+UphyRaop@users.noreply.github.com`.
+- GitHub Actions Pages run [`44563461113`](https://github.com/UphyRaop/content-creator-ai/actions/runs/44563461113) completed successfully. Checkout, install, static build, artifact upload and deploy steps passed.
+- `https://ccai.ur-project.biz/` loaded over HTTPS in Chrome. The desktop dashboard displayed “LIVE METRICS UNAVAILABLE,” demo-only RM costs, provisional 2 vCPU/4 GiB and 300-video planning assumptions, and unavailable resource meters. The simulated emergency-stop control changed the local preview status; it did not affect any real workload. CCAI page-origin console errors were not observed; only extension errors appeared.
+- Desktop dashboard smoke check ran at 1168×735. Mobile/tablet viewport testing remains unverified. This is the Pages-only UI; it does not execute SQLite, authenticated API routes, telemetry import, or Cloud Run jobs.
+- No Google Cloud resource, billing configuration, API, hosting subscription or charge was created. Cost RM0; RM20 remains untouched. The private backup repository was not changed.
