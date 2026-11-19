@@ -31,7 +31,7 @@ Approval gates are mandatory: no script before brief approval; no scene breakdow
 8. **Video Rendering Engine** — implementation, independent QA, and GitHub Pages deployment complete. A local/server Node/FFmpeg renderer produces H.264/AAC MP4 at 1080p, portrait or landscape, 30 or 60 FPS. GitHub Pages remains an explicit simulation; it cannot execute this renderer.
 9. **Post-Production Studio** — complete and deployed. Node mode creates derived FFmpeg MP4s from uploaded audio while preserving the parent render; Pages records a simulation only.
 10. **Thumbnail and Publishing Kit** — implementation, independent automated QA, and GitHub Pages deployment complete. Browser interaction remains partially unverified.
-11. **Final Testing and Deployment** — authorized; begins after Phase 10 verification records are deployed.
+11. **Final Testing and Deployment** — audit and automated fixes complete; the static preview remains deployed. Production release is blocked pending server API authentication, owner HTTPS enforcement, and resolution of legacy public-history personal email metadata. Desktop/mobile post-change browser testing was not available.
 
 ## Current authorization
 - On 19 November 2026 (Malaysia time), the user authorized autonomous completion of Phases 7–11 under the attached multi-agent protocol. Continue phases sequentially without requesting inter-phase approval.
@@ -126,3 +126,12 @@ The public repository contains three older commits whose author/committer metada
 - Desktop live-preview QA confirmed all 15 approved scene images unlock voice. After explicit confirmation, the simulated batch generated 15 labelled tones (869 characters, 0 credits, RM0). Approving all and then unlocking/rejecting one segment allowed regeneration of only that 53-character line; the other 14 approved segments stayed locked. The scene displayed measured audio duration and the timeline remained locked until the rejected line is re-approved.
 - Pages run `44475699762` deployed commit `5dd708e35357311b4a93969f475eeea36cf86b01` successfully at `https://ccai.ur-project.biz/` over HTTPS. Commit author and committer use the GitHub noreply identity. Console review found no CCAI page-origin errors; reported errors came from a browser extension.
 - No provider credentials were added. Scan of 41 repository files found no provider-key patterns, private keys, credential assignments, or personal email addresses. No live API or balance request was sent. Mobile viewport emulation was unavailable, so mobile behavior is not marked tested. GitHub Pages is static and cannot run SQLite; secure key/account management and server persistence remain available only for a future Node.js host. Cost remains RM0; RM20 testing budget is untouched.
+
+
+## Phase 11 final audit — 19 November 2026 (Malaysia time)
+- Automated regression and production builds passed after adding saved-project gates for script/image generation, Gemini preflight cost ceilings, and server-side render-manifest approval checks. The post-production render fixture was updated to seed its approved source manifest.
+- UI fixes add keyboard skip/focus support, clear disabled workflow steps, more legible small-screen navigation, and explicit timeline review plus render confirmation. Timeline mutations invalidate render review; a notes-only Save preserves a still-matching approval.
+- Independent QA: PARTIAL PASS. Unit/helper/renderer/build checks pass; HTTP handler integration, browser-based mobile/tablet use, and full end-to-end UI were not tested. Static Pages remains a simulation; no real AI calls or video exports occur on the preview.
+- Security: no credentials found in source files in the independent repository scan. Repository security is not fully PASS: old public commits disclose personal author/committer email metadata; GitHub Pages `https_enforced` is false; project CRUD APIs and entities remain unauthenticated.
+- Do not deploy the Node APIs to an internet-accessible server until authentication and project ownership are enforced for reads, updates, approvals, generation, render, and library endpoints. No production Node host is configured.
+- Costs: RM0; Gemini, FLUX, ElevenLabs, and the RM20 test budget were not used.

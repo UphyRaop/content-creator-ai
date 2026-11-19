@@ -92,3 +92,23 @@ Record phase completion, repository commit, Actions run, preview verification, a
 - Objective: review safe repository sync, workflow, Pages/Node capability boundary, secret posture, deployment and rollback checks.
 - Files: read-only review.
 - Status: complete; workflow and safe fast-forward sync verified. Findings: Pages workflow builds/deploys `dist`, while no Node FFmpeg host exists. GitHub Pages API says `https_enforced:false`; GitHub browser settings are signed out, and the GitHub connector exposes no Pages update action. The HTTPS URL works but HTTP also serves; manual enforcement is still required.
+
+
+## Phase 11 final assignments
+### CCAI-02-UIUX — P11-UI-FIX-02/03 — complete
+Added skip-to-main, visible focus, accessible locked-step indication, tablet/mobile legibility, normalized timeline hash approval, render confirmation, and correct downstream invalidation. Saving notes alone no longer clears a still-valid approval. Static build and inline JavaScript syntax passed; browser runtime testing not done. Files: `prototype.html`, `dist/index.html`.
+
+### CCAI-03-BACKEND — P11-BE-FIX-02/03 — complete
+Renderer requires a persisted approved timeline with matching canonical SHA-256 manifest. Updated the post-production render fixture to seed its approved source timeline. FFmpeg and post-production fixtures, TypeScript, and diff checks passed. Files: `src/lib/ffmpeg-renderer.ts`, `scripts/test-ffmpeg-renderer.mjs`, `scripts/test-post-production-render.mjs`.
+
+### CCAI-04-AI — P11-AI-FIX-02 — complete
+Script/image routes derive generation requests from saved SQLite project payloads; Gemini preflight requires prices, request cap, and image price when applicable before fetch. Helper tests show no fetch for blocked requests. No provider calls. Project APIs remain unauthenticated, a release blocker. Files: AI routes/provider, `src/lib/ai-generation-gates.ts`, `src/lib/gemini-cost-preflight.ts`, `scripts/test-ai-routes.mjs`, `.env.example`.
+
+### CCAI-05-QA — P11-FINAL-QA-02 — complete, PARTIAL PASS
+Full automated suites/builds/typecheck/static checks passed after test fixture correction. Route HTTP integration, browser/mobile post-change testing remain untested. Identified unauthenticated project APIs as release-blocking because saved approvals can be forged.
+
+### CCAI-06-DEVOPS — P11-SEC-DEPLOY-01 — complete, FAIL for release posture
+Source credential scan passed; legacy author/committer personal email metadata in public Git history and Pages HTTPS enforcement disabled; backend host absent. Backup remains private and untouched.
+
+### CCAI-01-LEAD — P11-INT-01 — implementation and QA complete; deployment verification pending
+Integrated approved fixes and final records. Synchronize with a noreply fast-forward commit, verify Pages workflow and custom-domain static preview. No Phase 12 exists in the approved roadmap.

@@ -68,3 +68,7 @@ Use Node.js 24 or newer. Run `npm ci`, `npm test`, `npm run build`, and `npm run
 - Commit only verified changes to `main` using the GitHub noreply identity. Do not rewrite history, force-push, delete the private backup, expose credentials, change repository visibility, or introduce paid services without explicit approval.
 - GitHub Pages is static. It cannot run SQLite persistence, background workers, private API-key vaults, or server-side FFmpeg. Label preview simulations accurately and keep server functionality in the Next.js source for a separately approved persistent host.
 - Maintain `ROADMAP.md`, `DECISIONS.md`, `REVISIONS.md`, `TASKS.md`, `QA.md`, `DEPLOYMENTS.md`, and `HANDOVER.md` as the durable project record. Reuse equivalent documentation if it already exists.
+
+
+## Phase 11 audit status
+Phases 7–11 were authorized together by the user. Phase 11 automated fixes and audits may be completed without inter-phase approval, but do not declare production readiness while API authentication/ownership, persistent Node hosting, GitHub Pages HTTPS enforcement, and public history email metadata remain unresolved. Never rewrite history or use paid services without separate approval. Model, reasoning and Fast Mode settings are not exposed to this environment; report them as unavailable rather than asserting a configuration.

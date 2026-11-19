@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { registerHooks } from "node:module";
 
-registerHooks({resolve(specifier,context,nextResolve){if(specifier==="./project-store"&&context.parentURL?.endsWith("/src/lib/ffmpeg-renderer.ts"))return nextResolve("./project-store.ts",context);return nextResolve(specifier,context);}});
+registerHooks({resolve(specifier,context,nextResolve){if(context.parentURL?.endsWith("/src/lib/ffmpeg-renderer.ts")&&["./project-store","./post-production"].includes(specifier))return nextResolve(`${specifier}.ts`,context);return nextResolve(specifier,context);}});
 const root=mkdtempSync(join(tmpdir(),"ccai-render-test-"));process.env.CCAI_DATABASE_PATH=join(root,"projects.sqlite");
 try{
   const store=await import("../src/lib/project-store.ts"),renderer=await import("../src/lib/ffmpeg-renderer.ts");
@@ -13,6 +13,10 @@ try{
   for(const args of [["-y","-f","lavfi","-i","color=c=navy:s=320x240:d=0.1","-frames:v","1",imageFile],["-y","-f","lavfi","-i","sine=frequency=440:duration=0.8","-ar","44100","-ac","1",audioFile]])assert.equal(spawnSync("ffmpeg",args,{stdio:"ignore"}).status,0,"fixture FFmpeg invocation should succeed");
   const audio=`data:audio/wav;base64,${readFileSync(audioFile).toString("base64")}`,image=`data:image/png;base64,${readFileSync(imageFile).toString("base64")}`;
   const project=store.createProject("Render fixture",{scriptApproved:true,scenes:[{id:"scene-1",approved:true,image,voiceSegments:[{id:"voice-1",approved:true,status:"completed",durationSeconds:.8,dataUrl:audio}]}]});
+  const setTimelineApproval=(projectId,approvedManifest,approved=true,manifestHash=renderer.hashRenderManifest(approvedManifest))=>{
+    const current=store.getProject(projectId);
+    store.updateProject(projectId,{payload:{...current.payload,timeline:{version:1,timeUnit:"seconds",tracks:approvedManifest.tracks,estimatedDuration:approvedManifest.duration,actualAudioDuration:null,renderApproval:{approved,manifestHash}}}});
+  };
   const transitions=["cut","crossfade","wipe","slide","zoom","fade-black"],starts=[0,.9,1.3,1.7,2.1,2.5];
   const images=transitions.map((transition,i)=>({id:`image-${i}`,sourceRef:"image:scene-1",start:starts[i],duration:.4,sourceOffset:0,timing:"estimated",motion:i%2?"pan-right":"zoom-in",transitionIn:transition,transitionDuration:.2}));
   const manifest={version:1,timeUnit:"seconds",duration:2.9,tracks:[
@@ -22,17 +26,30 @@ try{
     {id:"dialogue",kind:"dialogue",clips:[]},
   ]};
   assert.equal(renderer.validateRenderManifest(manifest),true,"every accepted transition should validate");
+  assert.throws(()=>renderer.createRenderJob({projectId:project.id,manifest,format:"landscape",fps:30}),/Approve this exact timeline manifest/,"legacy project without a saved timeline approval cannot render");
+  setTimelineApproval(project.id,manifest,false);
+  assert.throws(()=>renderer.createRenderJob({projectId:project.id,manifest,format:"landscape",fps:30}),/Approve this exact timeline manifest/,"an unapproved timeline cannot render");
+  setTimelineApproval(project.id,manifest,true,"0".repeat(64));
+  assert.throws(()=>renderer.createRenderJob({projectId:project.id,manifest,format:"landscape",fps:30}),/Approve this exact timeline manifest/,"a different approved manifest hash cannot render");
+  const reordered={...manifest,tracks:manifest.tracks.map(track=>({clips:track.clips.map(clip=>Object.fromEntries(Object.entries(clip).reverse())),kind:track.kind,id:track.id})).reverse()};
+  assert.notEqual(renderer.hashRenderManifest(reordered),renderer.hashRenderManifest(manifest),"track order remains meaningful in canonical approval hashes");
+  const keyReordered={...manifest,tracks:manifest.tracks.map(track=>({clips:track.clips.map(clip=>Object.fromEntries(Object.entries(clip).reverse())),kind:track.kind,id:track.id}))};
+  assert.equal(renderer.hashRenderManifest(keyReordered),renderer.hashRenderManifest(manifest),"object key order does not change the canonical approval hash");
   const outside=(kind,clip)=>({version:1,timeUnit:"seconds",duration:1,tracks:[{id:"images",kind:"image",clips:[{id:"image-ok",sourceRef:"image:scene-1",start:0,duration:.5,sourceOffset:0,timing:"estimated",motion:"none",transitionIn:"cut"}]},{id:"speech",kind:"narration",clips:[]},{id:"captions",kind:"caption",clips:[]},{id:"target",kind,clips:[clip]}]});
   assert.equal(renderer.validateRenderManifest(outside("image",{id:"image-late",sourceRef:"image:scene-1",start:.9,duration:.2,sourceOffset:0,timing:"estimated",motion:"none",transitionIn:"cut"})),false,"image end cannot exceed manifest duration");
   assert.equal(renderer.validateRenderManifest(outside("narration",{id:"audio-late",sourceRef:"voice:voice-1",start:.9,duration:.2,sourceOffset:0,timing:"estimated",motion:"none",transitionIn:"cut"})),false,"audio end cannot exceed manifest duration");
   assert.equal(renderer.validateRenderManifest(outside("caption",{id:"caption-late",sourceRef:"caption:late",start:.9,duration:.2,sourceOffset:0,text:"late",timing:"estimated",motion:"none",transitionIn:"cut"})),false,"caption end cannot exceed manifest duration");
   const omittedSpeech=structuredClone(manifest);omittedSpeech.tracks.find(track=>track.kind==="narration").clips=[];
+  setTimelineApproval(project.id,omittedSpeech);
   assert.throws(()=>renderer.createRenderJob({projectId:project.id,manifest:omittedSpeech,format:"landscape",fps:30}),/every approved project voice segment exactly once/,"a manifest cannot silently omit approved project speech");
   const mismatchedSpeech=structuredClone(manifest);mismatchedSpeech.tracks.find(track=>track.kind==="narration").clips[0].sourceRef="voice:unknown";
+  setTimelineApproval(project.id,mismatchedSpeech);
   assert.throws(()=>renderer.createRenderJob({projectId:project.id,manifest:mismatchedSpeech,format:"landscape",fps:30}),/not approved and complete/,"a manifest cannot substitute unrelated speech media");
   const incomplete=store.createProject("Incomplete voice fixture",{scriptApproved:true,scenes:[{id:"scene-1",approved:true,image,voiceSegments:[{id:"voice-1",approved:false,status:"completed",durationSeconds:.8,dataUrl:audio}]}]});
+  setTimelineApproval(incomplete.id,manifest);
   assert.throws(()=>renderer.createRenderJob({projectId:incomplete.id,manifest,format:"landscape",fps:30}),/Every scene voice segment/,"unapproved audio must not bypass the render approval gate");
 
+  setTimelineApproval(project.id,manifest);
   const job=renderer.createRenderJob({projectId:project.id,manifest,format:"landscape",fps:30});
   const queued=[];for(let i=0;i<5;i++){const next=renderer.createRenderJob({projectId:project.id,manifest,format:"landscape",fps:30});queued.push(next);assert.equal(next.status,"queued");}
   assert.throws(()=>renderer.createRenderJob({projectId:project.id,manifest,format:"landscape",fps:30}),/queue is full/);
@@ -50,17 +67,20 @@ try{
   const smallRange=renderer.parseRenderByteRange("bytes=0-99",output.length);assert.deepEqual(smallRange,{valid:true,partial:true,start:0,end:99});
   assert.equal(renderer.parseRenderByteRange("bytes=999999999-",output.length).valid,false);assert.equal(renderer.parseRenderByteRange("bytes=-100",output.length).end,output.length-1);
   const portraitManifest={version:1,timeUnit:"seconds",duration:.4,tracks:[{id:"images",kind:"image",clips:[{id:"portrait-image",sourceRef:"image:scene-1",start:0,duration:.4,sourceOffset:0,timing:"estimated",motion:"none",transitionIn:"cut"}]},{id:"captions",kind:"caption",clips:[]},{id:"voice",kind:"narration",clips:[{id:"portrait-voice",sourceRef:"voice:voice-1",start:0,duration:.4,sourceOffset:0,timing:"estimated",motion:"none",transitionIn:"cut"}]},{id:"dialogue",kind:"dialogue",clips:[]}]};
+  setTimelineApproval(project.id,portraitManifest);
   const portraitJob=renderer.createRenderJob({projectId:project.id,manifest:portraitManifest,format:"portrait",fps:60});let portraitState;
   do{await new Promise(resolve=>setTimeout(resolve,250));portraitState=renderer.getRenderJob(portraitJob.id);if(["completed","failed","cancelled"].includes(portraitState.status))break;}while(Date.now()<deadline);
   assert.equal(portraitState.status,"completed",portraitState.error||"portrait 60fps render should complete");const portrait=join(root,"portrait.mp4");writeFileSync(portrait,await renderer.readRenderOutput(portraitJob.id));
   const portraitProbe=spawnSync("ffprobe",["-v","error","-select_streams","v:0","-show_entries","stream=width,height,avg_frame_rate","-of","default=noprint_wrappers=1",portrait],{encoding:"utf8"});assert.equal(portraitProbe.status,0,portraitProbe.stderr);assert.match(portraitProbe.stdout,/width=1080/);assert.match(portraitProbe.stdout,/height=1920/);assert.match(portraitProbe.stdout,/avg_frame_rate=60\/1/);
   const longManifest={version:1,timeUnit:"seconds",duration:20,tracks:[{id:"images",kind:"image",clips:[{id:"long-image",sourceRef:"image:scene-1",start:0,duration:20,sourceOffset:0,timing:"estimated",motion:"zoom-in",transitionIn:"cut"}]},{id:"captions",kind:"caption",clips:[]},{id:"voice",kind:"narration",clips:[{id:"long-voice",sourceRef:"voice:voice-1",start:0,duration:.3,sourceOffset:0,timing:"estimated",motion:"none",transitionIn:"cut"}]},{id:"dialogue",kind:"dialogue",clips:[]}]};
+  setTimelineApproval(project.id,longManifest);
   const active=renderer.createRenderJob({projectId:project.id,manifest:longManifest,format:"landscape",fps:30});let activeState;
   do{await new Promise(resolve=>setTimeout(resolve,10));activeState=renderer.getRenderJob(active.id);}while(activeState.status==="queued"&&Date.now()<deadline);
   assert.equal(activeState.status,"running");assert.equal(renderer.cancelRenderJob(active.id).status,"running");
   do{await new Promise(resolve=>setTimeout(resolve,50));activeState=renderer.getRenderJob(active.id);}while(["queued","running"].includes(activeState.status)&&Date.now()<deadline);
   assert.equal(activeState.status,"cancelled","active FFmpeg render should stop on cancellation");
   const badAudioProject=store.createProject("Retry fixture",{scriptApproved:true,scenes:[{id:"scene-1",approved:true,image,voiceSegments:[{id:"voice-1",approved:true,status:"completed",durationSeconds:.8,dataUrl:"data:audio/wav;base64,@"}]}]});
+  setTimelineApproval(badAudioProject.id,portraitManifest);
   const failed=renderer.createRenderJob({projectId:badAudioProject.id,manifest:portraitManifest,format:"portrait",fps:30});let failedState;
   do{await new Promise(resolve=>setTimeout(resolve,100));failedState=renderer.getRenderJob(failed.id);if(["completed","failed","cancelled"].includes(failedState.status))break;}while(Date.now()<deadline);
   assert.equal(failedState.status,"failed");const saved=store.getProject(badAudioProject.id);store.updateProject(badAudioProject.id,{payload:{...saved.payload,scenes:[{...saved.payload.scenes[0],voiceSegments:[{...saved.payload.scenes[0].voiceSegments[0],dataUrl:audio}]}]}});

@@ -1,5 +1,6 @@
 import "server-only";
 import { createSimulatedScript, estimateCostMyr, estimatedDurationSeconds, wordCount, type ScriptDraft, type ScriptRequest } from "@/lib/script-workflow";
+import { fetchGeminiWithCostPreflight } from "@/lib/gemini-cost-preflight";
 export type ProviderUsage = { provider: "simulated" | "gemini"; inputTokens: number; outputTokens: number; estimatedCostMyr: number | null };
 export type ScriptProvider = { readonly id: ProviderUsage["provider"]; generate(request: ScriptRequest): Promise<{ draft: ScriptDraft; usage: ProviderUsage }> };
 export class SimulatedScriptProvider implements ScriptProvider {
@@ -13,15 +14,22 @@ export class GeminiScriptProvider implements ScriptProvider {
     if(process.env.CCAI_ENABLE_LIVE_AI!=="true"||process.env.CCAI_LIVE_AI_APPROVED!=="true") throw new Error("Live AI is disabled. Use simulated generation or obtain separate approval before enabling API calls.");
     const key=process.env.GEMINI_API_KEY;if(!key)throw new Error("Gemini is not configured. Add the key to the server environment.");
     const model=process.env.GEMINI_MODEL||"gemini-2.5-flash";
-    const response=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{method:"POST",headers:{"content-type":"application/json","x-goog-api-key":key},body:JSON.stringify({systemInstruction:{parts:[{text:`Write a production-ready ${request.format} video script in ${request.language}, about ${request.durationMinutes} minutes. Visual style: ${request.visualStyle}. Return script text only and follow the approved brief.`}]},contents:[{role:"user",parts:[{text:JSON.stringify({idea:request.idea,brief:request.brief,referenceNotes:request.referenceNotes,referenceText:request.referenceText,referenceImages:(request.referenceImages||[]).map(({dataUrl,...metadata})=>metadata),referenceVideos:request.referenceVideos})},...(request.referenceImages||[]).filter(image=>image.dataUrl).map(image=>({inlineData:{mimeType:image.mimeType||image.dataUrl!.slice(5,image.dataUrl!.indexOf(";")),data:image.dataUrl!.slice(image.dataUrl!.indexOf(",")+1)}}))]}],generationConfig:{temperature:.7,maxOutputTokens:Math.min(8192,request.durationMinutes*1200)}}),cache:"no-store"});
+    const maxOutputTokens=Math.min(8192,request.durationMinutes*1200);
+    const apiBody={systemInstruction:{parts:[{text:`Write a production-ready ${request.format} video script in ${request.language}, about ${request.durationMinutes} minutes. Visual style: ${request.visualStyle}. Return script text only and follow the approved brief.`}]},contents:[{role:"user",parts:[{text:JSON.stringify({idea:request.idea,brief:request.brief,referenceNotes:request.referenceNotes,referenceText:request.referenceText,referenceImages:(request.referenceImages||[]).map(({dataUrl,...metadata})=>metadata),referenceVideos:request.referenceVideos})},...(request.referenceImages||[]).filter(image=>image.dataUrl).map(image=>({inlineData:{mimeType:image.mimeType||image.dataUrl!.slice(5,image.dataUrl!.indexOf(";")),data:image.dataUrl!.slice(image.dataUrl!.indexOf(",")+1)}}))]}],generationConfig:{temperature:.7,maxOutputTokens}};
+    const body=JSON.stringify(apiBody);
+    const referenceImageCount=(request.referenceImages||[]).length;
+    const {response}=await fetchGeminiWithCostPreflight(fetch,`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{method:"POST",headers:{"content-type":"application/json","x-goog-api-key":key},body,cache:"no-store"},new TextEncoder().encode(body).length,maxOutputTokens,referenceImageCount,process.env);
     if(!response.ok)throw new Error(`Gemini request failed (${response.status}). Check server configuration and retry.`);
     const result=await response.json() as {
       candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
       usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };
     };
     const text=result.candidates?.[0]?.content?.parts?.map(p=>p.text||"").join("").trim();if(!text)throw new Error("Gemini returned an empty script. Please try again.");
-    const inputTokens=result.usageMetadata?.promptTokenCount||0,outputTokens=result.usageMetadata?.candidatesTokenCount||0,inputRateRaw=process.env.GEMINI_INPUT_MYR_PER_MILLION,outputRateRaw=process.env.GEMINI_OUTPUT_MYR_PER_MILLION,inputRate=inputRateRaw?.trim()?Number(inputRateRaw):undefined,outputRate=outputRateRaw?.trim()?Number(outputRateRaw):undefined,words=wordCount(text,request.language);
-    const estimatedCostMyr=inputRate!==undefined&&outputRate!==undefined&&Number.isFinite(inputRate)&&Number.isFinite(outputRate)?estimateCostMyr(inputTokens,outputTokens,inputRate,outputRate):null;
+    const inputTokens=result.usageMetadata?.promptTokenCount||0,outputTokens=result.usageMetadata?.candidatesTokenCount||0,inputRate=Number(process.env.GEMINI_INPUT_MYR_PER_MILLION),outputRate=Number(process.env.GEMINI_OUTPUT_MYR_PER_MILLION),words=wordCount(text,request.language);
+    const imageRateRaw=process.env.GEMINI_REFERENCE_IMAGE_MYR_PER_IMAGE;
+    const imageRate=imageRateRaw?.trim()?Number(imageRateRaw):0;
+    const tokenCost=estimateCostMyr(inputTokens,outputTokens,inputRate,outputRate);
+    const estimatedCostMyr=tokenCost===null?null:tokenCost+referenceImageCount*imageRate;
     return {draft:{text,wordCount:words,estimatedSeconds:estimatedDurationSeconds(text,140,request.language),format:request.format},usage:{provider:this.id,inputTokens,outputTokens,estimatedCostMyr}};
   }
 }

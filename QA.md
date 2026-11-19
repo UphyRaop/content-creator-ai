@@ -43,3 +43,30 @@
 - Live deployment verification: `8efc7b73722f29b9ae851051edf9b6a910f4c496` deployed in Pages run `44511713809`. The custom-domain page loaded over HTTPS; a read-only DOM check confirmed the thumbnail and publishing UI markers. This proves the deployment artifact contains Phase 10 but does not replace interaction QA.
 - **Security FAIL for repository state:** the working-tree scan found no common credentials, private keys, source email addresses or social/API endpoints. The full public Git history still exposes personal author/committer email metadata in three old commits (six identity fields); history was not rewritten. GitHub Pages also has `https_enforced:false`, and HTTP returns 200. No history or Pages security setting was changed.
 - Cost RM0; no paid APIs/hosting or RM20 testing budget use.
+
+
+## Phase 11 final QA — 19 November 2026 (Malaysia time)
+
+### Automated QA results
+- **PASS:** `npm test` (project storage, 18 checks).
+- **PASS:** `node --experimental-strip-types scripts/test-ai-routes.mjs` — saved project input derivation; brief/script/image approval and scene ownership gates; Gemini unknown-rate, missing ceiling, unpriced-image and over-ceiling zero-fetch behavior. This tests pure gate/preflight helpers, not Next HTTP route handlers.
+- **PASS:** `node --experimental-strip-types scripts/test-ffmpeg-renderer.mjs` — approved timeline manifest/hash; approved image/voice assets; render timing, formats, queue/cancel/retry fixtures.
+- **PASS:** `node --experimental-strip-types scripts/test-post-production.mjs`.
+- **PASS:** `node --experimental-strip-types scripts/test-post-production-render.mjs` after the fixture was corrected to approve its source timeline.
+- **PASS:** `node --experimental-strip-types scripts/test-publishing-kit.mjs`.
+- **PASS:** `npx tsc --noEmit`, `npm run build:static`, `npm run build`, extracted inline JS `node --check`, and `git diff --check`. Next emitted only non-fatal Node module-type warnings.
+- **PASS (source checks):** script/image requests derive approval and generation inputs from saved SQLite payloads rather than caller-supplied prompt/state; Gemini blocks before fetch without positive rates/ceiling/reference-image price; render creation checks saved `renderApproval` and canonical SHA-256 hash. Timeline edits/undo/redo invalidate approval; UI includes separate timeline approval and render confirmation.
+
+### Full 13-stage workflow coverage
+Stages 1–13 are present in the application. Phase-specific source/helper tests exist for project/input storage, AI gates, voice/workflow, timeline, render, post-production, and publishing kit. **NOT TESTED as a single browser end-to-end run:** brief/script editing, all UI approval clicks, image/voice generation interaction, timeline playback/touch editing, thumbnail upload/download, and final export workflow were not automated through the browser in this run. Stages using simulations are not real provider integrations.
+
+### Runtime, responsive and security disposition
+- The live Pages dashboard had previously loaded on desktop with seven existing browser-local projects and the RM0 simulation indicator; no project data was changed. Phase 11 code edits were not tested in a browser after deployment, and mobile/tablet, keyboard runtime, and color contrast were not browser-tested.
+- No live provider calls, paid APIs, video generation, or external hosting were used; cost RM0 and the RM20 budget remains untouched.
+- **FAIL / release blocker:** project and entity APIs have no authentication/ownership checks. Anyone able to reach a Node deployment can read, create, or replace project payloads, including saved approval flags, then call generation/render endpoints. New saved-state checks do not prevent that attack. A documented authentication and ownership layer is required before exposing Node APIs.
+- **FAIL:** public history includes author/committer personal email metadata in commits `05026b50`, `88da6c7c`, and `e2396853` (six identity fields). No history rewrite was performed.
+- **FAIL:** GitHub Pages reports HTTPS enforcement disabled; HTTPS works, but HTTP also responds 200.
+- **PASS for source scan:** independent DevOps scan found no common API key, access token, JWT, private key, or sensitive email strings in current tracked file contents; blank examples only.
+- **BLOCKED:** durable production hosting is not configured. Pages cannot run SQLite, server routes, background work, or FFmpeg.
+
+**Disposition:** Phase 11 audit and safe code fixes complete with PARTIAL PASS. Do not call CCAI production-ready or expose Node routes until the release blockers are resolved.

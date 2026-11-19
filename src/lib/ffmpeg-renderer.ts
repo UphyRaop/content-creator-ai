@@ -1,4 +1,5 @@
 import { spawn, type ChildProcess } from "node:child_process";
+import { createHash } from "node:crypto";
 import { randomUUID } from "node:crypto";
 import { copyFile, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -61,6 +62,36 @@ export function validateRenderManifest(value: unknown): value is Manifest {
   return m.tracks.some((x:any)=>x.kind==="image"&&x.clips.length>0);
 }
 
+/**
+ * Return the canonical approval hash for a supported render manifest. Object key
+ * order is ignored, track/clip order is preserved, and timeline times are
+ * normalized to the model's explicit 0.001-second precision.
+ */
+export function hashRenderManifest(value: unknown): string {
+  if (!validateRenderManifest(value)) throw new Error("Cannot hash an invalid render manifest.");
+  const m=value as Manifest;
+  const round=(n:number)=>Math.round(n*1000)/1000;
+  const normalized={
+    version:1,
+    timeUnit:"seconds",
+    duration:round(m.duration),
+    tracks:m.tracks.map(track=>({
+      id:track.id,kind:track.kind,
+      clips:track.clips.map(clip=>({
+        id:clip.id,sourceRef:clip.sourceRef,start:round(clip.start),duration:round(clip.duration),sourceOffset:round(clip.sourceOffset),
+        ...(clip.text===undefined?{}:{text:clip.text}),timing:clip.timing,motion:clip.motion,transitionIn:clip.transitionIn,
+        ...(clip.transitionDuration===undefined?{}:{transitionDuration:round(clip.transitionDuration)}),
+        ...(clip.motionIntensity===undefined?{}:{motionIntensity:clip.motionIntensity}),
+        ...(clip.motionDuration===undefined?{}:{motionDuration:round(clip.motionDuration)}),
+        ...(clip.cameraStart===undefined?{}:{cameraStart:{x:clip.cameraStart.x,y:clip.cameraStart.y,scale:clip.cameraStart.scale}}),
+        ...(clip.cameraEnd===undefined?{}:{cameraEnd:{x:clip.cameraEnd.x,y:clip.cameraEnd.y,scale:clip.cameraEnd.scale}}),
+      })),
+    })),
+  };
+  const canonical=(item:unknown):string=>Array.isArray(item)?`[${item.map(canonical).join(",")}]`:item&&typeof item==="object"?`{${Object.keys(item as Record<string,unknown>).sort().map(key=>`${JSON.stringify(key)}:${canonical((item as Record<string,unknown>)[key])}`).join(",")}}`:JSON.stringify(item);
+  return createHash("sha256").update(canonical(normalized),"utf8").digest("hex");
+}
+
 function decodeDataUrl(value:unknown, kind:"image"|"audio"):Buffer {
   if(typeof value!=="string"||value.length>MAX_DATA_URL)throw new Error("Referenced project media is missing or too large.");
   const pattern=kind==="image"?/^data:image\/(png|jpeg|webp|gif);base64,([a-z0-9+/]+=*)$/i:/^data:audio\/(wav|mpeg|mp3|mp4|x-m4a|aac|ogg|webm|x-wav);base64,([a-z0-9+/]+=*)$/i;
@@ -69,6 +100,10 @@ function decodeDataUrl(value:unknown, kind:"image"|"audio"):Buffer {
 function assetsFor(projectId:string,manifest:Manifest) {
   const project=getProject(projectId);if(!project)throw new Error("Project not found.");const p=project.payload;
   if(p.scriptApproved!==true)throw new Error("Approve the script before rendering.");
+  const timeline=p.timeline&&typeof p.timeline==="object"&&!Array.isArray(p.timeline)?p.timeline as Record<string,any>:null;
+  const approval=timeline?.renderApproval&&typeof timeline.renderApproval==="object"&&!Array.isArray(timeline.renderApproval)?timeline.renderApproval as Record<string,unknown>:null;
+  const approvedHash=approval?.manifestHash;
+  if(approval?.approved!==true||typeof approvedHash!=="string"||! /^[a-f0-9]{64}$/i.test(approvedHash)||approvedHash.toLowerCase()!==hashRenderManifest(manifest))throw new Error("Approve this exact timeline manifest before rendering.");
   const scenes=Array.isArray(p.scenes)?p.scenes as Array<Record<string,any>>:[];
   if(!scenes.length||scenes.some(s=>s.approved!==true||!s.image))throw new Error("Every image must be approved before rendering.");
   const voice=new Map<string,string>();for(const s of scenes){const lines=Array.isArray(s.voiceSegments)?s.voiceSegments:[];if(!lines.length)throw new Error("Every scene needs approved completed speech audio before rendering.");for(const v of lines){const src=typeof v.dataUrl==="string"?v.dataUrl:v.versions?.find((x:any)=>typeof x.dataUrl==="string")?.dataUrl;if(v.approved!==true||v.status!=="completed"||v.needsGeneration||!src)throw new Error("Every scene voice segment must be approved, completed, and backed by audio before rendering.");voice.set(`voice:${v.id}`,src);}}

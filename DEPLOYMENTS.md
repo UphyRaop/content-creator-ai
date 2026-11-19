@@ -20,3 +20,8 @@ GitHub Pages serves static files. It cannot run the SQLite API routes, persisten
 - Fast-forward commit `8efc7b73722f29b9ae851051edf9b6a910f4c496` (“Implement Phase 10 thumbnail and publishing kit”) is on `main`; author and committer use the GitHub noreply address. Pages workflow run `44511713809` completed successfully.
 - `https://ccai.ur-project.biz/` loaded over HTTPS in the cloud browser. A read-only DOM check confirmed the page title “CCAI · Video Studio” and presence of the Phase 10 thumbnail and publishing-kit markers. Browser interaction QA is limited; see `QA.md`.
 - GitHub Pages remains static: thumbnail variations and render/export states are simulations and browser-local persistence. It cannot run SQLite, Node API routes or FFmpeg. GitHub API reports `https_enforced:false`; HTTP still returns 200, so owner action is required to enable HTTPS enforcement.
+
+## Phase 11 deployment verification
+- P11 source and QA changes are ready for a noreply-identity fast-forward commit. GitHub Pages will be checked against the resulting Actions run and the custom domain after the source commit.
+- This is a static prototype deployment only. It does not enable or deploy the SQLite/Node API routes. Production backend remains blocked pending authentication/ownership and a supported persistent Node host.
+- HTTPS enforcement and legacy history email metadata remain outstanding; see `QA.md`.
