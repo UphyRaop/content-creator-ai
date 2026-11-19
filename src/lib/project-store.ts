@@ -42,11 +42,13 @@ function parseRow(row: Record<string, unknown>): ProjectRow {
 }
 
 export function listProjects() {
-  return database().prepare("SELECT id,title,created_at,updated_at,CAST(COALESCE(json_extract(payload,'$.step'),0) AS INTEGER) AS step FROM projects ORDER BY updated_at DESC").all()
+  return database().prepare("SELECT id,title,created_at,updated_at,CAST(COALESCE(json_extract(payload,'$.step'),0) AS INTEGER) AS step,COALESCE(json_extract(payload,'$.projectStatus'),'Draft') AS project_status,CAST(COALESCE(json_extract(payload,'$.priority'),3) AS INTEGER) AS priority,COALESCE(json_extract(payload,'$.seriesId'),'') AS series_id,COALESCE(json_extract(payload,'$.channelId'),'') AS channel_id,COALESCE(json_extract(payload,'$.brandKitId'),'') AS brand_kit_id FROM projects ORDER BY updated_at DESC").all()
     .map((row) => ({
       id: String(row.id), title: String(row.title),
       createdAt: String(row.created_at), updatedAt: String(row.updated_at),
       step: Number(row.step),
+      status: String(row.project_status), priority: Number(row.priority),
+      seriesId: String(row.series_id), channelId: String(row.channel_id), brandKitId: String(row.brand_kit_id),
     }));
 }
 
@@ -82,7 +84,19 @@ export function deleteProject(id: string) {
 
 export function validatePayload(payload: unknown): payload is ProjectPayload {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return false;
-  const settings = (payload as ProjectPayload).settings;
+  const record = payload as ProjectPayload;
+  if (record.projectStatus !== undefined && !["Draft", "In Progress", "Awaiting Approval", "Completed", "Archived"].includes(String(record.projectStatus))) return false;
+  if (record.priority !== undefined && (!Number.isInteger(record.priority) || Number(record.priority) < 1 || Number(record.priority) > 5)) return false;
+  for (const key of ["characterIds", "locationIds"]) {
+    if (record[key] !== undefined && (!Array.isArray(record[key]) || record[key].length > 100 || record[key].some((id) => typeof id !== "string" || id.length > 100))) return false;
+  }
+  for (const key of ["season", "episode"]) {
+    if (record[key] !== undefined && (!Number.isInteger(record[key]) || Number(record[key]) < 1 || Number(record[key]) > 1000)) return false;
+  }
+  if (record.storyContinuity !== undefined && (typeof record.storyContinuity !== "string" || record.storyContinuity.length > 20_000)) return false;
+  if (record.appearanceOverrides !== undefined && (!record.appearanceOverrides || typeof record.appearanceOverrides !== "object" || Array.isArray(record.appearanceOverrides))) return false;
+  if (record.scenes !== undefined && (!Array.isArray(record.scenes) || record.scenes.length > 100 || record.scenes.some((scene) => !scene || typeof scene !== "object" || Array.isArray(scene)))) return false;
+  const settings = record.settings;
   if (settings && typeof settings === "object") {
     const values = settings as Record<string, unknown>;
     if (values.referenceImages !== undefined) {

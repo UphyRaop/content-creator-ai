@@ -8,6 +8,7 @@ process.env.CCAI_DATABASE_PATH = join(directory, "projects.sqlite");
 try {
   const workflow = await import("../src/lib/script-workflow.ts");
   const store = await import("../src/lib/project-store.ts");
+  const entities = await import("../src/lib/entity-store.ts");
   const project = store.createProject("Demo film", { step: 2, settings: { durationMinutes: 3 } });
   assert.equal(project.title, "Demo film");
   assert.equal(project.payload.step, 2);
@@ -29,6 +30,23 @@ try {
   assert.equal(store.validatePayload({ settings: { referenceImages: [{ dataUrl: "data:text/plain;base64,YQ==" }] } }), false);
   assert.equal(store.validatePayload({ settings: { referenceVideos: ["javascript:alert(1)"] } }), false);
   console.log("PASS validates image and video references");
+
+  const character = entities.saveEntity("characters", { id: "character-1", name: "Mira", age: "28", appearance: "Short dark hair", referenceImages: [] });
+  assert.equal(character.name, "Mira");
+  assert.equal(entities.listEntities("characters")[0].appearance, "Short dark hair");
+  assert.throws(() => entities.saveEntity("characters", { id: "bad", name: "", referenceImages: [] }), /Invalid/);
+  assert.throws(() => entities.listEntities("other"), /Unknown collection/);
+  const duplicate = entities.duplicateEntity("characters", "character-1");
+  assert.equal(duplicate?.name, "Copy of Mira");
+  assert.equal(entities.deleteEntity("characters", duplicate.id), true);
+  console.log("PASS stores, validates, duplicates, and deletes reusable SQLite library records");
+
+  assert.equal(store.validatePayload({ projectStatus: "Awaiting Approval", priority: 1, seriesId: "series-a", season: 2, episode: 3, characterIds: ["character-1"], locationIds: ["place-1"], storyContinuity: "Previous event" }), true);
+  assert.equal(store.validatePayload({ projectStatus: "Publishing" }), false);
+  assert.equal(store.validatePayload({ priority: 6 }), false);
+  assert.equal(store.validatePayload({ season: 0 }), false);
+  assert.equal(store.validatePayload({ scenes: "invalid" }), false);
+  console.log("PASS validates project status, queue, episodic continuity, assignments, and scene metadata");
 
   const request = { idea: "A bakery story", durationMinutes: 2, language: "English", visualStyle: "Documentary", format: "mixed", brief: { title: "Bakery", direction: "A warm story", goal: "Inspire", approved: true }, referenceText: "A family recipe", referenceVideos: ["https://example.test/video"] };
   assert.equal(workflow.validateScriptRequest(request), true);

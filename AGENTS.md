@@ -21,7 +21,7 @@ CCAI is an AI-powered video creation application. Do not add social media automa
 Preserve the existing approval gates: approve the brief before generating a script, approve the script before creating scenes, and approve every scene before generating voice. A regeneration must be user-triggered, use the edited prompt, and affect only the selected scene.
 
 ## Approved development roadmap
-Use the 11 approved development phases in `ROADMAP.md`: Application Foundation; Multimodal Idea Input; AI Script Generation; Project and Character Management; AI Image Generation Studio; AI Voice Generation; Video Timeline and Editor; Video Rendering Engine; Post-Production Studio; Thumbnail and Publishing Kit; Final Testing and Deployment. Phase 1 and Phase 2 are complete. Phase 3 may proceed under current user authorization; do not start Phase 4 without separate approval.
+Use the 11 approved development phases in `ROADMAP.md`: Application Foundation; Multimodal Idea Input; AI Script Generation; Project and Character Management; AI Image Generation Studio; AI Voice Generation; Video Timeline and Editor; Video Rendering Engine; Post-Production Studio; Thumbnail and Publishing Kit; Final Testing and Deployment. Phases 1–3 are complete. Phase 4 is currently authorized; do not start Phase 5 without separate user approval.
 
 ## Approved technology and operating constraints
 - Next.js, TypeScript, Node.js built-in SQLite (`node:sqlite`), GitHub, and the existing source files. Do not use Supabase or Cloudflare.
@@ -38,7 +38,9 @@ Use the 11 approved development phases in `ROADMAP.md`: Application Foundation; 
 - Users may paste a transcript or reference excerpts. Do not fetch arbitrary URLs or remote media automatically.
 - Preserve version history and invalidate approval plus downstream work when approved brief/script content changes.
 - Reference images are limited to 2 MB each and 12 per project in the prototype.
-- Do not add later production capabilities or alter approved decisions without user approval. Update `ROADMAP.md` and `DECISIONS.md` when decisions change.
+- Phase 4 provides reusable character/location/series/brand/channel libraries; project and scene assignments; continuity context; project status, search and manual queue priorities; and JSON backup/import. Imports add new records and never overwrite existing data.
+- Keep all content generation user-triggered and simulated. Project outfit overrides and scene assignments must not mutate reusable source profiles.
+- Do not add Phase 5 or later production capabilities or alter approved decisions without user approval. Update `ROADMAP.md` and `DECISIONS.md` when decisions change.
 
 ## Development checks
 Use Node.js 24 or newer. Run `npm ci`, `npm test`, `npm run build`, and `npm run build:static` as relevant. Keep credentials and personal information out of source, public artifacts, and logs.

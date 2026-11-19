@@ -24,7 +24,7 @@ Approval gates are mandatory: no script before brief approval; no scene breakdow
 1. **Application Foundation** — complete. Dashboard and project CRUD, browser autosave for the static preview, SQLite-backed server storage, responsive navigation, and dark/light themes.
 2. **Multimodal Idea Input** — complete. Video idea, duration 1–5 minutes, aspect ratio, language, visual style, categorized image references, HTTPS video references, notes, and user-supplied transcript/context.
 3. **AI Script Generation** — complete for the no-cost simulated preview and server provider boundary. Includes brief drafting/approval, narration/dialogue/mixed formats, editable scripts, word count and duration estimates, version save/restore, usage estimates, server-only Gemini adapter, and approval invalidation. No live Gemini API call was made. Reference media is not fetched automatically; users can provide transcript/context.
-4. **Project and Character Management** — not started; requires approval after Phase 3.
+4. **Project and Character Management** — implemented in this release; QA and deployment verification are recorded below. Includes reusable character/location/series/brand/channel records, project and scene assignments, episode continuity context, search/status/priority queue, and non-overwriting JSON import/export.
 5. **AI Image Generation Studio** — not started.
 6. **AI Voice Generation** — not started.
 7. **Video Timeline and Editor** — not started.
@@ -51,3 +51,10 @@ Approval gates are mandatory: no script before brief approval; no scene breakdow
 
 ## Known repository history issue
 The public repository contains three older commits whose author/committer metadata used personal email addresses. New commits use GitHub noreply identities. History was intentionally not rewritten or force-pushed; see the security scan record in the prior migration history.
+
+
+## Phase 4 verification record
+- User authorized Phase 4 on 19 November 2026 (Malaysia time). Phase 5 remains not started and requires separate approval.
+- Implemented reusable SQLite/browser-local libraries for characters, locations, video series, brand kits, and channel profiles, including edit, duplicate, delete, and multi-image references. Project records link series/channel/brand/characters/locations and episode number. Scene cards can assign characters, locations, and outfit overrides without changing reusable profiles. Series continuity notes are available to creative brief drafting; generation remains manually triggered and simulated.
+- Dashboard adds search, status/series/channel filters, production progress, Draft/In Progress/Awaiting Approval/Completed/Archived status, manual priority and a queue ordered by priority. JSON exports cover one project or the whole project/library data; validated imports add copies instead of replacing entries.
+- QA and deployment evidence will be recorded after checks complete. Cost: RM0; no paid providers or hosting.

@@ -29,11 +29,19 @@
 - Project settings: duration 1–5 minutes, 9:16 or 16:9, language, and visual style.
 - Allow multiple character, background, and storyboard image references and multiple HTTPS reference-video URLs.
 - Support desktop/mobile navigation and dark/light modes.
+
+## Phase 4 approved scope
+- Reusable character, location, video-series, brand-kit and channel-profile libraries. Library images are reference assets; no image generation runs automatically.
+- Projects may be standalone or assigned to a series/season/episode, channel, brand kit, characters, and locations. Scene assignments and project-specific appearance/outfit overrides do not mutate reusable profiles.
+- Previous events, character arcs, unresolved storylines and episode summaries can be supplied as continuity context to the creative brief. The existing brief/script approval gates remain mandatory.
+- Project statuses are Draft, In Progress, Awaiting Approval, Completed and Archived. Queue priority is manually managed. No social account management or automated publishing.
+- JSON project/library backup and import adds copies and prevents overwrites by default. Imported content is validated and existing workflow/version history is preserved.
+- GitHub Pages continues to use browser-local storage; server-hosted libraries use the existing SQLite database. No external service, paid API or new subscription is approved.
 - Store uploaded references with the project. Prototype image limits: 2 MB per image and 12 images per project.
 - Preserve all workflow and approval gates; approved work must not be unnecessarily regenerated.
 
 ## Development boundary
-- Phase 1 and Phase 2 are complete. Phase 3 is authorized and implemented as a simulated prototype with a server-only Gemini adapter boundary. Phase 4 requires separate user approval.
+- Phases 1–3 are complete. Phase 4 is authorized and implemented as a simulated prototype. Phase 5 requires separate user approval.
 - The GitHub Pages preview uses local simulation. Live Gemini calls are disabled by default and require separate explicit approval; no credential has been configured or used.
 - Brief/script approval is required before downstream stages. Changes to the approved brief or script clear approval and downstream state. Script versions are stored with the project payload.
 - Reference links are not fetched. Users can paste transcript/reference excerpts for context; inaccessible content is described gracefully.

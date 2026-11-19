@@ -1,6 +1,6 @@
 # Content Creator AI (CCAI)
 
-CCAI is an AI-assisted video creation workspace with a project dashboard and an approval-gated 13-stage production prototype. Phases 1–3 are complete for the simulated preview. No paid API calls are made.
+CCAI is an AI-assisted video creation workspace with a project dashboard and an approval-gated 13-stage production prototype. Phases 1–4 are implemented for the simulated preview. No paid API calls are made.
 
 ## Preview
 
@@ -41,4 +41,11 @@ Reference URLs are stored but not fetched automatically. Paste a transcript or r
 - [Roadmap and progress](ROADMAP.md)
 - [Approved decisions](DECISIONS.md)
 
-Do not add real provider credentials, make paid API calls, or start Phase 4 without the user's approval.
+Do not add real provider credentials, make paid API calls, or start Phase 5 without the user's approval.
+
+
+## Phase 4 project management
+
+The dashboard includes reusable character, location, series, brand kit, and channel profile libraries. Projects can be assigned to a series/season/episode, channel, brand, characters, and locations; scene cards keep their own cast, location, and outfit overrides. Series continuity notes inform a creative brief only when the user explicitly generates one. Project search, filters, workflow status, progress, manual queue priority, single-project export, and full-library JSON backup/import are included. Imports validate and add copies instead of replacing existing records.
+
+On GitHub Pages, projects and libraries persist only in that browser's local storage. SQLite provides server persistence for a future Node.js deployment. AI and media responses remain simulated; the Phase 3 approval gates are unchanged. **Manual check:** create a character with image references, assign it and a location to a project and scene, add series continuity, exercise each status and queue priority, then export/import a JSON backup and confirm existing entries remain.
