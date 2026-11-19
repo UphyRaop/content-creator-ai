@@ -37,11 +37,13 @@ Approval gates are mandatory: no script before the brief is approved; no scene b
 - No external hosting provider, paid subscription, or live AI/media API was introduced.
 
 ## Migration and verification record
-- Prepared the current backup source snapshot for migration without its Git history. The public main repository has not yet received these files.
-- Scanned the backup source files before publication for credential patterns, API tokens, private keys, and personal email addresses. Excluded the obsolete `.openai/hosting.json` Sites project identifier.
-- Preserve all Phase 1 and Phase 2 features and SQLite backend source during migration.
-- Last confirmed project checks: project-store tests, TypeScript check, Next.js production build, static prototype build, and the existing approval-gate/browser regression checks passed before this repository migration.
-- Desktop and mobile viewport QA should be completed against the published static artifact; record any environment limitation rather than marking an unrun check as passed.
+- Migrated the source snapshot from the private backup to public `main` in commit `d343d21c0eda74f12b9bf8188b4b757e90b014aa`; backup Git history was not migrated. The private backup remains intact.
+- Scanned all 23 published files before upload and rescanned the remote blobs. No credentials, tokens, private keys, JWTs, personal emails, stale preview-repository references, or obsolete Sites project ID were found. The unused `.openai/hosting.json` Sites identifier was excluded.
+- Verified the migration commit author and committer use the GitHub noreply address.
+- Regression checks after migration: all five project-store tests, TypeScript check, static build, and Next.js production build passed.
+- GitHub Actions run `44447043844` deployed successfully. The custom domain `https://ccai.ur-project.biz/` loads with HTTPS. Desktop browser check passed at 1180 px with no horizontal overflow or page console errors.
+- Mobile viewport check remains unverified: the managed browser blocks DevTools/device emulation by organization policy. Responsive CSS breakpoints are present; this is not a mobile test pass.
+- Phase 3 has not started and still requires user approval.
 
 ## Cost status
 No AI/media API calls or paid hosting were used. The RM20 testing budget remains untouched.
