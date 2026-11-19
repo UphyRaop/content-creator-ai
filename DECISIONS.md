@@ -33,5 +33,8 @@
 - Preserve all workflow and approval gates; approved work must not be unnecessarily regenerated.
 
 ## Development boundary
-- Phase 1 and Phase 2 are complete. Phase 3 has not started and requires the user's approval after reviewing the preview.
+- Phase 1 and Phase 2 are complete. Phase 3 is authorized and implemented as a simulated prototype with a server-only Gemini adapter boundary. Phase 4 requires separate user approval.
+- The GitHub Pages preview uses local simulation. Live Gemini calls are disabled by default and require separate explicit approval; no credential has been configured or used.
+- Brief/script approval is required before downstream stages. Changes to the approved brief or script clear approval and downstream state. Script versions are stored with the project payload.
+- Reference links are not fetched. Users can paste transcript/reference excerpts for context; inaccessible content is described gracefully.
 - No real AI, image, voice, or FFmpeg rendering integration is active. All provider/media responses remain simulated.

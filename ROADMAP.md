@@ -1,14 +1,14 @@
 # CCAI Roadmap and Progress
 
 ## Product definition
-CCAI is an AI-powered video creation application. Social account management, content calendars for social posting, automated publishing, and social analytics are out of scope.
+CCAI is an AI-powered video creation application. Social account management, publishing automation, and social analytics are out of scope.
 
-## Approved production workflow
+## Approved 13-stage production workflow
 1. Idea and reference input
 2. Creative brief approval
 3. AI script generation
 4. Script editing and approval
-5. Scene breakdown and image prompt generation
+5. Scene breakdown
 6. AI image generation
 7. Individual scene approval and regeneration
 8. AI voice generation
@@ -18,32 +18,35 @@ CCAI is an AI-powered video creation application. Social account management, con
 12. Thumbnail generation
 13. Video export
 
-Approval gates are mandatory: no script before the brief is approved; no scene breakdown before the script is approved; no voice before every scene is approved. Regeneration is selected-scene only and must use the revised prompt. Simulated AI responses must not be described as live integrations.
+Approval gates are mandatory: no script before brief approval; no scene breakdown before script approval; no voice before every scene is approved. Editing approved brief/script content clears its approval and dependent downstream work. Simulated responses are always identified as simulations.
 
-## Phase status
+## Approved 11-phase development roadmap
+1. **Application Foundation** — complete. Dashboard and project CRUD, browser autosave for the static preview, SQLite-backed server storage, responsive navigation, and dark/light themes.
+2. **Multimodal Idea Input** — complete. Video idea, duration 1–5 minutes, aspect ratio, language, visual style, categorized image references, HTTPS video references, notes, and user-supplied transcript/context.
+3. **AI Script Generation** — complete for the no-cost simulated preview and server provider boundary. Includes brief drafting/approval, narration/dialogue/mixed formats, editable scripts, word count and duration estimates, version save/restore, usage estimates, server-only Gemini adapter, and approval invalidation. No live Gemini API call was made. Reference media is not fetched automatically; users can provide transcript/context.
+4. **Project and Character Management** — not started; requires approval after Phase 3.
+5. **AI Image Generation Studio** — not started.
+6. **AI Voice Generation** — not started.
+7. **Video Timeline and Editor** — not started.
+8. **Video Rendering Engine** — not started.
+9. **Post-Production Studio** — not started.
+10. **Thumbnail and Publishing Kit** — not started.
+11. **Final Testing and Deployment** — not started.
 
-- [x] **Phase 1 — Cloud Infrastructure and Dashboard:** project dashboard, create/edit/duplicate/delete, browser autosave for static preview, SQLite-backed server API, navigation, and light/dark themes.
-- [x] **Phase 2 — AI Content Planning:** idea/reference inputs; duration 1–5 minutes; 9:16 and 16:9; language and style; multiple categorized image references; multiple HTTPS video URLs; existing approval gates preserved.
-- [ ] **Phase 3 — AI Content Production:** not started; requires user approval. Real API use is also gated by user approval and budget.
-- [ ] **Phase 4 — Approval Center:** not started.
-- [ ] **Phase 5 — Social Media Automation:** not part of the approved CCAI product; do not implement.
-- [ ] **Phase 6 — Analytics and Optimization:** not started; requires scope approval.
-
-## Current preview and infrastructure
+## Architecture and deployment
 - Public main repository: `UphyRaop/content-creator-ai`.
-- Private backup: `UphyRaop/content-creator-ai-backup`; keep it intact.
-- Static preview: [https://ccai.ur-project.biz/](https://ccai.ur-project.biz/), deployed from `dist` using GitHub Actions on pushes to `main`.
-- GitHub Pages preview persistence is browser-local and device-local. SQLite API routes and storage are preserved in source but need a Node.js server with persistent writable storage; GitHub Pages cannot execute them.
-- No external hosting provider, paid subscription, or live AI/media API was introduced.
+- Private backup: `UphyRaop/content-creator-ai-backup`; preserve it.
+- Static preview: [https://ccai.ur-project.biz/](https://ccai.ur-project.biz/) from the `dist` directory using GitHub Actions on pushes to `main`.
+- GitHub Pages uses browser-local storage. SQLite API routes require a Node.js server with persistent writable storage; GitHub Pages cannot run the backend.
+- Gemini adapter is server-only. Preview uses simulation. Live calls require `CCAI_ENABLE_LIVE_AI=true`, `CCAI_LIVE_AI_APPROVED=true`, and a server-side `GEMINI_API_KEY`; no key or live consent is currently configured. Configure current token rates before showing a real cost estimate.
+- Remote reference URLs are stored but not crawled/fetched. Users can paste accessible transcript or reference excerpts.
 
-## Migration and verification record
-- Migrated the source snapshot from the private backup to public `main` in commit `d343d21c0eda74f12b9bf8188b4b757e90b014aa`; backup Git history was not migrated. The private backup remains intact.
-- Scanned all 23 published files before upload and rescanned the remote blobs. No credentials, tokens, private keys, JWTs, personal emails, stale preview-repository references, or obsolete Sites project ID were found. The unused `.openai/hosting.json` Sites identifier was excluded.
-- Verified the migration commit author and committer use the GitHub noreply address.
-- Regression checks after migration: all five project-store tests, TypeScript check, static build, and Next.js production build passed.
-- GitHub Actions run `44447043844` deployed successfully. The custom domain `https://ccai.ur-project.biz/` loads with HTTPS. Desktop browser check passed at 1180 px with no horizontal overflow or page console errors.
-- Mobile viewport check remains unverified: the managed browser blocks DevTools/device emulation by organization policy. Responsive CSS breakpoints are present; this is not a mobile test pass.
-- Phase 3 has not started and still requires user approval.
+## Phase 3 verification record
+- Automated test command: `npm test` (project-store and script workflow tests).
+- Type checks: `npx tsc --noEmit`.
+- Builds: `npm run build:static` and `npm run build`.
+- Browser smoke/regression checks and deployment status are recorded in the implementation handover for this phase after verification.
+- No paid API calls, hosting, or new services were used. RM20 testing budget remains untouched.
 
-## Cost status
-No AI/media API calls or paid hosting were used. The RM20 testing budget remains untouched.
+## Known repository history issue
+The public repository contains three older commits whose author/committer metadata used personal email addresses. New commits use GitHub noreply identities. History was intentionally not rewritten or force-pushed; see the security scan record in the prior migration history.

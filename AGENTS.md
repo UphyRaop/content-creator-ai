@@ -20,6 +20,9 @@ CCAI is an AI-powered video creation application. Do not add social media automa
 
 Preserve the existing approval gates: approve the brief before generating a script, approve the script before creating scenes, and approve every scene before generating voice. A regeneration must be user-triggered, use the edited prompt, and affect only the selected scene.
 
+## Approved development roadmap
+Use the 11 approved development phases in `ROADMAP.md`: Application Foundation; Multimodal Idea Input; AI Script Generation; Project and Character Management; AI Image Generation Studio; AI Voice Generation; Video Timeline and Editor; Video Rendering Engine; Post-Production Studio; Thumbnail and Publishing Kit; Final Testing and Deployment. Phase 1 and Phase 2 are complete. Phase 3 may proceed under current user authorization; do not start Phase 4 without separate approval.
+
 ## Approved technology and operating constraints
 - Next.js, TypeScript, Node.js built-in SQLite (`node:sqlite`), GitHub, and the existing source files. Do not use Supabase or Cloudflare.
 - Keep AI providers interchangeable: Gemini for scripts, FLUX.1 Schnell for images, ElevenLabs for voice, and FFmpeg for rendering.
@@ -31,6 +34,9 @@ Preserve the existing approval gates: approve the brief before generating a scri
 - Support desktop and iPhone layouts, keyboard access, readable contrast, and light/dark themes.
 - The dashboard supports project create, rename/edit, duplicate, delete, and autosave. SQLite stores project data on a Node.js deployment; the static Pages preview stores projects in that browser on that device.
 - Settings include 1–5 minute duration, 9:16/16:9 aspect ratio, language, visual style, multiple categorized image references, and multiple HTTPS reference-video URLs.
+- Phase 3 includes a simulated brief/script workflow for Pages and a server-only interchangeable Gemini adapter. Live API calls remain disabled unless the user separately approves them; provider keys must stay in server environment variables.
+- Users may paste a transcript or reference excerpts. Do not fetch arbitrary URLs or remote media automatically.
+- Preserve version history and invalidate approval plus downstream work when approved brief/script content changes.
 - Reference images are limited to 2 MB each and 12 per project in the prototype.
 - Do not add later production capabilities or alter approved decisions without user approval. Update `ROADMAP.md` and `DECISIONS.md` when decisions change.
 
