@@ -210,7 +210,7 @@ Integrated and synchronized P11 source/docs in noreply fast-forward commit `ba5a
 - Status: audit complete. Saved approval gates and server-only credentials exist, but provider/render routes are not connected to reservations/emergency stop, lack durable idempotent job state and cancellation, and FLUX output-host validation was missing. Lead fixed FLUX URL policy and Gemini missing-usage cost fallback; no live provider request.
 
 ### CCAI-05-QA — P1–P14 test review
-- Status: partial pass. Regression suites, cloud threshold/concurrency/idempotency fixtures, and one local FFmpeg fixture pass. No real GCP telemetry, cloud jobs, production-scale benchmark, mobile/tablet browser run, or Cloud Run deployment.
+- Status: partial pass. Regression suites, cloud threshold/concurrency/idempotency fixtures, and one local FFmpeg fixture pass. The HTTP integration harness now reports 79 checks with zero failures. No real GCP telemetry, cloud jobs, production-scale benchmark, mobile/tablet browser run, or Cloud Run deployment.
 
 ### CCAI-06-DEVOPS — P13 GCP review
 - Status: source and official-doc review complete. Read `docs/phase13-cloud-architecture-review.md`. No account or resources accessed or created. Deployment remains blocked by SQLite/local media/in-memory queue and unresolved cost architecture.

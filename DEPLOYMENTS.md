@@ -57,9 +57,10 @@ GitHub Pages serves static files. It cannot run the SQLite API routes, persisten
 - Desktop dashboard smoke check ran at 1168×735. Mobile/tablet viewport testing remains unverified. This is the Pages-only UI; it does not execute SQLite, authenticated API routes, telemetry import, or Cloud Run jobs.
 - No Google Cloud resource, billing configuration, API, hosting subscription or charge was created. Cost RM0; RM20 remains untouched. The private backup repository was not changed.
 
-## Phase 12–14 continuation boundary — 19 November 2026
-- No GitHub Pages update was deployed during this continuation; the changed UI text/static artifact and source-side safety fixes await sync. The existing verified preview remains the prior deployed version.
-- The checkout lacks a usable GitHub push remote (its local `origin` points to `/workspace/ccai-history-rewrite.git`), so do not use local `git push`. Sync must use the authorized GitHub integration against current remote `main`, preserving its history and using noreply identity; verify Actions run and deployed preview afterward.
+## Phase 12–14 continuation deployment — 19 November 2026
+- Commit `8d021590fbf060245020356ca573a7732f1b4b00` (“Harden provider admission and document cloud readiness”) fast-forwarded from `5b2e66dac4cb0d11f0279b0649b52d3538bf0fb6` with GitHub noreply author/committer. GitHub Pages Actions run [`44581029545`](https://github.com/UphyRaop/content-creator-ai/actions/runs/44581029545) completed successfully.
+- Preview `https://ccai.ur-project.biz/` loaded over HTTPS in shared Chrome after sync. Search and status filter behavior passed at 1180×757; document width did not overflow the viewport. Console showed a browser-extension error only, no CCAI-origin errors. The mobile/tablet viewport was not emulated.
+- The checkout's local `origin` points to `/workspace/ccai-history-rewrite.git`; no local push was attempted. GitHub integration was used against current remote `main` with an expected-head fast-forward update and no history rewrite.
 - Gemini now has a 45-second request timeout and conservative cost fallback when usage metadata is absent. FLUX sample download requires an exact `CCAI_FLUX_OUTPUT_HOSTS` allowlist and rejects redirects; this must be configured/validated by an owner only if live FLUX is later approved. No provider requests were executed.
 - GitHub Pages continues as static simulation only; it cannot host the Node APIs, SQLite ledger, FFmpeg, Cloud Run workers, or secret manager.
 - Phase 13 deployment remains BLOCKED. Do not deploy until the owner selects the data/runtime architecture and approves any associated recurring cost, billing account use, IAM/service secrets, database/media migration and rollback. No DNS changes were made.
