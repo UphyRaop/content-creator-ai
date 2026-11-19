@@ -104,6 +104,8 @@ try {
   assert.deepEqual(imageFlow.deduplicateImageJobs(queued, [{ ...queued[0], id: "j3", sceneId: "s1" }, { ...queued[0], id: "j4", sceneId: "s3" }]).map((job) => job.id), ["j4"]);
   console.log("PASS recovers interrupted queue work and prevents duplicate scene jobs");
 
+  assert.equal(imageFlow.imageRequestKind(false), "initial");
+  assert.equal(imageFlow.imageRequestKind(true), "regeneration");
   assert.equal(imageFlow.estimateImageCostMyr(4, "simulated"), 0);
   assert.equal(imageFlow.estimateImageCostMyr(4, "flux-schnell"), null);
   assert.equal(imageFlow.estimateImageCostMyr(4, "flux-schnell", 0.5), 2);

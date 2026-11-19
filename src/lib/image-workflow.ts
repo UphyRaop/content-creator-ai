@@ -31,6 +31,11 @@ export type ImageJob = {
 
 const MAX_SCENES = 100;
 
+/** Existing scene images requested again count as regenerations, including input-refresh batches. */
+export function imageRequestKind(hasPreviousImage: boolean): "initial" | "regeneration" {
+  return hasPreviousImage ? "regeneration" : "initial";
+}
+
 function words(text: string, locale = "en"): string[] {
   if (typeof Intl.Segmenter === "function") {
     return Array.from(new Intl.Segmenter(locale, { granularity: "word" }).segment(text))
