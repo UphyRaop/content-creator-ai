@@ -196,3 +196,9 @@ The public repository contains three older commits whose author/committer metada
 - Commit `612592075ebc4cf0614d595ee999ffa1e704a46b` passed Playwright run `44687790479` and Pages deploy run `44687790598`.
 - Six viewport profiles and the simulated 13-stage path/gates passed; report and six screenshots are retained as artifact `14606708742` until 2026-12-04.
 - Direct custom-domain/certificate inspection and native iOS hardware testing remain unverified. No DNS changes or costs.
+
+## Global Navigation Redesign & Developer Mode — implementation checkpoint (2026-11-20)
+- Supersedes the earlier seven-tap activation and preview-unavailable notice. New header has hamburger, CCAI branding and far-right `</>` access. The masked URTN preview gate supports cancel, invalid-code feedback, unlock and lock; session access is reset when the browser session ends. This is not secure owner authentication.
+- Drawer now groups Workspace, Content library, Management and the 13 production stages; active destinations are marked; groups expand/collapse; selection, outside click and Escape close it. Navigation flushes the current project before leaving, preserving unsaved work.
+- Functional preview simulates the full app in a live iframe at 1920×1080, 1366×768, 768×1024, 1024×768, 390×844 and 844×390 with fit/zoom controls. Privileged tools remain disabled; generation approvals and cost protection remain unchanged.
+- QA and deployment status follows in `QA.md` and `DEPLOYMENTS.md`.
