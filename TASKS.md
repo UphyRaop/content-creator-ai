@@ -239,3 +239,10 @@ Integrated and synchronized P11 source/docs in noreply fast-forward commit `ba5a
 - Lead, UIUX, QA, backend security, AI workflow mapping, and DevOps review tasks are complete for the authorized scope.
 - Latest verified main commit `612592075ebc4cf0614d595ee999ffa1e704a46b` passed Pages run `44687790598` and Playwright run `44687790479`. Screenshot/report artifact: `14606708742`, retained until 2026-12-04.
 - Remaining verification boundary: no native device/iOS Safari session and no direct custom-domain/certificate probe. Privileged mode/live providers remain disabled; no DNS changes or cost.
+
+## Global Navigation Redesign and Developer Mode — 2026-11-20
+- **CCAI-02-UIUX:** complete. Replaced prior gesture with masked URTN preview gate, lock/cancel behavior, compact hamburger header, categorized drawer and responsive live app simulator. Files: `prototype.html`, `dist/index.html`, `public/prototype.html`.
+- **CCAI-03-BACKEND:** reviewed security boundary; preview gate does not authorize or expose privileged APIs. No backend or data schema changed.
+- **CCAI-05-QA:** Playwright six-profile, navigation, gate, workflow and regression suite; final status and screenshot count recorded in `QA.md`.
+- **CCAI-06-DEVOPS:** deploy via existing Pages workflow only; preserve domain, DNS, private backup and GitHub settings. Verify Actions and artifact links in `DEPLOYMENTS.md`.
+- No Phase 3/other future phase started; no paid services, live AI, cloud provisioning, DNS edits or migration.
