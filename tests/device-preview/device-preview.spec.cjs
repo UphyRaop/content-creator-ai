@@ -122,7 +122,7 @@ test('7-tap preview exit and profile switching preserve the app iframe and local
   await frame.getByRole('button', { name: /create project/i }).click();
   await expect(frame.locator('#activeProjectName')).toHaveText('QA Device Preview Synthetic Project');
   const identity = await frame.locator('body').evaluate(() => {
-    window.__ccaiDeviceQaIdentity ||= crypto.randomUUID();
+    window.__ccaiDeviceQaIdentity ||= `preview-qa-${Date.now()}-${Math.random()}`;
     return window.__ccaiDeviceQaIdentity;
   });
   const storedProjectBefore = await frame.locator('body').evaluate(() => {
@@ -304,7 +304,9 @@ test('all 13 stage screens navigate using a synthetic approved-media project and
     if (index === 8) {
       await expect(frame.getByRole('button', { name: 'Review and approve timeline for render' })).toBeVisible();
       await frame.getByRole('button', { name: 'Review and approve timeline for render' }).click();
-      await expect(frame.getByText(/RENDER APPROVED/)).toBeVisible();
+      await expect(frame.locator('#notice')).toContainText('Timeline reviewed and approved for render');
+      const approvalState = await frame.locator('body').evaluate(() => ({ approved: timelineApprovalValid(), eligible: renderEligible() }));
+      expect(approvalState).toEqual({ approved: true, eligible: true });
     }
     if (index === 9) {
       await expect(frame.getByText(/No MP4 is produced|No video file will be created/i)).toBeVisible();
