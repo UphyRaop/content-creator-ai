@@ -93,12 +93,20 @@ Phases 7–11 were authorized together by the user. Phase 11 automated fixes and
 
 ## Branding and Developer Mode boundary (2026-11-20)
 - Use the approved brand tokens `#090909`, `#FF8A24`, and `#800024`; retain readable contrast, dark/light theme support, and existing workflow and storage behavior.
-- The logo's seven-tap entry point is hidden from normal users and opens the UI-only Device Preview Mode described in the 2026-11-20 authorization record below. It may simulate responsive viewports of the existing application, but must not reveal privileged diagnostics, credentials, server logs, administrative or production controls, or bypass approval/cost safeguards.
+- The old seven-tap entry point has been replaced by the approved `</>` preview-code gate. Follow the latest Global Navigation Redesign & Developer Mode record below; the simulator is UI-only and must not reveal privileged diagnostics, credentials, server logs, administrative or production controls, or bypass approval/cost safeguards.
 - Server-side Developer Mode stays unavailable until owner-bound recent reauthentication and a secure session capability are implemented and hosted on a protected Node backend. Never trust a browser flag, local storage, URL parameter, or caller-supplied role.
 - Public GitHub Pages is a static simulation. Do not deploy privileged Developer Mode controls there.
 
 ## Developer Preview Mode authorization (2026-11-20)
-- The owner authorized seven consecutive CCAI logo activations to open a hidden, UI-only preview with six device dimensions: 1920×1080, 1366×768, 768×1024, 1024×768, 390×844, and 844×390.
+- Historical record: the owner first authorized seven consecutive CCAI logo activations to open the UI-only preview with six device dimensions: 1920×1080, 1366×768, 768×1024, 1024×768, 390×844, and 844×390. The later Global Navigation Redesign authorization replaces that activation method.
 - Render the live application in a same-origin iframe with real CSS viewport dimensions; never substitute screenshots. Preserve current project/workflow browser-local data when changing dimensions and zoom. Exit must save/synchronize state.
 - This does not authorize privileged Developer Mode: diagnostics, API credentials, server logs, admin controls, security bypasses, AI generation, or cost-protection bypass remain unavailable. AI and cloud actions remain simulated/blocked according to existing rules.
 - Playwright checks run in GitHub Actions and retain screenshots/report artifacts. Browser results are Chromium emulation, not native iOS Safari or real device hardware tests.
+
+
+## Global Navigation Redesign and Developer Mode — latest authorization (2026-11-20)
+- Replace the old logo gesture with the far-right `</>` button. The client-side preview gate accepts `URTN`, uses a masked field, and supports unlock, cancel and lock. It is not secure authentication; it only unlocks UI preview navigation for the browser session.
+- Use a compact global header with hamburger at far left, CCAI branding, and remove the old horizontal navigation. The drawer groups Workspace (Projects, Production queue), Content library (Characters, Locations, Video series, Brand kits, Channel profiles, Voice profiles), Management (Cloud usage & billing, Backup & restore), and the 13 production workflow stages. Indicate the active destination, collapse groups, close after navigation/outside click/Escape, and flush pending project saves before leaving a workflow.
+- Show Developer Mode drawer links only after the preview gate is unlocked. Device simulation must render the full app live in a same-origin iframe, not use screenshots; preserve state while changing profiles, allow zoom/fit, and support the six exact profiles above.
+- Keep privileged diagnostics, API credentials, server logs, admin controls and server APIs protected until secure server-side owner authentication is available. Preserve content approval gates and cost safeguards.
+- Automated QA uses Playwright in GitHub Actions, covers all six viewport profiles and navigation plus the 13-stage preview flow, and retains screenshot/report artifacts. Screenshots document browser rendering; they are not device simulation. No paid services, live AI calls, cloud provisioning, database migration, DNS changes or backup changes.

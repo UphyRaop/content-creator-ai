@@ -123,3 +123,9 @@
 - Device Preview uses one live same-origin full-app iframe at one of six exact CSS viewport sizes and a fit/zoom control. It must preserve project/workflow state when profiles change and save/synchronize before exit.
 - This authorization does not enable privileged Developer Mode, diagnostics, secrets, server logs, administrative controls, AI calls, approval bypasses, or cloud cost controls. Those remain unavailable or guarded.
 - Browser QA uses simulated local data and no external/provider API requests. Screenshots and reports are GitHub Actions artifacts; the Chromium viewport is not native iOS Safari.
+
+## Global Navigation Redesign and Developer Mode (2026-11-20)
+- The latest approved interaction replaces the seven-tap gesture: the subtle `</>` header control opens a masked preview-code form for `URTN`; unlock, cancel and lock are available, and access resets with the browser session. It is deliberately a client-side preview gate, never owner authentication.
+- Use the compact hamburger-led header and categorized collapsible drawer from the latest owner-approved navigation structure. Selecting a destination closes the menu after the current project save flushes.
+- Developer Preview Mode is UI-only and appears in the drawer only while unlocked. It renders the full app in a live same-origin iframe for the six exact device profiles, with adjustable fit/zoom and preserved project/workflow state. No screenshots as simulation.
+- Privileged diagnostics, secrets, server logs, admin APIs, AI generation, approval bypass and cost-control bypass remain unavailable.

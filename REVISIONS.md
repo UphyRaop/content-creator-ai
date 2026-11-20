@@ -44,3 +44,9 @@
 - Commit `612592075ebc4cf0614d595ee999ffa1e704a46b` passed Playwright run `44687790479` and Pages deployment run `44687790598`.
 - Playwright artifact `14606708742` contains the HTML report and actual Chromium captures for all six viewport profiles (expires 2026-12-04). The suite checks the UI-only 13-stage simulation and approval gates without weakening secure-context validation.
 - Direct custom-domain/certificate inspection and native iOS device testing remain unavailable. No spend, DNS edits, live provider calls, or cloud changes.
+
+## 2026-11-20 — Global Navigation Redesign & Developer Mode
+- Replaced the earlier seven-tap logo trigger with a subtle `</>` button and masked URTN preview access form. Added cancel, incorrect-code feedback, session-only unlock and lock. Clearly labeled as a UI preview gate, not owner authentication.
+- Replaced horizontal stage navigation with a compact hamburger drawer grouped into Workspace, Content library, Management and production workflow. Active-page markers, expandable sections, outside/Escape/selection close behavior, and save-before-navigation handling are included.
+- Connected Developer Preview Mode to the real application inside a same-origin iframe across six target viewport profiles; fit/zoom and responsive state retention are supported. Privileged tools and live operations remain disabled.
+- Automated QA and deployment evidence: see `QA.md` and `DEPLOYMENTS.md`.

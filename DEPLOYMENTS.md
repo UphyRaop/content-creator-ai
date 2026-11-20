@@ -91,3 +91,10 @@ GitHub Pages serves static files. It cannot run the SQLite API routes, persisten
 - Pages deploy run [44687790598](https://github.com/UphyRaop/content-creator-ai/actions/runs/44687790598) passed for `612592075ebc4cf0614d595ee999ffa1e704a46b`.
 - Matching automated device suite [44687790479](https://github.com/UphyRaop/content-creator-ai/actions/runs/44687790479) passed and uploaded [artifact 14606708742](https://github.com/UphyRaop/content-creator-ai/actions/runs/44687790479/artifacts/14606708742), the report and six viewport screenshots (expires 2026-12-04).
 - Existing Pages configuration retains `ccai.ur-project.biz`; deployment workflow proves static build/publication. The available web verifier could not independently inspect the custom domain or its certificate. DNS was not modified.
+
+## Global Navigation Redesign & Developer Mode — 2026-11-20
+- Existing `main`-push GitHub Pages workflow deploys the static output. This update does not change DNS, custom-domain settings, HTTPS settings, hosting, or the private backup.
+- Final Pages workflow run, deployed commit, URL check, Playwright run, and artifact URL are recorded here after GitHub Actions completes. A successful Pages workflow confirms build and publish jobs; do not infer an HTTPS redirect or mobile hardware test from that alone.
+
+### Pre-deployment verification
+- Local preview and Playwright checks passed before sync. The next normal fast-forward commit triggers both existing Actions workflows; successful Pages publication and the retained Playwright artifact must be verified from the resulting run IDs before calling the deployment complete.
