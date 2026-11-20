@@ -78,7 +78,8 @@ GitHub Pages serves static files. It cannot run the SQLite API routes, persisten
 - Latest handover-only commit `fe1cac3d0982e5f289b2b1ae8a2ffde560e9c1a4` triggered run `44675111026`, whose Deploy Pages step failed after the upload step succeeded: attempt 1 reported zero artifacts, and its retry reported two duplicate `github-pages` artifacts. The previous successful static deployment (run `44674910030`) contains the same application files. This is a GitHub Actions artifact lookup issue, not a build failure.
 - Documentation follow-up commit `2fcaa457732cec881aba0adc56d05285697411f3` then completed Pages run [`44675530914`](https://github.com/UphyRaop/content-creator-ai/actions/runs/44675530914) successfully, confirming the automatic deployment path recovered. No application payload changed in these handover-only commits.
 
-## 2026-11-20 — Device Preview Mode deployment (pending)
+## 2026-11-20 — Device Preview Mode deployment (Pages PASS; Playwright rerun pending)
 - Pages automatic deployment remains the existing deploy-on-`main` workflow; build output is `dist/` and contains the interactive static prototype.
 - Deployment is authorized only after responsive and regression checks. No DNS or HTTPS settings will be changed.
-- A separate Playwright Actions workflow is being added; it will execute before/alongside Pages deployment and upload six viewport screenshots, an HTML report and traces as a 14-day artifact. Current local QA found an exact-size defect; no deployment result for this feature exists yet.
+- Local six-profile and 13-stage Playwright/regression checks passed. Pages run [`44683636101`](https://github.com/UphyRaop/content-creator-ai/actions/runs/44683636101) succeeded for commit `f04e22b9b4aabf2c01e45cdac8ed45f9812b0622`.
+- First GitHub Playwright run [`44683634596`](https://github.com/UphyRaop/content-creator-ai/actions/runs/44683634596) failed before any job ran: the workflow defined both `NO_PROXY` and `no_proxy`, which GitHub rejects as duplicate case-insensitive environment variables. Removed the lowercase key; the next commit will rerun both workflows. No Actions screenshot artifact exists yet.
