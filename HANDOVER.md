@@ -69,3 +69,4 @@
 - Owner action remains: check GitHub Settings → Pages and enable “Enforce HTTPS” if unchecked. No DNS was changed.
 - Keep Developer Mode disabled in the public static preview. Use this checkpoint as verified state; do not claim screenshot or mobile viewport coverage.
 - Final documentation follow-up commit `5c25d6291be7d2061a353890ab460fbde0bd9860` (GitHub noreply identity) and Pages run `44674910030` also succeeded; it did not modify application behavior.
+- A further handover-only commit `fe1cac3d0982e5f289b2b1ae8a2ffde560e9c1a4` triggered Pages run `44675111026`; build and artifact upload passed, but Deploy Pages failed on artifact lookup (first attempt found zero, retry found duplicate artifacts). The last successful deployment remains run `44674910030`, which contains the same application payload. Do not describe run `44675111026` as successful.
