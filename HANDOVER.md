@@ -98,3 +98,8 @@
 ### Current verification checkpoint
 - Local Playwright full matrix: 11 passed, 25 expected viewport skips; six screenshots and HTML report generated. `npm test`, TypeScript, static build, Next production build, syntax, changed-file secret scan and diff check passed.
 - Remaining sequence: fast-forward sync the verified source/tests/docs to latest `main`; verify Pages and Playwright Actions for the exact new commit; verify six PNG screenshot artifact metadata; check the custom URL over HTTPS in a browser; then record final run/artifact links. Never force-push, change DNS, or claim a workflow success before reading its status.
+
+### Completed checkpoint — Global Navigation Redesign & Developer Mode
+- Final application source, static outputs, docs and Playwright spec are on `main` at `bb8a335ca9e7ee7c03ca2c0006445a01c5496a61`; all large files were verified at full expected blob sizes. The final commit uses GitHub noreply identity.
+- Pages run [44713191240](https://github.com/UphyRaop/content-creator-ai/actions/runs/44713191240) **PASS**; Playwright run [44713191228](https://github.com/UphyRaop/content-creator-ai/actions/runs/44713191228) **PASS**. Artifact [14618910353](https://github.com/UphyRaop/content-creator-ai/actions/runs/44713191228/artifacts/14618910353) has six screenshots and the report (14-day retention). The custom domain loaded in Chrome over HTTPS with the updated dashboard.
+- No Phase 3+ work started; no live AI, cost, cloud resources, DNS edits, repository settings or backup changes. Native iOS Safari/hardware and TLS certificate details remain untested.
