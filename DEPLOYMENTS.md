@@ -67,9 +67,10 @@ GitHub Pages serves static files. It cannot run the SQLite API routes, persisten
 - Current public `main` history scan found personal email metadata in three older commits. Current commits use noreply. History was not rewritten or force-pushed under the project restrictions; treat this as an outstanding privacy issue.
 - Final tested source/mocked-provider update is commit `4300e8eff63721a59f65ac6ce831be48728e3037`, fast-forwarded from `f9688eb417c5375010140d93895c9d2a00645265`; author and committer use GitHub noreply. Pages workflow [`44583016152`](https://github.com/UphyRaop/content-creator-ai/actions/runs/44583016152) succeeded. The public URL was visually verified after the preceding source commit; this final deployment changes backend/test/docs and leaves the Pages artifact unchanged.
 
-## 2026-11-20 branding update — deployment pending
+## 2026-11-20 branding update — Pages workflow succeeded
 - Target: `https://ccai.ur-project.biz/`; static deploy workflow runs on `main` updates and builds `dist/`.
 - Latest known remote before this change: `a03dacfa3b2419868dd61ebf3baccb113f67939d`; Pages workflow run `44583481171` succeeded.
-- Local branding build passes; GitHub sync and a new Pages run are pending.
-- HTTPS enforcement could not be verified with the current GitHub connector; latest recorded setting remained `https_enforced:false`. Owner must check GitHub Pages settings manually if enforcement is not available through the account UI.
+- Security-checked changes were fast-forwarded as commit `0fd25dbb8114359dfa2fcb03db43e36121a94403` with noreply author and committer. Pages workflow run [`44674575147`](https://github.com/UphyRaop/content-creator-ai/actions/runs/44674575147) completed successfully for that exact commit.
+- The workflow confirms successful build/upload/deploy. Direct custom-domain page content and HTTPS redirection were not independently inspected: the cloud browser URL policy denied access; Chromium/Playwright could not launch in the local sandbox. Do not report visual accessibility or HTTPS as verified.
+- HTTPS enforcement could not be read through the GitHub connector; latest previously recorded setting remained `https_enforced:false`. Owner action: inspect GitHub repository Settings → Pages and enable “Enforce HTTPS” if it is unchecked.
 - Full Developer Mode remains disabled on Pages. No DNS, hosting provider, credentials, or external services changed.

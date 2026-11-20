@@ -61,3 +61,10 @@
 - `npm test`, `npx tsc --noEmit`, Next production build, static build, auth/AI/cost/provider/cloud/P11 tests, and `git diff --check` passed. P11 HTTP test: 79/79.
 - Chromium/Playwright launch failed with sandbox SIGTRAP; requested six viewport screenshots and browser console are NOT TESTED. Do not call CSS inspection a runtime pass.
 - Next: complete the final source security scan, sync only reviewed changes/docs to `main` using GitHub integration and noreply identity, verify Pages Actions run/URL, then update this checkpoint with the actual commit and deployment result. Do not touch private backup, rewrite history, enable HTTPS/DNS, or activate paid services.
+
+### Deployment checkpoint update (2026-11-20)
+- Commit `0fd25dbb8114359dfa2fcb03db43e36121a94403` is on `main`; commit author and committer are `355911884+UphyRaop@users.noreply.github.com`.
+- Pages workflow run `44674575147` succeeded for the exact source commit.
+- The cloud browser security policy denied direct access to `https://ccai.ur-project.biz/`; local Chromium/Playwright could not start. Treat the public page's visual appearance, console, custom-domain response, and HTTPS redirect as NOT TESTED, despite successful workflow deployment.
+- Owner action remains: check GitHub Settings → Pages and enable “Enforce HTTPS” if unchecked. No DNS was changed.
+- Keep Developer Mode disabled in the public static preview. Use this checkpoint as verified state; do not claim screenshot or mobile viewport coverage.
