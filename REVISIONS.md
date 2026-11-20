@@ -22,3 +22,10 @@
 - Versioned SQLite cloud-ledger migration preserves prior emergency-stop state transactionally; emergency stop is installation-wide; public reservation create/release stay disabled (503) until trusted telemetry and worker reconciliation are in place.
 - Added Google Cloud architecture readiness review and updated project status/continuity docs. No GCP resources, paid services, DNS, or API usage; RM0 spent.
 
+## 2026-11-20 — CCAI branding and safe preview entry
+- Rebranded the application shell with exact brand tokens, CCAI mark, Creator Studio metadata/favicon, loading screen, and requested footer/company copy.
+- Added seven-tap logo behavior leading to an unavailable-only Developer Mode preview notice. Added owner-authenticated, same-origin, disabled server route and focused security test.
+- Closed cloud render retry and post-production admission gaps with the same fail-closed cloud gate; added route-guard fixtures.
+- Automated functional and build suites passed. Chromium/Playwright runtime failed to start in the sandbox (SIGTRAP/Crashpad permission), so screenshots and requested exact viewport runtime checks were not completed.
+- No live AI or cloud work, DNS changes, hosting spend, or data migration. RM0 used.
+

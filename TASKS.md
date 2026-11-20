@@ -218,3 +218,9 @@ Integrated and synchronized P11 source/docs in noreply fast-forward commit `ba5a
 ### CCAI-04-AI — CCAI-P12-SEC-01
 - Scope: read-only security/bypass review of metering APIs, estimates, reservation lifecycle, and future provider integration.
 - Status: complete. No active GCP or live-provider path exists; reservation admission remains disabled until worker/telemetry integration is implemented. Release authority, owner-scoped billing, period validation, and unconnected AI/render route admission are future production blockers.
+
+### CCAI-BRAND-DEV-01 — Branding redesign and safe Developer Mode preview
+- Status: UI and fail-closed API prepared; public preview must not expose privileged Developer Mode.
+- Done: exact palette, accessible CCAI logo, metadata/favicon, startup screen, attribution footer, seven-tap unavailable notice; endpoint/test; cloud render retry/post-production guards; source/build/regression checks.
+- Pending: owner-bound recent reauthentication and secure console require a protected backend design; static Pages remains unsupported. Six target viewport screenshots and runtime tests require a browser that can launch and set exact viewport sizes.
+- Blockers: current sandbox browser launcher exits with SIGTRAP; Pages HTTPS setting could not be read by GitHub connector. No owner credential or action was attempted.

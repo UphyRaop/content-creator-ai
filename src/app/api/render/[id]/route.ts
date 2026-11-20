@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cancelRenderJob, retryRenderJobAsync } from "@/lib/ffmpeg-renderer";
 import { hasProjectApproval } from "@/lib/approval-store";
 import { crossOriginResponse, notFoundResponse, ownedRenderJob, requireRenderUser, sameOriginMutation } from "../access";
+import { cloudRenderAdmissionBlock } from "@/lib/provider-admission";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,6 +37,8 @@ export async function POST(request: Request, { params }: Context) {
   if (!access) return notFoundResponse();
   if (!hasProjectApproval(user.id, access.project.id, "timeline")) return NextResponse.json({ error: "The current timeline approval is stale." }, { status: 409, headers: { "cache-control": "no-store" } });
   if (access.job.kind === "post-production" && access.job.parentRenderJobId && !ownedRenderJob(user.id, access.job.parentRenderJobId)) return notFoundResponse();
+  const admissionBlock = cloudRenderAdmissionBlock(process.env);
+  if (admissionBlock) return NextResponse.json({ error: admissionBlock }, { status: 503, headers: { "cache-control": "no-store" } });
   try {
     const job = await retryRenderJobAsync(id);
     return job ? NextResponse.json({ job }, { status: 202, headers: { "cache-control": "no-store" } }) : NextResponse.json({ error: "Retryable render job not found." }, { status: 404 });

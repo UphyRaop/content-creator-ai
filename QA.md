@@ -156,3 +156,13 @@ Stages 1–13 are present in the application. Phase-specific source/helper tests
 - `npm audit --audit-level=high`: NOT VERIFIED. The npm advisory endpoint was unreachable from the environment (network request failed with `EPERM`); this is not a clean audit result.
 
 Cost: RM0; the RM20 provider-testing budget remains untouched.
+
+## Branding / Developer Mode QA — 2026-11-20
+- **PASS:** Static preview source assertions for brand palette, CCAI/Content Creator AI labels, favicon metadata, loader/footer copy, and safe seven-tap behavior.
+- **PASS:** Isolated tap handler check: six taps do not open the notice; seven taps open it; timeout and close reset/focus behavior pass. No API request or privileged diagnostics are exposed by the static preview.
+- **PASS:** `/api/developer-mode` tests: unauthenticated requests 401, cross-origin mutation denied, caller-supplied activation/secret flags rejected without echo, expired session rejected, and valid session reports unavailable (503).
+- **PASS:** `npm test`, `npx tsc --noEmit`, `npm run build`, `npm run build:static`, auth API, AI/cost preflight, provider mocks, cloud metering, render route guards, and P11 HTTP suite (79/79).
+- **NOT TESTED:** Six requested viewport runtime tests/screenshots (1920×1080, 1366×768, 768×1024, 1024×768, 390×844, 844×390). Chromium/Playwright failed to launch in this environment with a Crashpad `setsockopt` permission failure and SIGTRAP. Responsive CSS was source-reviewed only.
+- **NOT VERIFIED:** Browser console, live custom-domain accessibility, HTTPS redirection/enforcement, and UI persistence in a runtime browser after this change. No user preview storage was read or modified.
+- **Security note:** Full owner reauthentication and privileged Developer Mode are intentionally unavailable until protected backend support is implemented. Public Pages displays no diagnostics or privilege controls.
+- **Cost:** RM0; no live provider calls, Google Cloud, or RM20 testing-budget use.

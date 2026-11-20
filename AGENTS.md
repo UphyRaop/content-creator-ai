@@ -90,3 +90,9 @@ Phases 7–11 were authorized together by the user. Phase 11 automated fixes and
 - Cloud Run is not a safe home for current SQLite, media files, or the in-memory renderer queue. Do not enable it until durable database, object storage, queue, identity, secrets, rollback, and spend controls are designed and separately approved.
 - Do not create cloud deployment templates that can provision resources by default. Any future scripts must require explicit owner action and clearly show potentially billable services before execution.
 - Current local FFmpeg fixture is not a production-scale benchmark. Report its resolution/fps and environment only; do not extrapolate it as Cloud Run capacity.
+
+## Branding and Developer Mode boundary (2026-11-20)
+- Use the approved brand tokens `#090909`, `#FF8A24`, and `#800024`; retain readable contrast, dark/light theme support, and existing workflow and storage behavior.
+- The logo's seven-tap entry point is a hidden preview affordance only. On GitHub Pages it must open only an unavailable notice and must not reveal diagnostics, secrets, user data, cost controls, or production controls.
+- Server-side Developer Mode stays unavailable until owner-bound recent reauthentication and a secure session capability are implemented and hosted on a protected Node backend. Never trust a browser flag, local storage, URL parameter, or caller-supplied role.
+- Public GitHub Pages is a static simulation. Do not deploy privileged Developer Mode controls there.

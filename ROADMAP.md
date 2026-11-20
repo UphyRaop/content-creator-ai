@@ -175,3 +175,9 @@ The public repository contains three older commits whose author/committer metada
 - Direct script/image APIs now return 503 for any non-simulated provider until metered durable admission is implemented; Cloud Run render submission is also blocked. Gemini/FLUX/ElevenLabs success paths are exercised with stubs only. FLUX polling has a 120-second overall deadline.
 - Local FFmpeg 7.1.5 fixture passed for a synthetic H.264 1080p landscape 30 FPS file. Requested 1/2/3/5-minute, portrait/landscape, 30/60 FPS and full effects benchmark matrix remains untested; production-scale/Cloud Run capacity is not claimed.
 - No AI/render operation is integrated with metering, idempotent durable jobs, or cancellation/reconciliation; live execution remains blocked.
+
+### Branding redesign and Developer Mode preparation — PARTIAL PASS (2026-11-20)
+- Applied the approved CCAI palette, branded logo/metadata/loading/footer, and a hidden seven-tap preview entry. The preview shows an unavailable message only; it has no diagnostics or privileged operations.
+- Added an authenticated same-origin `/api/developer-mode` endpoint that fails closed with 503 until recent server-side reauthentication exists. Cloud render retry and post-production admission are also guarded consistently.
+- Preview security and source/build tests passed. Exact six-viewport runtime tests and screenshots were not available in the browser sandbox; responsive CSS was reviewed only. HTTPS enforcement remains a GitHub Pages setting requiring owner verification.
+- Full secure Developer Mode, owner reauthentication, live browser viewport QA, and protected hosting are deferred. No live APIs, cloud resources, DNS changes, or costs were used.

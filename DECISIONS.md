@@ -111,3 +111,9 @@
 - Architecture alternatives have not been approved: (A) one VM plus persistent POSIX disk to preserve SQLite, with ongoing host cost; or (B) Cloud Run Service/Jobs plus Cloud SQL/PostgreSQL, Cloud Storage, and durable job records/queue, with a data migration and persistent service charges. Review `docs/phase13-cloud-architecture-review.md` before selecting either.
 - No architecture switch, GCP deployment, billing activation, live API, or credential configuration is authorized by this preparation task. RM0 remains a design goal, not a guarantee or verified bill.
 - Phase 14 adapters remain disabled. Provider and renderer actions must not be enabled until cloud metering, idempotency, durable job state, and ambiguous-outcome reconciliation are connected and verified.
+
+## Branding and Developer Mode preview decision (2026-11-20)
+- Approved brand: black `#090909`, orange `#FF8A24`, maroon `#800024`; preserve existing themes, saved data, approvals, and production workflow.
+- The public GitHub Pages logo's seven-tap sequence may reveal only an unavailable notice. It must not expose the developer console or privileged controls.
+- Recent server-side owner reauthentication is not implemented. The Node endpoint stays unavailable (503) for authenticated requests, with unauthenticated requests rejected; no browser flag can enable it.
+- No screenshot or exact viewport runtime evidence is available from the restricted browser sandbox. Treat all six viewports as NOT TESTED until captured in a supported browser.

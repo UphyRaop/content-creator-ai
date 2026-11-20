@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createPostProductionExportJob, type PostProductionAudioUpload } from "@/lib/ffmpeg-renderer";
 import { hasProjectApproval } from "@/lib/approval-store";
 import { crossOriginResponse, notFoundResponse, ownedRenderJob, requireRenderUser, sameOriginMutation } from "../../access";
+import { cloudRenderAdmissionBlock } from "@/lib/provider-admission";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 const MAX_BODY=32*1024*1024;
@@ -21,6 +22,8 @@ export async function POST(request:Request,{params}:Context){
   if(!source)return notFoundResponse();
   if(source.job.status!=="completed")return NextResponse.json({error:"The source render must be complete."},{status:409,headers:{"cache-control":"no-store"}});
   if(!hasProjectApproval(user.id,source.project.id,"timeline"))return NextResponse.json({error:"The current timeline approval is stale."},{status:409,headers:{"cache-control":"no-store"}});
+  const admissionBlock=cloudRenderAdmissionBlock(process.env);
+  if(admissionBlock)return NextResponse.json({error:admissionBlock},{status:503,headers:{"cache-control":"no-store"}});
   try{
     const body=JSON.parse(await readBoundedBody(request)) as Record<string,unknown>;
     if(typeof body.parentRenderVersion!=="string"||typeof body.revisionId!=="string"||!Array.isArray(body.audioAssets))return NextResponse.json({error:"Parent version, revision ID, and audio assets are required."},{status:400});
