@@ -38,3 +38,9 @@
 - No live AI, paid service, cloud resource, database migration or user-data overwrite occurred.
 - Actions run `44684412972` passed setup/build and all six viewport tests, then failed only on two desktop test harness assumptions (UUID availability on HTTP and a nonexistent status label). The test now checks the real timeline approval state; local rerun passed. A third CI run is pending after syncing the test correction.
 - The first HTTPS CI attempt established that the app correctly refuses timeline approval without `crypto.subtle` on HTTP. QA prepared a local HTTPS test server with an ephemeral, non-uploaded certificate; the application approval check stays unchanged. Desktop workflow passes with `isSecureContext` and `crypto.subtle` asserted, and six target profiles pass locally. Final GitHub Actions run pending.
+
+
+### Developer Preview Mode — completion update
+- Commit `612592075ebc4cf0614d595ee999ffa1e704a46b` passed Playwright run `44687790479` and Pages deployment run `44687790598`.
+- Playwright artifact `14606708742` contains the HTML report and actual Chromium captures for all six viewport profiles (expires 2026-12-04). The suite checks the UI-only 13-stage simulation and approval gates without weakening secure-context validation.
+- Direct custom-domain/certificate inspection and native iOS device testing remain unavailable. No spend, DNS edits, live provider calls, or cloud changes.

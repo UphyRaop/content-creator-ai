@@ -190,3 +190,9 @@ The public repository contains three older commits whose author/committer metada
 - Automated regression test, TypeScript check, static build, Next production build, inline script syntax, security-pattern scan, and `git diff --check` passed. Pages deploy run `44683636101` succeeded for commit `f04e22b9b4aabf2c01e45cdac8ed45f9812b0622`. Playwright workflow first failed before jobs because `NO_PROXY` and `no_proxy` were duplicate case-insensitive env keys; removed the lowercase duplicate and a follow-up Actions run is pending.
 - Follow-up Actions run `44684412972` completed build and all six viewport checks, then exposed two test-only desktop assertion issues: unavailable `crypto.randomUUID()` in the runner HTTP context and a nonexistent expected render label. QA corrected those assertions to use an innocuous test identity and verify the actual approval notice plus timeline/render eligibility; local reruns pass. A third GitHub Actions run is pending.
 - The same CI run later confirmed timeline approval correctly fails closed when `crypto.subtle` is absent over HTTP. The test harness now uses a local HTTPS server and an ephemeral, unuploaded certificate, preserving the production secure-context check. Local HTTPS QA and secure timeline approval pass; a final Actions run is pending.
+
+
+### Developer Preview Mode — final Actions result (supersedes pending CI status)
+- Commit `612592075ebc4cf0614d595ee999ffa1e704a46b` passed Playwright run `44687790479` and Pages deploy run `44687790598`.
+- Six viewport profiles and the simulated 13-stage path/gates passed; report and six screenshots are retained as artifact `14606708742` until 2026-12-04.
+- Direct custom-domain/certificate inspection and native iOS hardware testing remain unverified. No DNS changes or costs.
