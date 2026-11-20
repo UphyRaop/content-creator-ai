@@ -156,4 +156,86 @@ Integrated and synchronized P11 source/docs in noreply fast-forward commit `ba5a
 - Code and local verification complete. Current task is syncing reviewed changes to public `main` with a GitHub noreply identity, then checking the Pages run and deployed preview. Do not start another feature phase.
 - Recovered team roles: UIUX, backend, AI/security, QA and DevOps work is reported complete; lead integration and isolated desktop workflow are complete. No agents remain active; hidden agent contexts are not claimed as recovered.
 - Tests repeated: 19 project-store checks, 77 API checks, auth/AI/vault/renderer/post-production/publishing suites, TypeScript, Next and static builds, diff check and source/artifact credential-pattern scan passed.
--
+- Residuals: mobile/tablet runtime unavailable; owner must enable HTTPS enforcement; no persistent Node host; old public commit email metadata remains unchanged. Cost RM0; RM20 untouched; private backup unchanged.
+
+- Dependency review: `npm audit --audit-level=high` passed with 0 findings.
+
+
+## Active phase — CCAI Phase 12: Google Cloud Usage & Cost Protection
+
+### CCAI-01-LEAD — CCAI-P12-INT-01
+- Objective: integrate metering/reservation backend, simulated dashboard, verified free-tier research and independent QA; preserve existing CCAI functionality.
+- Constraints: RM0; no Google Cloud resources, billing activation, paid API, infrastructure deployment, private backup edits, or unverified metrics presented as actual.
+- Acceptance: persist allowances/usage/history; server-enforce shared reservations and 80/85/90 thresholds, fail-closed on stale/unavailable metrics and manual emergency stop; label preview simulation; regression/build passes; deploy Pages via fast-forward with noreply identity.
+- Status: complete for Phase 12 preparation. Fast-forward commit `dd4c08340f6680e00809176f2d20982b18ba9f6c` uses GitHub noreply identity; Pages run `44563461113` succeeded; the dashboard was verified at the custom domain. Production admission remains intentionally disabled (503) until trusted metrics and a durable worker exist.
+
+### CCAI-02-UIUX — CCAI-P12-UI-01
+- Objective: responsive Cloud Usage & Billing dashboard in the existing prototype.
+- Files: `prototype.html` only.
+- Acceptance: simulated/estimated/verified labels; resource bars, daily/monthly stats, history, warnings, protection state, reset and emergency stop; no external calls or claims that UI stop disables GCP.
+- Status: complete. Dashboard labels all data as simulated/unavailable, shows all eight resource pools without inventing provider limits, documents 2 vCPU/4 GiB and 300 videos as provisional assumptions, distinguishes the sample RM500 envelope from the approved RM0 goal, and makes emergency stop preview-only. Source assertions, syntax and diff checks passed; browser/device runtime was not available.
+
+### CCAI-03-BACKEND — CCAI-P12-BE-01
+- Objective: SQLite-persistent, resource-dimensional usage provenance, billing-period snapshots, and secured fail-closed reservation APIs.
+- Files: `src/lib/cloud-metering.ts`, `src/app/api/cloud/usage/**`, `scripts/test-cloud-metering.mjs`.
+- Acceptance: Pacific DST-aware billing windows with stored UTC bounds; separate per-pool units/limits and MYR actual/estimate; 80/85/90 warnings and projected 90% admission block; server-configured allowances/estimates; same-origin/session owner APIs; fail-closed pool readiness; emergency stop; no caller-forged verified data, period, TTL, or resource estimates; no Cloud calls.
+- Status: backend ledger complete; admission endpoint intentionally disabled with 503 until trusted multi-pool estimates, GCP telemetry and a durable worker exist. `node --experimental-strip-types scripts/test-cloud-metering.mjs`, `npx tsc --noEmit`, and `git diff --check` pass. Fixture covers Pacific month/DST boundaries, authentication, untrusted metrics, all-pool fail-closed summary, warning/projection thresholds, shared MYR reservation arithmetic, idempotency, release/persistence and durable no-auto-release behavior.
+- Runtime limits: no trusted GCP telemetry importer or worker is active, so metrics default unavailable and cloud operations report inactive. Current internal reservation primitive models one configured resource pool per resource type; it is not exposed as active job admission because it does not reserve all affected pools. No actual Cloud job execution, retry orchestration, or timeout enforcement is active/tested. Independent QA verified concurrent process reservations. Reservations stay reserved after the 5-minute review deadline until explicit release or verified reconciliation to avoid freeing ambiguous chargeable work. No paid APIs, GCP setup, or spending authorization.
+
+### CCAI-05-QA — CCAI-P12-QA-PLAN-01
+- Objective: independent Phase 12 test matrix and security/regression review.
+- Files: `docs/qa/phase12-test-plan.md` only during implementation.
+- Acceptance: thresholds, concurrency, failure/retry, restart, reset/history, missing metrics, bypass, responsive simulation and all existing phases.
+- Status: complete with PARTIAL PASS. Focused metering, persistence, threshold, concurrent-reservation and P1–P11 regression checks passed. Actual GCP telemetry, live worker behavior, and viewport/device runtime were not tested. See `QA.md` and `docs/qa/phase12-test-plan.md`.
+
+### CCAI-06-DEVOPS — CCAI-P12-GCP-01
+- Objective: official-source research of Google free tier, shared allowances, Cloud Run Services/Jobs, durable storage, budget alerts and cost controls.
+- Files: `docs/google-cloud-phase12.md` only during implementation.
+- Acceptance: current official sources, quota aggregation/reset caveats, pricing coverage/gaps, no resource creation or charges.
+- Status: complete. Official Google documentation review is recorded in `docs/google-cloud-phase12.md`. No account, project, billing configuration, API, resource or deployment was accessed or created.
+
+## Phase 12–14 continuation — 19 November 2026
+
+### CCAI-01-LEAD — P12–P14 integration
+- Status: partial completion. Integrated current audit, safe Gemini/FLUX hardening, documentation, QA evidence, and owner action list. No cloud provisioning, live API, billing, or DNS action.
+- Remaining: resolve hosting/database decision with owner, implement a trusted telemetry adapter and cross-resource/account ledger, integrate every billable route, establish durable job/media state and migration/rollback, complete production tests and benchmarks, then deploy only after cost/billing approval.
+
+### CCAI-02-UIUX — P12 dashboard review
+- Status: PASS. Dashboard labels data as simulated/unavailable and clearly differentiates RM0 target from actual verified billing. Resource rows, warning/protection states, themes and responsive CSS exist. Source assertions pass; runtime device/browser checks were not performed in this continuation.
+
+### CCAI-03-BACKEND — P12 ledger hardening
+- Status: PASS for safe local preparation. Added transactional versioned schema migration and installation-wide emergency-stop scope; admission and release remain HTTP 503. `node --experimental-strip-types scripts/test-cloud-metering.mjs`, `npx tsc --noEmit`, and `git diff --check` pass.
+
+### CCAI-04-AI — P14 provider audit
+- Status: partial completion. Added route-level fail-closed gates for non-simulated providers, Gemini timeout/cost fallback, bounded FLUX polling and exact output-host allowlist. Gemini/FLUX/ElevenLabs mock-success tests pass without network access. Durable metered job integration, route idempotency/rate limits, and external cancellation/outcome reconciliation remain blocked; no live request.
+
+### CCAI-05-QA — P1–P14 test review
+- Status: partial pass. Regression suites, cloud threshold/concurrency/idempotency fixtures, and one local FFmpeg fixture pass. The HTTP integration harness now reports 79 checks with zero failures. No real GCP telemetry, cloud jobs, production-scale benchmark, mobile/tablet browser run, or Cloud Run deployment.
+
+### CCAI-06-DEVOPS — P13 GCP review
+- Status: source and official-doc review complete. Read `docs/phase13-cloud-architecture-review.md`. No account or resources accessed or created. Deployment remains blocked by SQLite/local media/in-memory queue and unresolved cost architecture.
+
+### CCAI-04-AI — CCAI-P12-SEC-01
+- Scope: read-only security/bypass review of metering APIs, estimates, reservation lifecycle, and future provider integration.
+- Status: complete. No active GCP or live-provider path exists; reservation admission remains disabled until worker/telemetry integration is implemented. Release authority, owner-scoped billing, period validation, and unconnected AI/render route admission are future production blockers.
+
+### CCAI-BRAND-DEV-01 — Branding redesign and safe Developer Mode preview
+- Status: UI and fail-closed API prepared; public preview must not expose privileged Developer Mode.
+- Done: exact palette, accessible CCAI logo, metadata/favicon, startup screen, attribution footer, seven-tap unavailable notice; endpoint/test; cloud render retry/post-production guards; source/build/regression checks.
+- Pending: owner-bound recent reauthentication and secure console require a protected backend design; static Pages remains unsupported. Six target viewport screenshots and runtime tests require a browser that can launch and set exact viewport sizes.
+- Blockers: current sandbox browser launcher exits with SIGTRAP; Pages HTTPS setting could not be read by GitHub connector. No owner credential or action was attempted.
+
+### CCAI-DEV-PREVIEW-01 — Hidden full-app device preview and browser QA (2026-11-20)
+- **CCAI-01-LEAD:** integrate changes, maintain guardrails/docs, run regressions, synchronize to remote `main` via GitHub integration, verify Actions/Pages and artifact evidence. Status: in progress; local checks and Pages deploy pass. Initial workflow creation was blocked by duplicate `NO_PROXY`/`no_proxy` keys; later harness assumptions (`crypto.randomUUID()` and nonexistent render label) were corrected. CI run `44685815878` then confirmed the app's intended fail-closed response to insecure HTTP (`crypto.subtle` unavailable); QA server is now local HTTPS with an ephemeral runner-temp certificate and the secure-origin override removed. Local rerun passes; GitHub Actions HTTPS rerun/artifact verification pending.
+- **CCAI-02-UIUX:** implement seven-tap hidden Device Preview Mode, responsive same-origin iframe, six exact profiles, fit/zoom, project persistence, exit/keyboard flow. Files: `prototype.html`, generated `dist/index.html`, `public/prototype.html`. Status: complete after fixing viewport dimensions, Stage 5 preview helper and exit/reopen project selection.
+- **CCAI-05-QA:** implement pinned Playwright GitHub Actions suite, independent six-profile UI/console/overflow/persistence/gate tests, full simulated workflow, screenshots/report artifacts, rerun after fixes. Files: `.github/workflows/device-preview-playwright.yml`, `playwright.config.cjs`, `tests/device-preview/device-preview.spec.cjs`, `scripts/serve-static-preview.mjs`. Status: local HTTPS QA complete (9 passed, 15 expected skips); real secure-context `crypto.subtle` timeline approval succeeds, approval/eligibility predicates pass, visible controls have accessible names/nonzero bounds, key text is not clipped, and all six target profiles are rendered in a 1920×1080 host viewport. CI failures and HTTPS correction documented in `QA.md`; GitHub Actions HTTPS rerun/artifact verification pending.
+- **CCAI-03-BACKEND:** read-only security/gate audit. Status: complete; no credentials/privileged operations are exposed by preview; backend Developer Mode remains unavailable. Browser local state remains user-editable and must not be treated as trusted server approval.
+- **CCAI-04-AI:** read-only map of the 13 workflow stages/gates; confirm preview performs no live provider operation. Status: complete; simulated UI/gate coverage only.
+- **CCAI-06-DEVOPS:** read-only Pages/deployment review. Status: complete; Pages deploy-on-main exists, prior run 44675772141 succeeded; current user-approved changes still need a successful deployment run.
+- **Acceptance:** all six exact inner viewports pass; full-app preview responsive and usable; profile switching does not reload/reset the frame; synthetic project persists through exit/reopen; no unexpected network/API requests or console errors; functional approval gates preserved; local regressions/static build and static deployment pass; screenshots/report are uploaded as Actions artifacts; GitHub noreply identity is used.
+
+
+#### CCAI-DEV-PREVIEW-01 — Final acceptance
+- Lead, UIUX, QA, backend security, AI workflow mapping, and DevOps review tasks are complete for the authorized scope.
+- Latest verified main commit `612592075ebc4cf0614d595ee999ffa1e704a46b` passed Pages run `44687790598` and Playwright run `44687790479`. Screenshot/report artifact: `14606708742`, retained until 2026-12-04.
+- Remaining verification boundary: no native device/iOS Safari session and no direct custom-domain/certificate probe. Privileged mode/live providers remain disabled; no DNS changes or cost.
