@@ -98,3 +98,9 @@ GitHub Pages serves static files. It cannot run the SQLite API routes, persisten
 
 ### Pre-deployment verification
 - Local preview and Playwright checks passed before sync. The next normal fast-forward commit triggers both existing Actions workflows; successful Pages publication and the retained Playwright artifact must be verified from the resulting run IDs before calling the deployment complete.
+
+### Verified final deployment — global navigation and preview mode
+- **PASS:** `main` commit `bb8a335ca9e7ee7c03ca2c0006445a01c5496a61` triggered Pages run [44713191240](https://github.com/UphyRaop/content-creator-ai/actions/runs/44713191240), which completed successfully.
+- **PASS:** matching Playwright run [44713191228](https://github.com/UphyRaop/content-creator-ai/actions/runs/44713191228) completed successfully for that commit. Its six viewport screenshots and HTML report are in [artifact 14618910353](https://github.com/UphyRaop/content-creator-ai/actions/runs/44713191228/artifacts/14618910353), retained until 2026-12-04.
+- **PASS:** the published `https://ccai.ur-project.biz/` loaded in Chrome over HTTPS with the CCAI dashboard, hamburger navigation and `</>` control. The deployment did not change DNS or repository settings. Native mobile hardware and origin TLS certificate details were not independently tested.
+- Source and commit identities were verified through the GitHub integration. Author and committer use the account's GitHub noreply identity. No history rewrite, paid service, live API call, cloud provisioning or backup modification occurred.
