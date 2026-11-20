@@ -47,6 +47,44 @@ async function blockExternalAndApi(page, externalRequests, apiRequests) {
   });
 }
 
+async function auditVisibleControls(frame) {
+  return frame.locator('html').evaluate(() => {
+    const visible = element => {
+      const rect = element.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return false;
+      for (let current = element; current && current.nodeType === Node.ELEMENT_NODE; current = current.parentElement) {
+        const style = getComputedStyle(current);
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false;
+      }
+      return true;
+    };
+    const labelledbyText = element => (element.getAttribute('aria-labelledby') || '')
+      .split(/\s+/).filter(Boolean).map(id => document.getElementById(id)?.innerText || '').join(' ').trim();
+    const controls = [...document.querySelectorAll('button,a,input,select,textarea,[role="button"],[role="link"]')].filter(visible);
+    const missingNames = controls.filter(element => {
+      const nativeLabels = element.labels ? [...element.labels].map(label => label.innerText).join(' ') : '';
+      const visibleText = ['BUTTON', 'A'].includes(element.tagName) ? element.innerText : '';
+      return !(element.getAttribute('aria-label') || labelledbyText(element) || nativeLabels.trim() || visibleText.trim() || element.getAttribute('title') || element.getAttribute('alt'));
+    }).map(element => `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}`);
+    const zeroSizeControls = [...document.querySelectorAll('button,a,input,select,textarea,[role="button"],[role="link"]')]
+      .filter(element => {
+        for (let current = element; current && current.nodeType === Node.ELEMENT_NODE; current = current.parentElement) {
+          const style = getComputedStyle(current);
+          if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false;
+        }
+        return element.getBoundingClientRect().width <= 0 || element.getBoundingClientRect().height <= 0;
+      })
+      .map(element => `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}`);
+    const clippedCriticalText = [...document.querySelectorAll('button,a,label,h1,h2,h3')].filter(visible).filter(element => {
+      const style = getComputedStyle(element);
+      const horizontalClip = ['hidden', 'clip'].includes(style.overflowX) && element.scrollWidth > element.clientWidth + 2;
+      const verticalClip = ['hidden', 'clip'].includes(style.overflowY) && element.scrollHeight > element.clientHeight + 2;
+      return horizontalClip || verticalClip || style.textOverflow === 'ellipsis';
+    }).map(element => `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}.${String(element.className || '').toString().split(' ').slice(0, 2).join('.')}`);
+    return { missingNames, zeroSizeControls, clippedCriticalText };
+  });
+}
+
 test('device profile fits without horizontal overflow and has no browser errors', async ({ page }, info) => {
   const errors = [];
   const externalRequests = [];
@@ -63,6 +101,10 @@ test('device profile fits without horizontal overflow and has no browser errors'
   });
 
   await openDevicePreview(page);
+  const simulatorAccessibility = await auditVisibleControls(page);
+  expect(simulatorAccessibility.missingNames, JSON.stringify(simulatorAccessibility)).toEqual([]);
+  expect(simulatorAccessibility.zeroSizeControls, JSON.stringify(simulatorAccessibility)).toEqual([]);
+  expect(simulatorAccessibility.clippedCriticalText, JSON.stringify(simulatorAccessibility)).toEqual([]);
   const size = profileSizes[info.project.name];
   await page.locator('#device-preview-profile').selectOption(`${size.width}x${size.height}`);
   const frame = await appFrame(page);
@@ -76,9 +118,13 @@ test('device profile fits without horizontal overflow and has no browser errors'
   await expect(briefGate).toHaveAttribute('aria-disabled', 'true');
   await briefGate.click({ force: true });
   await expect(frame.locator('#view h1')).toHaveText('What video do you want to make?');
-  await frame.locator('#idea').fill(`Synthetic idea for ${info.project.name}; no external references or paid generation.`);
+  await frame.locator('#idea').fill('A quiet morning in a small studio.');
   await frame.getByRole('button', { name: 'Generate creative brief' }).click();
   await expect(frame.locator('#view h1')).toHaveText('Creative brief');
+  const accessibilityAudit = await auditVisibleControls(frame);
+  expect(accessibilityAudit.missingNames, JSON.stringify(accessibilityAudit)).toEqual([]);
+  expect(accessibilityAudit.zeroSizeControls, JSON.stringify(accessibilityAudit)).toEqual([]);
+  expect(accessibilityAudit.clippedCriticalText, JSON.stringify(accessibilityAudit)).toEqual([]);
 
   const metrics = await frame.locator('html').evaluate(() => {
     const root = document.documentElement;
@@ -303,6 +349,8 @@ test('all 13 stage screens navigate using a synthetic approved-media project and
     await expect(frame.locator('#view h1')).toHaveText(titles[index]);
     if (index === 8) {
       await expect(frame.getByRole('button', { name: 'Review and approve timeline for render' })).toBeVisible();
+      const secureCrypto = await frame.locator('body').evaluate(() => ({ secure: isSecureContext, subtleAvailable: Boolean(crypto.subtle) }));
+      expect(secureCrypto).toEqual({ secure: true, subtleAvailable: true });
       await frame.getByRole('button', { name: 'Review and approve timeline for render' }).click();
       await expect(frame.locator('#notice')).toContainText('Timeline reviewed and approved for render');
       const approvalState = await frame.locator('body').evaluate(() => ({ approved: timelineApprovalValid(), eligible: renderEligible() }));

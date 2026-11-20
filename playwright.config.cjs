@@ -17,29 +17,34 @@ module.exports = defineConfig({
   workers: 1,
   reporter: [['list'], ['html', { outputFolder: './artifacts/device-preview-report', open: 'never' }]],
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://ccai.ur-project.biz:4173',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'https://ccai.ur-project.biz:4173',
     browserName: 'chromium',
     headless: true,
+    ignoreHTTPSErrors: true,
     launchOptions: {
       ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } : {}),
       args: [
         '--no-proxy-server',
         '--host-resolver-rules=MAP ccai.ur-project.biz 127.0.0.1',
-        '--unsafely-treat-insecure-origin-as-secure=http://ccai.ur-project.biz:4173',
       ],
     },
-    viewport: { width: 1366, height: 768 },
+    viewport: { width: 1920, height: 1080 },
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
   },
   projects: profiles.map(([name, width, height]) => ({
     name,
-    use: { viewport: { width, height }, deviceScaleFactor: 1, isMobile: width <= 500, hasTouch: width <= 500 },
+    use: { viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1, isMobile: false, hasTouch: width <= 500 },
   })),
   webServer: {
-    command: 'python3 -m http.server 4173 --bind 127.0.0.1 --directory dist',
-    url: 'http://127.0.0.1:4173',
+    command: 'node scripts/serve-static-preview.mjs',
+    url: 'https://127.0.0.1:4173',
+    ignoreHTTPSErrors: true,
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,
+    env: {
+      CCAI_TEST_TLS_CERT: process.env.CCAI_TEST_TLS_CERT || '',
+      CCAI_TEST_TLS_KEY: process.env.CCAI_TEST_TLS_KEY || '',
+    },
   },
 });
