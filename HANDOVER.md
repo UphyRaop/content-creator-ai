@@ -87,4 +87,14 @@
 #### Developer Preview Mode — completion checkpoint
 - Main commit `612592075ebc4cf0614d595ee999ffa1e704a46b` (GitHub noreply author/committer) passed Pages deployment run `44687790598` and Playwright run `44687790479`.
 - Report and six real Chromium viewport screenshots are in [Actions artifact 14606708742](https://github.com/UphyRaop/content-creator-ai/actions/runs/44687790479/artifacts/14606708742), available through 2026-12-04.
-- Scope complete. Browser-local preview approvals are not trusted backend approvals. Native hardware and direct custom-domain TLS verification remain untested. No DNS, paid API, cloud resource, or backup changes.
+- Scope complete. Do not treat static browser-local approvals as trusted backend approvals. Native hardware and direct custom-domain TLS verification remain untested. No DNS, paid API, cloud resource, or backup changes.
+
+## Latest continuation checkpoint — Global Navigation Redesign (2026-11-20)
+- UI implementation is in `prototype.html`; static outputs are generated as `dist/index.html` and `public/prototype.html`. The former seven-tap behavior is superseded by the masked `</>`/URTN preview gate.
+- Responsive drawer covers all management/library/workspace destinations and all 13 workflow steps. Developer preview shows the live app iframe at six exact viewports and has fit/zoom controls. The gate is preview-only; do not enable diagnostics or privileged APIs.
+- QA owns the Playwright workflow/config/spec. Wait for the full six-profile run, verify six screenshots/report, run remaining checks, push normal fast-forward to `main`, then verify Pages/Actions and artifact links. Do not push local historical Git state or unrelated generated artifacts.
+- Maintain restrictions: RM0, no live AI/cloud resources, no DNS changes, no backup modifications, no next phase.
+
+### Current verification checkpoint
+- Local Playwright full matrix: 11 passed, 25 expected viewport skips; six screenshots and HTML report generated. `npm test`, TypeScript, static build, Next production build, syntax, changed-file secret scan and diff check passed.
+- Remaining sequence: fast-forward sync the verified source/tests/docs to latest `main`; verify Pages and Playwright Actions for the exact new commit; verify six PNG screenshot artifact metadata; check the custom URL over HTTPS in a browser; then record final run/artifact links. Never force-push, change DNS, or claim a workflow success before reading its status.
