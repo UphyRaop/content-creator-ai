@@ -159,6 +159,8 @@ test('device profile fits without horizontal overflow and has no browser errors'
   await briefGate.click({ force: true });
   await expect(frame.locator('#view h1')).toHaveText('What video do you want to make?');
   await frame.locator('#navDrawerToggle').click();
+  await expect(responsiveDrawer).toHaveAttribute('aria-hidden', 'true');
+  await expect.poll(() => responsiveDrawer.evaluate(element => getComputedStyle(element).visibility)).toBe('hidden');
   await frame.locator('#idea').fill('A quiet morning in a small studio.');
   await frame.getByRole('button', { name: 'Generate creative brief' }).click();
   await expect(frame.locator('#view h1')).toHaveText('Creative brief');
@@ -171,8 +173,12 @@ test('device profile fits without horizontal overflow and has no browser errors'
     const root = document.documentElement;
     const body = document.body;
     const visible = [...document.querySelectorAll('body *')].filter(el => {
-      const style = getComputedStyle(el);
-      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) !== 0 && el.getBoundingClientRect().width > 0;
+      if (el.getBoundingClientRect().width <= 0 || el.getBoundingClientRect().height <= 0) return false;
+      for (let current = el; current && current !== body; current = current.parentElement) {
+        const style = getComputedStyle(current);
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false;
+      }
+      return true;
     });
     const offscreen = visible.filter(el => {
       for (let parent = el.parentElement; parent && parent !== body; parent = parent.parentElement) {
