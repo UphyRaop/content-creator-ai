@@ -99,3 +99,7 @@ The consolidated owner actions, including links, steps, cost expectations, billi
 
 ### Branding and Developer Mode preview
 The CCAI shell uses the approved black, orange, and maroon brand palette, a branded startup state, favicon, and company attribution. Seven taps on the CCAI logo open an unavailable-only notice in the public preview. Privileged Developer Mode is intentionally disabled: GitHub Pages has no secure owner reauthentication backend. The public preview remains simulated and continues to store preview data in browser-local storage.
+
+## Hidden Device Preview Mode
+
+In the static preview, tap or click the CCAI logo seven times in succession to open the hidden **Device Preview Mode**. Select a desktop, laptop, tablet, or mobile profile and adjust the fit/zoom controls. This renders the interactive application inside a live same-origin frame at the selected CSS viewport; it is not a screenshot. Existing browser-local preview data is retained while switching profiles, and the preview saves before exit. This is for interface testing only: privileged diagnostics, credentials, server logs, admin controls, live AI calls, and cloud operations remain unavailable.

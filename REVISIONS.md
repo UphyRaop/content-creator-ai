@@ -29,3 +29,10 @@
 - Automated functional and build suites passed. Chromium/Playwright runtime failed to start in the sandbox (SIGTRAP/Crashpad permission), so screenshots and requested exact viewport runtime checks were not completed.
 - No live AI or cloud work, DNS changes, hosting spend, or data migration. RM0 used.
 
+
+## 2026-11-20 — Developer Preview Mode and automated device QA (local PASS; remote pending)
+- Replaced the hidden seven-tap unavailable-notice behavior with an authorized UI-only simulator for the six target viewports. The app itself renders live in a same-origin iframe; no screenshots are used to simulate devices. Existing project browser storage and approval workflow remain in the child application.
+- Added zoom/fit controls and save/sync behavior on exit. Privileged Developer Mode stays unavailable.
+- Added a Playwright GitHub Actions workflow with retained screenshots/reports. Local Chromium QA passed all six exact viewport sizes and the desktop-only simulated 13-stage walk-through, gate matrix, and exit/reopen state checks (9 passed, 15 expected skips). During QA, fixed the 2px iframe sizing defect, a Stage 5 preview render error, and project selection restoration.
+- Regression tests, TypeScript, static and Next production builds, script syntax/security-pattern checks, and diff check passed. GitHub Actions and Pages deployment are not yet verified; do not report the feature as deployed until both runs succeed.
+- No live AI, paid service, cloud resource, database migration or user-data overwrite occurred.

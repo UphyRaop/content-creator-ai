@@ -114,6 +114,12 @@
 
 ## Branding and Developer Mode preview decision (2026-11-20)
 - Approved brand: black `#090909`, orange `#FF8A24`, maroon `#800024`; preserve existing themes, saved data, approvals, and production workflow.
-- The public GitHub Pages logo's seven-tap sequence may reveal only an unavailable notice. It must not expose the developer console or privileged controls.
+- Historical state before the later 2026-11-20 Device Preview authorization: the public logo's seven-tap sequence showed an unavailable notice. The newer Device Preview Mode decision below supersedes this UI behavior only; privileged controls remain unavailable.
 - Recent server-side owner reauthentication is not implemented. The Node endpoint stays unavailable (503) for authenticated requests, with unauthenticated requests rejected; no browser flag can enable it.
-- No screenshot or exact viewport runtime evidence is available from the restricted browser sandbox. Treat all six viewports as NOT TESTED until captured in a supported browser.
+- At the time this decision was written, exact viewport evidence was unavailable. See the later QA record for current automated Chromium results; native iOS Safari remains untested.
+
+## Device Preview Mode decision (2026-11-20)
+- The owner authorized a hidden seven-consecutive-tap logo gesture that opens a functional, UI-only Device Preview Mode. This supersedes the prior unavailable-notice-only preview instruction for this feature.
+- Device Preview uses one live same-origin full-app iframe at one of six exact CSS viewport sizes and a fit/zoom control. It must preserve project/workflow state when profiles change and save/synchronize before exit.
+- This authorization does not enable privileged Developer Mode, diagnostics, secrets, server logs, administrative controls, AI calls, approval bypasses, or cloud cost controls. Those remain unavailable or guarded.
+- Browser QA uses simulated local data and no external/provider API requests. Screenshots and reports are GitHub Actions artifacts; the Chromium viewport is not native iOS Safari.

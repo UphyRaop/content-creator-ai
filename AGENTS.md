@@ -93,6 +93,12 @@ Phases 7–11 were authorized together by the user. Phase 11 automated fixes and
 
 ## Branding and Developer Mode boundary (2026-11-20)
 - Use the approved brand tokens `#090909`, `#FF8A24`, and `#800024`; retain readable contrast, dark/light theme support, and existing workflow and storage behavior.
-- The logo's seven-tap entry point is a hidden preview affordance only. On GitHub Pages it must open only an unavailable notice and must not reveal diagnostics, secrets, user data, cost controls, or production controls.
+- The logo's seven-tap entry point is hidden from normal users and opens the UI-only Device Preview Mode described in the 2026-11-20 authorization record below. It may simulate responsive viewports of the existing application, but must not reveal privileged diagnostics, credentials, server logs, administrative or production controls, or bypass approval/cost safeguards.
 - Server-side Developer Mode stays unavailable until owner-bound recent reauthentication and a secure session capability are implemented and hosted on a protected Node backend. Never trust a browser flag, local storage, URL parameter, or caller-supplied role.
 - Public GitHub Pages is a static simulation. Do not deploy privileged Developer Mode controls there.
+
+## Developer Preview Mode authorization (2026-11-20)
+- The owner authorized seven consecutive CCAI logo activations to open a hidden, UI-only preview with six device dimensions: 1920×1080, 1366×768, 768×1024, 1024×768, 390×844, and 844×390.
+- Render the live application in a same-origin iframe with real CSS viewport dimensions; never substitute screenshots. Preserve current project/workflow browser-local data when changing dimensions and zoom. Exit must save/synchronize state.
+- This does not authorize privileged Developer Mode: diagnostics, API credentials, server logs, admin controls, security bypasses, AI generation, or cost-protection bypass remain unavailable. AI and cloud actions remain simulated/blocked according to existing rules.
+- Playwright checks run in GitHub Actions and retain screenshots/report artifacts. Browser results are Chromium emulation, not native iOS Safari or real device hardware tests.

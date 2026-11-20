@@ -77,3 +77,8 @@ GitHub Pages serves static files. It cannot run the SQLite API routes, persisten
 - Documentation follow-up commit `5c25d6291be7d2061a353890ab460fbde0bd9860` also uses the GitHub noreply identity; its Pages run [`44674910030`](https://github.com/UphyRaop/content-creator-ai/actions/runs/44674910030) succeeded. It changed project records only; the previously verified static artifact remains unchanged.
 - Latest handover-only commit `fe1cac3d0982e5f289b2b1ae8a2ffde560e9c1a4` triggered run `44675111026`, whose Deploy Pages step failed after the upload step succeeded: attempt 1 reported zero artifacts, and its retry reported two duplicate `github-pages` artifacts. The previous successful static deployment (run `44674910030`) contains the same application files. This is a GitHub Actions artifact lookup issue, not a build failure.
 - Documentation follow-up commit `2fcaa457732cec881aba0adc56d05285697411f3` then completed Pages run [`44675530914`](https://github.com/UphyRaop/content-creator-ai/actions/runs/44675530914) successfully, confirming the automatic deployment path recovered. No application payload changed in these handover-only commits.
+
+## 2026-11-20 — Device Preview Mode deployment (pending)
+- Pages automatic deployment remains the existing deploy-on-`main` workflow; build output is `dist/` and contains the interactive static prototype.
+- Deployment is authorized only after responsive and regression checks. No DNS or HTTPS settings will be changed.
+- A separate Playwright Actions workflow is being added; it will execute before/alongside Pages deployment and upload six viewport screenshots, an HTML report and traces as a 14-day artifact. Current local QA found an exact-size defect; no deployment result for this feature exists yet.
