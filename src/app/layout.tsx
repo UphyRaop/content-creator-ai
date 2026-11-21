@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     shortcut: "/icons/v1/favicon.ico",
     apple: [{ url: "/icons/v1/ccai-ai-monogram-dark-180.png", sizes: "180x180", type: "image/png" }],
   },
-  manifest: "/manifest.webmanifest?v=1",
+  manifest: "/manifest.webmanifest?v=2",
   description: "Content Creator AI (CCAI) Creator Studio — an approval-gated workspace for planning and producing videos.",
 };
 
