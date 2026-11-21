@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import ts from 'typescript';
 
@@ -11,5 +11,7 @@ const workflow = await readFile(resolve(root, 'src/lib/timeline-workflow.ts'), '
 const compiled = ts.transpileModule(workflow, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } });
 if (compiled.diagnostics?.some(item => item.category === ts.DiagnosticCategory.Error)) throw new Error('Timeline workflow browser build failed.');
 await writeFile(resolve(dist, 'timeline-workflow.js'), compiled.outputText, 'utf8');
+await cp(resolve(root, 'public/icons'), resolve(dist, 'icons'), { recursive: true });
+await cp(resolve(root, 'public/manifest.webmanifest'), resolve(dist, 'manifest.webmanifest'));
 await writeFile(resolve(dist, 'CNAME'), 'ccai.ur-project.biz\n', 'utf8');
 console.log('Static prototype and timeline module built in dist');
